@@ -1,3 +1,4 @@
+package TargetMine;
 
 
 import java.io.IOException;
@@ -12,32 +13,33 @@ import org.intermine.pathquery.Constraints;
 import org.intermine.pathquery.OrderDirection;
 import org.intermine.pathquery.PathQuery;
 
-public class QueryClient
+public class TargetMineQueryClient
 {
     private static final String ROOT = "https://targetmine.mizuguchilab.org/targetmine/service";
-
-    public static void main(String[] args) throws IOException {
+    
+    
+    
+    public static void query(String geneList) throws IOException {
         ServiceFactory factory = new ServiceFactory(ROOT);
         Model model = factory.getModel();
         PathQuery query = new PathQuery(model);
 
         // Select the output columns:
-        query.addViews("Gene.symbol",
-                "Gene.secondaryIdentifier",
-                "Gene.goAnnotation.ontologyTerm.identifier",
-                "Gene.goAnnotation.ontologyTerm.name",
-                "Gene.goAnnotation.evidence.code.code",
-                "Gene.goAnnotation.ontologyTerm.namespace");
+        query.addViews(	"Gene.primaryIdentifier",
+                		"Gene.symbol",
+                		"Gene.name",
+                		"Gene.organism.name");
 
         // Add orderby
         query.addOrderBy("Gene.secondaryIdentifier", OrderDirection.ASC);
 
         // Filter the results with the following constraints:
-        query.addConstraint(Constraints.lookup("Gene", "zen", null));
+        query.addConstraint(Constraints.lookup("Gene", geneList, null));
+        
 
         QueryService service = factory.getQueryService();
         PrintStream out = System.out;
-        String format = "%-13.13s | %-13.13s | %-13.13s | %-13.13s | %-13.13s | %-13.13s\n";
+        String format = "%-13.13s | %-13.13s | %-13.13s | %-13.13s \n";
         out.printf(format, query.getView().toArray());
         Iterator<List<Object>> rows = service.getRowListIterator(query);
         while (rows.hasNext()) {
