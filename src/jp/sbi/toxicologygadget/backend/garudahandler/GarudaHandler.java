@@ -9,8 +9,7 @@ import javax.swing.JFrame;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 
-import jp.sbi.algobuider2.backend.garudahandler.DiscoveryTouple;
-import jp.sbi.algobuider2.ui.configure.UIConfiguration;
+import jp.sbi.toxicologygadget.backend.garudahandler.DiscoveryTouple;
 import jp.sbi.garuda.backend.GarudaBackend;
 import jp.sbi.garuda.backend.POJOs.CompatibleGadgetDetails;
 import jp.sbi.garuda.backend.exception.NoFileToSendException;
@@ -30,7 +29,7 @@ public class GarudaHandler {
 	private GarudaBackend garudaBackend;
 	private JFrame parentFrame;
 	
-private GarudaBackendPipelinePlugin pipelinePlugin ;
+	private GarudaBackendPipelinePlugin pipelinePlugin;
 	
 	public GarudaHandler ( JFrame parentFrame ) throws GarudaConnectionNotInitializedException, NetworkConnectionException
 	{

@@ -21,5 +21,6 @@
 	<classpathentry kind="lib" path="lib/GarudaSDK2.0src.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-all-1.8.1.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.16.jar"/>
+	<classpathentry kind="lib" path="lib/GarudaPipelinePluginsrc.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
