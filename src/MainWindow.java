@@ -14,11 +14,16 @@ import javax.swing.JTextArea;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
+import jp.sbi.garuda.backend.net.exception.GarudaConnectionNotInitializedException;
+import jp.sbi.garuda.backend.net.exception.NetworkConnectionException;
+import jp.sbi.toxicologygadget.backend.garudahandler.GarudaHandler;
+
 public class MainWindow {
 
 	private JFrame frame;
 	private JTable tbl_DataTable;
-
+	private GarudaHandler garudaHandler;
+	
 	/**
 	 * Launch the application.
 	 */
@@ -28,6 +33,9 @@ public class MainWindow {
 				try {
 					MainWindow window = new MainWindow();
 					window.frame.setVisible(true);
+					
+					
+					
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -40,6 +48,17 @@ public class MainWindow {
 	 */
 	public MainWindow() {
 		initialize();
+		
+		try {
+			this.garudaHandler = new GarudaHandler(this.frame);
+			
+			this.garudaHandler.activateConnection();
+			
+		} catch (GarudaConnectionNotInitializedException | NetworkConnectionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 	/**

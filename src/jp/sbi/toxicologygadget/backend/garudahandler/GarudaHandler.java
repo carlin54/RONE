@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -14,6 +15,7 @@ import jp.sbi.garuda.backend.GarudaBackend;
 import jp.sbi.garuda.backend.POJOs.CompatibleGadgetDetails;
 import jp.sbi.garuda.backend.exception.NoFileToSendException;
 import jp.sbi.garuda.backend.incomingHandler.IncomingRequestProtocolHandler;
+import jp.sbi.garuda.backend.incomingHandler.garudaActionListeners.requests.LoadDataRequestActionListener;
 import jp.sbi.garuda.backend.incomingHandler.garudaActionListeners.responses.ActivateGadgetResponseActionListener;
 import jp.sbi.garuda.backend.incomingHandler.garudaActionListeners.responses.GetCompatibleGadgetListResponseActionListener;
 import jp.sbi.garuda.backend.incomingHandler.responseCodes.GarudaResponseCode;
@@ -31,13 +33,21 @@ public class GarudaHandler {
 	
 	private GarudaBackendPipelinePlugin pipelinePlugin;
 	
-	public GarudaHandler ( JFrame parentFrame ) throws GarudaConnectionNotInitializedException, NetworkConnectionException
+	
+	public GarudaHandler (JFrame parentFrame) throws GarudaConnectionNotInitializedException, NetworkConnectionException
 	{
 		this.parentFrame = parentFrame ;
-		garudaBackend = new GarudaBackend(UIConfiguration.getGarudaID(), UIConfiguration.getTitle() , this.parentFrame) ;
+		garudaBackend = new GarudaBackend(GarudaConstants.GARUDA_ID, GarudaConstants.GARUDA_NAME , this.parentFrame);
 		garudaBackend.addGarudaGlassPanel(this.parentFrame, null);
-		initGarudaListeners () ;
-		initPipeline ()  ;
+
+		initGarudaListeners ();
+		initPipeline();
+		
+		// garudaBackend.getCompatibleGadgetList("txt", "genelist");
+		// garudaBackend.getCompatibleGadgetList("txt", "ensemble");
+		
+		// File ensembleGenelist = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\EnsembleGenelist.txt");
+		
 	}
 	
 	private void initPipeline () 
@@ -58,12 +68,12 @@ public class GarudaHandler {
 		return garudaBackend.getGarudaGlassPanel() ;
 	}
 	
-	public IncomingRequestProtocolHandler  accessIncomingRequestListenerHandler (  )
+	public IncomingRequestProtocolHandler accessIncomingRequestListenerHandler (  )
 	{
 		return garudaBackend.getIncomingRequestHandler() ;
 	}
 	
-	public IncomingRequestProtocolHandler  accessIncomingResponseListenerHandler (  )
+	public IncomingRequestProtocolHandler accessIncomingResponseListenerHandler (  )
 	{
 		return garudaBackend.getIncomingRequestHandler() ;
 	}
@@ -111,17 +121,38 @@ public class GarudaHandler {
 	}
 	
 	private void initGarudaListeners () {
+		
+		
+		
+		garudaBackend.getIncomingRequestHandler().addLoadDataRequestActionListener( new LoadDataRequestActionListener() {
+	
+
+			@Override
+			public void loadDataRequestReceivedAsFile(File file, String senderId, String senderName,
+					String originDeviceId, String currentDeviceId, String fileName, String fileFormat) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void loadDataRequestReceivedAsStream(byte[] receivedData, String senderId, String senderName,
+					String originDeviceId, String currentDeviceId, String fileName, String fileFormat) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
 		garudaBackend.getIncomingResponseHandler().addActivateGadgetResponseActionListener( new ActivateGadgetResponseActionListener() {
 			
 			@Override
 			public void gadgetActivationFailed(GarudaResponseCode response) {
-				// JOptionPane.showMessageDialog(parentFrame, "Activation Failed " + response.id, "Garuda Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(parentFrame, "Activation Failed " + response.id, "Garuda Error", JOptionPane.ERROR_MESSAGE);
 				
 			}
 			
 			@Override
 			public void gadgetActivated() {
-				// JOptionPane.showMessageDialog(parentFrame, "Connected to Garuda ", "Garuda connection", JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(parentFrame, "Connected to Garuda ", "Garuda connection", JOptionPane.INFORMATION_MESSAGE);
 			}
 		}) ;
 		
@@ -129,13 +160,13 @@ public class GarudaHandler {
 			
 			@Override
 			public void noCompatibleGadgetsFound(GarudaResponseCode responseCode) {
-				// JOptionPane.showMessageDialog(parentFrame, "No compatible Gadgets " + responseCode.id, "Garuda Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(parentFrame, "No compatible Gadgets " + responseCode.id, "Garuda Error", JOptionPane.ERROR_MESSAGE);
 				
 			}
 			
 			@Override
 			public void gotErrorOnCompatibleGadgetListRequest(GarudaResponseCode responseCode) {
-				// JOptionPane.showMessageDialog(parentFrame, "Error while getting compatible gadgets " + responseCode.id, "Garuda Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(parentFrame, "Error while getting compatible gadgets " + responseCode.id, "Garuda Error", JOptionPane.ERROR_MESSAGE);
 			}
 			
 			@Override
@@ -145,7 +176,7 @@ public class GarudaHandler {
 			
 			@Override
 			public void fileNotInOutBoundList(GarudaResponseCode responseCode) {
-				// JOptionPane.showMessageDialog(parentFrame, "File not in output list " + responseCode.id, "Garuda Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(parentFrame, "File not in output list " + responseCode.id, "Garuda Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}) ;
 	}
