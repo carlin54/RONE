@@ -34,8 +34,6 @@ public class MainWindow {
 					MainWindow window = new MainWindow();
 					window.frame.setVisible(true);
 					
-					
-					
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -52,7 +50,7 @@ public class MainWindow {
 		try {
 			this.garudaHandler = new GarudaHandler(this.frame);
 			
-			this.garudaHandler.activateConnection();
+			
 			
 		} catch (GarudaConnectionNotInitializedException | NetworkConnectionException e) {
 			// TODO Auto-generated catch block

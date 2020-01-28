@@ -33,15 +33,22 @@ public class GarudaHandler {
 	
 	private GarudaBackendPipelinePlugin pipelinePlugin;
 	
-	
 	public GarudaHandler (JFrame parentFrame) throws GarudaConnectionNotInitializedException, NetworkConnectionException
 	{
 		this.parentFrame = parentFrame ;
-		garudaBackend = new GarudaBackend(GarudaConstants.GARUDA_ID, GarudaConstants.GARUDA_NAME , this.parentFrame);
-		garudaBackend.addGarudaGlassPanel(this.parentFrame, null);
 
+		garudaBackend = new GarudaBackend(GarudaConstants.GARUDA_ID, GarudaConstants.GARUDA_NAME, this.parentFrame);
+
+		garudaBackend.addGarudaGlassPanel(this.parentFrame, null);
+		
 		initGarudaListeners ();
 		initPipeline();
+		
+		garudaBackend.activateGadget();
+		
+		boolean s = this.isConnected();
+
+		this.activateConnection();
 		
 		// garudaBackend.getCompatibleGadgetList("txt", "genelist");
 		// garudaBackend.getCompatibleGadgetList("txt", "ensemble");
@@ -49,6 +56,7 @@ public class GarudaHandler {
 		// File ensembleGenelist = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\EnsembleGenelist.txt");
 		
 	}
+
 	
 	private void initPipeline () 
 	{
@@ -58,7 +66,11 @@ public class GarudaHandler {
 		
 	}
 	
-	public void activateConnection () 
+	public boolean isConnected() {
+		return garudaBackend.isConnectionLive();
+	}
+	
+	public void activateConnection() 
 	{
 		garudaBackend.activateGadget();
 	}
@@ -83,7 +95,7 @@ public class GarudaHandler {
 		return pipelinePlugin ;
 	}
 	
-	public void garudaDiscover ( File fileToDiscover, String fileFormat)
+	public void garudaDiscover(File fileToDiscover, String fileFormat)
 	{
 		if ( fileToDiscover == null || !fileToDiscover.exists())
 			throw new IllegalArgumentException( "File does not exist") ;
@@ -94,7 +106,7 @@ public class GarudaHandler {
 		garudaBackend.getCompatibleGadgetList(fileToDiscover, fileFormat);
 	}
 	
-	public void garudaDiscover ( DiscoveryTouple discoveryTouple)
+	public void garudaDiscover (DiscoveryTouple discoveryTouple)
 	{
 		if ( discoveryTouple == null || discoveryTouple.getFileFormat() == null || discoveryTouple.getFileToDiscover()== null)
 			throw new IllegalArgumentException( "Incompatible discovery touple") ;
@@ -121,10 +133,8 @@ public class GarudaHandler {
 	}
 	
 	private void initGarudaListeners () {
-		
-		
-		
-		garudaBackend.getIncomingRequestHandler().addLoadDataRequestActionListener( new LoadDataRequestActionListener() {
+				
+		garudaBackend.getIncomingRequestHandler().addLoadDataRequestActionListener(new LoadDataRequestActionListener() {
 	
 
 			@Override
@@ -142,11 +152,11 @@ public class GarudaHandler {
 			}
 		});
 		
-		garudaBackend.getIncomingResponseHandler().addActivateGadgetResponseActionListener( new ActivateGadgetResponseActionListener() {
+		garudaBackend.getIncomingResponseHandler().addActivateGadgetResponseActionListener(new ActivateGadgetResponseActionListener() {
 			
 			@Override
 			public void gadgetActivationFailed(GarudaResponseCode response) {
-				JOptionPane.showMessageDialog(parentFrame, "Activation Failed " + response.id, "Garuda Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(parentFrame, "Activation Failed " + response.toString(), "Garuda Error", JOptionPane.ERROR_MESSAGE);
 				
 			}
 			
@@ -156,7 +166,7 @@ public class GarudaHandler {
 			}
 		}) ;
 		
-		garudaBackend.getIncomingResponseHandler().addGetCompatibleGadgetListResponseActionListener( new GetCompatibleGadgetListResponseActionListener() {
+		garudaBackend.getIncomingResponseHandler().addGetCompatibleGadgetListResponseActionListener(new GetCompatibleGadgetListResponseActionListener() {
 			
 			@Override
 			public void noCompatibleGadgetsFound(GarudaResponseCode responseCode) {
@@ -179,6 +189,7 @@ public class GarudaHandler {
 				JOptionPane.showMessageDialog(parentFrame, "File not in output list " + responseCode.id, "Garuda Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}) ;
+	
 	}
 	
 }
