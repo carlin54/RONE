@@ -92,15 +92,15 @@ public class GarudaHandler {
 		garudaBackend.getCompatibleGadgetList(discoveryTouple.getFileToDiscover(), discoveryTouple.getFileFormat());
 	}
 	
-	public void sendFileTo ( CompatibleGadgetDetails targetGadget, boolean isStream) throws NoFileToSendException
+	public void sendFileTo (CompatibleGadgetDetails targetGadget, boolean isStream) throws NoFileToSendException
 	{
-		if ( !isStream)
+		if (!isStream)
 			garudaBackend.sendDataToGadgetAsFile(targetGadget);
 		else
 			garudaBackend.sendDataToGadgetAsStream(targetGadget);
 	}
 	
-	public void sendPipelineReply ( File pipelineFile , String fileFormat) throws JsonGenerationException, JsonMappingException, IOException, PipelineNotInitializedException
+	public void sendPipelineReply (File pipelineFile, String fileFormat) throws JsonGenerationException, JsonMappingException, IOException, PipelineNotInitializedException
 	{
 		pipelinePlugin.sendSendPipelineMessageToGadgetResponse(pipelineFile, fileFormat);
 	}

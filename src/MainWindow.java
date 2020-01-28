@@ -11,10 +11,13 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JTextArea;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 
 public class MainWindow {
 
 	private JFrame frame;
+	private JTable tbl_DataTable;
 
 	/**
 	 * Launch the application.
@@ -44,7 +47,7 @@ public class MainWindow {
 	 */
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 450, 300);
+		frame.setBounds(100, 100, 746, 474);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		
@@ -64,10 +67,26 @@ public class MainWindow {
 		btn_SendToReactome.setBounds(10, 123, 125, 25);
 		frame.getContentPane().add(btn_SendToReactome);
 		
-		JTextArea text_GeneInfo = new JTextArea();
-		text_GeneInfo.setTabSize(4);
-		text_GeneInfo.setBounds(146, 30, 286, 207);
-		frame.getContentPane().add(text_GeneInfo);
+		tbl_DataTable = new JTable();
+		tbl_DataTable.setModel(new DefaultTableModel(
+			new Object[][] {
+				{null},
+				{null},
+				{null},
+				{null},
+				{null},
+				{null},
+				{null},
+				{null},
+				{null},
+				{null},
+			},
+			new String[] {
+				"New column"
+			}
+		));
+		tbl_DataTable.setBounds(141, 32, 575, 356);
+		frame.getContentPane().add(tbl_DataTable);
 		
 		JMenuBar menuBar = new JMenuBar();
 		frame.setJMenuBar(menuBar);
