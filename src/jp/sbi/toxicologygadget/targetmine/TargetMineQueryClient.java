@@ -31,7 +31,7 @@ public class TargetMineQueryClient
                 		"Gene.organism.name");
 
         // Add orderby
-        query.addOrderBy("Gene.secondaryIdentifier", OrderDirection.ASC);
+        query.addOrderBy("Gene.primaryIdentifier", OrderDirection.ASC);
 
         // Filter the results with the following constraints:
         query.addConstraint(Constraints.lookup("Gene", geneList, null));
