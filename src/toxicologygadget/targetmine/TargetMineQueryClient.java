@@ -1,4 +1,4 @@
-package jp.sbi.toxicologygadget.targetmine;
+package toxicologygadget.targetmine;
 
 
 import java.io.IOException;

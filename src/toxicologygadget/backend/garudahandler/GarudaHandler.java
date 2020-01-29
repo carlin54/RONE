@@ -1,4 +1,4 @@
-package jp.sbi.toxicologygadget.backend.garudahandler;
+package toxicologygadget.backend.garudahandler;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,7 +10,6 @@ import javax.swing.JOptionPane;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 
-import jp.sbi.toxicologygadget.backend.garudahandler.DiscoveryTouple;
 import jp.sbi.garuda.backend.GarudaBackend;
 import jp.sbi.garuda.backend.POJOs.CompatibleGadgetDetails;
 import jp.sbi.garuda.backend.exception.NoFileToSendException;
@@ -25,6 +24,7 @@ import jp.sbi.garuda.backend.plugin.pipeline.GarudaBackendPipelinePlugin;
 import jp.sbi.garuda.backend.plugin.pipeline.exceptions.PipelineNotInitializedException;
 import jp.sbi.garuda.backend.plugin.pipeline.responseCodes.GarudaPipelineResponseCode;
 import jp.sbi.garuda.backend.ui.GarudaGlassPanel;
+import toxicologygadget.backend.garudahandler.DiscoveryTouple;
 
 public class GarudaHandler {
 

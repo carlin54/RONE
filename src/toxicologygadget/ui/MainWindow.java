@@ -1,3 +1,5 @@
+package toxicologygadget.ui;
+
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
@@ -16,7 +18,7 @@ import javax.swing.table.DefaultTableModel;
 
 import jp.sbi.garuda.backend.net.exception.GarudaConnectionNotInitializedException;
 import jp.sbi.garuda.backend.net.exception.NetworkConnectionException;
-import jp.sbi.toxicologygadget.backend.garudahandler.GarudaHandler;
+import toxicologygadget.backend.garudahandler.GarudaHandler;
 
 public class MainWindow {
 

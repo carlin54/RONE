@@ -1,4 +1,4 @@
-package jp.sbi.toxicologygadget.backend.garudahandler;
+package toxicologygadget.backend.garudahandler;
 
 import java.io.File;
 
