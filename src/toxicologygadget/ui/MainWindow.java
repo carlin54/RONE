@@ -7,6 +7,8 @@ import java.awt.GridBagLayout;
 import java.awt.Button;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
+import java.io.File;
+import java.io.IOException;
 import java.awt.GridLayout;
 import javax.swing.JLabel;
 import javax.swing.JMenuBar;
@@ -19,6 +21,7 @@ import javax.swing.table.DefaultTableModel;
 import jp.sbi.garuda.backend.net.exception.GarudaConnectionNotInitializedException;
 import jp.sbi.garuda.backend.net.exception.NetworkConnectionException;
 import toxicologygadget.backend.garudahandler.GarudaHandler;
+import toxicologygadget.filemanager.FileManager;
 
 public class MainWindow {
 
@@ -32,6 +35,16 @@ public class MainWindow {
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
+				
+				File dir = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\AGCT_VisibleClustering.txt");
+				
+				try {
+					FileManager.parseAGCTVisibleClusterFile(dir);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
 				try {
 					MainWindow window = new MainWindow();
 					window.frame.setVisible(true);

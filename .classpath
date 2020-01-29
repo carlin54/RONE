@@ -15,7 +15,11 @@
 	<classpathentry kind="lib" path="lib/log4j.jar"/>
 	<classpathentry kind="lib" path="lib/stax-api-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/stax-ri-1.0.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+		<accessrules>
+			<accessrule kind="accessible" pattern="javafx/**"/>
+		</accessrules>
+	</classpathentry>
 	<classpathentry kind="lib" path="lib/commons-codec-1.10.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io-2.4.jar"/>
 	<classpathentry kind="lib" path="lib/GarudaSDK2.0src.jar"/>
