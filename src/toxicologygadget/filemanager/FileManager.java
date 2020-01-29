@@ -8,6 +8,10 @@ public class FileManager {
 	
 	
 	
+	public static void loadEnsembleGenelistTxt(File ensembleGenelist) {
+		
+	}
+	
 	public static void parseAGCTVisibleClusterFile(File clusterResultsFile) throws IOException {
 		String command;
 		
