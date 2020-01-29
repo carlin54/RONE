@@ -46,12 +46,9 @@ public class GarudaHandler {
 		
 		garudaBackend.activateGadget();
 		
-		boolean s = this.isConnected();
-
 		this.activateConnection();
 		
-		// garudaBackend.getCompatibleGadgetList("txt", "genelist");
-		// garudaBackend.getCompatibleGadgetList("txt", "ensemble");
+		garudaBackend.getCompatibleGadgetList("txt", "txt");
 		
 		// File ensembleGenelist = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\EnsembleGenelist.txt");
 		
