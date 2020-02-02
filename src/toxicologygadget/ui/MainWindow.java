@@ -50,19 +50,17 @@ public class MainWindow implements ActionListener {
 				
 				int[] clusterResults;
 				String[] genelist;
-				
 				try {
+					
+					
 					clusterResults = FileManager.loadAGCTClusterResults(clusterResFile);
 					genelist = FileManager.loadEnsembleGenelistTxt(ensembleGenelistFile);
-					
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
 				
-				try {
 					MainWindow window = new MainWindow();
 					window.frame.setVisible(true);
+					
+					window.tbl_GeneTable.loadGenelist(genelist);
+					
 					
 				} catch (Exception e) {
 					e.printStackTrace();

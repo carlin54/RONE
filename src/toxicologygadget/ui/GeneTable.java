@@ -6,6 +6,7 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import antlr.collections.impl.Vector;
 import javafx.scene.control.TableColumn;
 
 public class GeneTable extends JTable {
@@ -21,7 +22,7 @@ public class GeneTable extends JTable {
 			    "Are you sure you would like to clear the current table?",
 			    "Import Genelist",
 			    JOptionPane.YES_NO_OPTION);
-		return n == 1;
+		return n == 0;
 	}
 	
 	public void loadGenelist(String[] genelist) {
@@ -31,10 +32,16 @@ public class GeneTable extends JTable {
 		else 
 			return;
 		
+		String[] columnNames = {"Genelist"};
+		
 		
 		DefaultTableModel model = new DefaultTableModel();
-	    model.addColumn("Genelist");
-		model.addRow(genelist);
+		
+		model.addColumn("Genes");
+		for(int i = 0; i < genelist.length; i++) {
+			model.addRow(new Object[]{genelist[i]});
+		}
+		
 		
 		this.setModel(model);
 		
