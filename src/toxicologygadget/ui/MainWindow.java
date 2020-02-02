@@ -7,6 +7,8 @@ import java.awt.GridBagLayout;
 import java.awt.Button;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.awt.GridLayout;
@@ -14,6 +16,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
@@ -22,12 +25,18 @@ import jp.sbi.garuda.backend.net.exception.GarudaConnectionNotInitializedExcepti
 import jp.sbi.garuda.backend.net.exception.NetworkConnectionException;
 import toxicologygadget.backend.garudahandler.GarudaHandler;
 import toxicologygadget.filemanager.FileManager;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JFileChooser;
 
-public class MainWindow {
+public class MainWindow implements ActionListener {
 
 	private JFrame frame;
 	private JTable tbl_DataTable;
 	private GarudaHandler garudaHandler;
+	private final Action fileOpenAction = new FileOpenAction();
+	
+	
 	
 	/**
 	 * Launch the application.
@@ -39,7 +48,7 @@ public class MainWindow {
 				File dir = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\AGCT_VisibleClustering.txt");
 				
 				try {
-					FileManager.parseAGCTVisibleClusterFile(dir);
+					FileManager.loadAGCTVisibleClusterFile(dir);
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -126,10 +135,60 @@ public class MainWindow {
 		JMenu mnFile = new JMenu("File");
 		menuBar.add(mnFile);
 		
+	
+		
 		JMenuItem mntmOpen = new JMenuItem("Open");
+		mntmOpen.setAction(fileOpenAction);
 		mnFile.add(mntmOpen);
+		
+		mntmOpen.addActionListener(this);
 		
 		JMenuItem mntmSave = new JMenuItem("Save");
 		mnFile.add(mntmSave);
 	}
+
+	public JTable getDataTable() {
+		return this.tbl_DataTable;
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+
+	}
+
+	private class FileOpenAction extends AbstractAction {
+		
+		final JFileChooser fc = new JFileChooser();
+		
+
+		
+		public FileOpenAction() {
+			putValue(NAME, "Open");
+			putValue(SHORT_DESCRIPTION, "Some short description");
+		}
+		public void actionPerformed(ActionEvent e) {
+			
+			//In response to a button click:
+			int returnVal = fc.showOpenDialog(frame);
+			
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				File file = fc.getSelectedFile();
+				
+				Object[] possibilities = {"Cluster", "Genelist", "Ensemble"};
+				String s = (String)JOptionPane.showInputDialog(
+				                    frame,
+				                    "Complete the sentence:\n",
+				                    "File Type",
+				                    JOptionPane.PLAIN_MESSAGE,
+				                    null,
+				                    possibilities,
+				                    "Genelist");
+				
+			}
+			
+		}
+	}
+
+
 }

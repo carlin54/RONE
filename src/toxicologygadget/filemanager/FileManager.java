@@ -1,18 +1,36 @@
 package toxicologygadget.filemanager;
 
 import java.io.*; 
-
-import java.util.regex.*;  
+import java.util.regex.*;
+import toxicologygadget.ui.MainWindow;  
 
 public class FileManager {
+		
 	
-	
-	
-	public static void loadEnsembleGenelistTxt(File ensembleGenelist) {
+	public static String[] loadEnsembleGenelistTxt(File ensembleGenelistFile) {
+		
+		//TODO: file exists exception
+		String ensembleGenelist;
+		
+		BufferedReader bufferReader = null;
+		
+		// find the command
+		// @Reference_String|AP -Point Manifold3D -P -2 -B 2 -I 0
+		try {
+			bufferReader = new BufferedReader(new FileReader(ensembleGenelistFile));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} 
+	  
+		String line; 
+		
+		return null;
 		
 	}
 	
-	public static void parseAGCTVisibleClusterFile(File clusterResultsFile) throws IOException {
+	public static int[] loadAGCTVisibleClusterFile(File clusterResultsFile) throws IOException {
+		
+		//TODO: file exists exception
 		String command;
 		
 		int numberOfGenes = (int) (clusterResultsFile.length() - 2);
@@ -80,10 +98,13 @@ public class FileManager {
 			
 			if(!foundCluster) {
 				System.out.println("Error Processing AGCT file - cluster not found!"); 
+				return null;
 				//@ TODO: add exception handling 
 			}
 			
 		}
+		
+		return clusterResults;
 		
   	}
 		
