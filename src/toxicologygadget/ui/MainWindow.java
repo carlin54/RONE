@@ -32,7 +32,7 @@ import javax.swing.JFileChooser;
 public class MainWindow implements ActionListener {
 
 	private JFrame frame;
-	private JTable tbl_DataTable;
+	private GeneTable tbl_GeneTable;
 	private GarudaHandler garudaHandler;
 	private final Action fileOpenAction = new FileOpenAction();
 	
@@ -108,26 +108,28 @@ public class MainWindow implements ActionListener {
 		btn_SendToReactome.setBounds(10, 123, 125, 25);
 		frame.getContentPane().add(btn_SendToReactome);
 		
-		tbl_DataTable = new JTable();
-		tbl_DataTable.setModel(new DefaultTableModel(
-			new Object[][] {
-				{null},
-				{null},
-				{null},
-				{null},
-				{null},
-				{null},
-				{null},
-				{null},
-				{null},
-				{null},
-			},
-			new String[] {
-				"New column"
-			}
-		));
-		tbl_DataTable.setBounds(141, 32, 575, 356);
-		frame.getContentPane().add(tbl_DataTable);
+		tbl_GeneTable = new GeneTable();
+		
+		/*tbl_GeneTable.setModel(new DefaultTableModel(
+				new Object[][] {
+					{null},
+					{null},
+					{null},
+					{null},
+					{null},
+					{null},
+					{null},
+					{null},
+					{null},
+					{null},
+				},
+				new String[] {
+					"New column"
+				}
+			));*/
+		
+		tbl_GeneTable.setBounds(141, 32, 575, 356);
+		frame.getContentPane().add(tbl_GeneTable);
 		
 		JMenuBar menuBar = new JMenuBar();
 		frame.setJMenuBar(menuBar);
@@ -147,9 +149,6 @@ public class MainWindow implements ActionListener {
 		mnFile.add(mntmSave);
 	}
 
-	public JTable getDataTable() {
-		return this.tbl_DataTable;
-	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -157,6 +156,16 @@ public class MainWindow implements ActionListener {
 
 	}
 
+	private void loadFile(File file, String contence) {
+		
+		if(!file.exists()) {
+			return;
+		}
+		
+		
+		
+	}
+	
 	private class FileOpenAction extends AbstractAction {
 		
 		final JFileChooser fc = new JFileChooser();
@@ -167,6 +176,7 @@ public class MainWindow implements ActionListener {
 			putValue(NAME, "Open");
 			putValue(SHORT_DESCRIPTION, "Some short description");
 		}
+		
 		public void actionPerformed(ActionEvent e) {
 			
 			//In response to a button click:
@@ -175,8 +185,8 @@ public class MainWindow implements ActionListener {
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				File file = fc.getSelectedFile();
 				
-				Object[] possibilities = {"Cluster", "Genelist", "Ensemble"};
-				String s = (String)JOptionPane.showInputDialog(
+				Object[] possibilities = {"Genelist", "Cluster", "Ensemble"};
+				String contence = (String)JOptionPane.showInputDialog(
 				                    frame,
 				                    "Complete the sentence:\n",
 				                    "File Type",
@@ -185,6 +195,7 @@ public class MainWindow implements ActionListener {
 				                    possibilities,
 				                    "Genelist");
 				
+				loadFile(file, contence);
 			}
 			
 		}
