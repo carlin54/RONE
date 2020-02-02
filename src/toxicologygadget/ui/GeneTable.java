@@ -26,10 +26,10 @@ public class GeneTable extends JTable {
 	
 	public void loadGenelist(String[] genelist) {
 		
-		if(!clearTableConfirmation()) {
+		if(clearTableConfirmation())
+			clearTable();
+		else 
 			return;
-		}
-		clearTable();
 		
 		
 		DefaultTableModel model = new DefaultTableModel();
