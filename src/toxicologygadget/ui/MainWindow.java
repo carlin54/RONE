@@ -46,7 +46,7 @@ public class MainWindow implements ActionListener {
 			public void run() {
 				
 				File clusterResFile = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\AGCT_VisibleClustering.txt");
-				File ensembleGenelistFile = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\AGCT_EnsemblyGenelist.txt.txt");
+				File ensembleGenelistFile = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\AGCT_EnsemblyGenelist.txt");
 				
 				int[] clusterResults;
 				String[] genelist;
