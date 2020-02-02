@@ -45,10 +45,16 @@ public class MainWindow implements ActionListener {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				
-				File dir = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\AGCT_VisibleClustering.txt");
+				File clusterResFile = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\AGCT_VisibleClustering.txt");
+				File ensembleGenelistFile = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\EnsembleGenelist.txt");
+				
+				int[] clusterResults;
+				String[] genelist;
 				
 				try {
-					FileManager.loadAGCTVisibleClusterFile(dir);
+					FileManager.loadAGCTClusterResults(clusterResFile);
+					FileManager.loadEnsembleGenelistTxt(ensembleGenelistFile);
+					
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -155,14 +161,31 @@ public class MainWindow implements ActionListener {
 
 
 	}
-
-	private void loadFile(File file, String contence) {
+	
+	private boolean isTxtExtention(File file) {
+		String path = file.getPath();
+		int len = path.length();
+		System.out.println(path.substring(len-4, len-1));
+		return path.substring(len-3, len).contentEquals(".txt");
+	}
+	
+	private void loadFile(File file, String contents) {
 		
-		if(!file.exists()) {
-			return;
+		if(!file.exists()) return;
+		
+		
+		switch (contents) {
+		case "Genelist":
+				// TODO: Add ensemble genelist
+				if(isTxtExtention(file)) {
+					String[] ensembleGenelist = FileManager.loadEnsembleGenelistTxt(file);
+					if(ensembleGenelist != null) {
+						tbl_GeneTable.loadGenelist(ensembleGenelist);
+					}
+				}
+				
+			break;
 		}
-		
-		
 		
 	}
 	
@@ -186,7 +209,7 @@ public class MainWindow implements ActionListener {
 				File file = fc.getSelectedFile();
 				
 				Object[] possibilities = {"Genelist", "Cluster", "Ensemble"};
-				String contence = (String)JOptionPane.showInputDialog(
+				String content = (String)JOptionPane.showInputDialog(
 				                    frame,
 				                    "Complete the sentence:\n",
 				                    "File Type",
@@ -195,7 +218,7 @@ public class MainWindow implements ActionListener {
 				                    possibilities,
 				                    "Genelist");
 				
-				loadFile(file, contence);
+				loadFile(file, content);
 			}
 			
 		}
