@@ -32,11 +32,7 @@ public class GeneTable extends JTable {
 		else 
 			return;
 		
-		String[] columnNames = {"Genelist"};
-		
-		
 		DefaultTableModel model = new DefaultTableModel();
-		
 		model.addColumn("Genes");
 		for(int i = 0; i < genelist.length; i++) {
 			model.addRow(new Object[]{genelist[i]});
