@@ -52,8 +52,8 @@ public class MainWindow implements ActionListener {
 				String[] genelist;
 				
 				try {
-					FileManager.loadAGCTClusterResults(clusterResFile);
-					FileManager.loadEnsembleGenelistTxt(ensembleGenelistFile);
+					clusterResults = FileManager.loadAGCTClusterResults(clusterResFile);
+					genelist = FileManager.loadEnsembleGenelistTxt(ensembleGenelistFile);
 					
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block

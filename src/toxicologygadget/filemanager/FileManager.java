@@ -7,13 +7,34 @@ import toxicologygadget.ui.MainWindow;
 public class FileManager {
 		
 
+	private static int getNumberOfLines(File file) {
+		BufferedReader bufferReader = null;
+		
+		try {
+			bufferReader = new BufferedReader(new FileReader(file));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} 
+		
+		int i = 0;
+		String line;
+		try {
+			for(i = 0; (line = bufferReader.readLine()) != null; i++);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return i;
+	  
+	}
 	
-	public static String[] loadEnsembleGenelistTxt(File ensembleGenelistFile) {
+	public static String[] loadEnsembleGenelistTxt(File ensembleGenelistFile) throws IOException {
 		
 		if (!ensembleGenelistFile.exists()) return null;
 		
 		//TODO: file exists exception
-		String[] ensembleGenelist;
+		int numGenes = getNumberOfLines(ensembleGenelistFile);
+		String[] ensembleGenelist = new String[(int) numGenes];
 		
 		BufferedReader bufferReader = null;
 		
@@ -23,9 +44,14 @@ public class FileManager {
 			e.printStackTrace();
 		} 
 	  
-		String line; 
+		String gene; 
 		
-		return null;
+		for(int i = 0; (gene = bufferReader.readLine()) != null; i++) {
+			ensembleGenelist[i] = gene;
+		}
+		
+		return ensembleGenelist;
+		
 		
 	}
 	
