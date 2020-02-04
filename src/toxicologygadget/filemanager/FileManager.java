@@ -7,6 +7,8 @@ import toxicologygadget.ui.MainWindow;
 public class FileManager {
 		
 
+	private static final Object[][] String = null;
+
 	private static int getNumberOfLines(File file) {
 		BufferedReader bufferReader = null;
 		
@@ -28,7 +30,70 @@ public class FileManager {
 	  
 	}
 	
-	public static String[] loadEnsembleGenelistTxt(File ensembleGenelistFile) throws IOException {
+	public static String[][] loadCSV(File file, int numColumns){
+		
+		if (!file.exists()) return null;
+		
+		//TODO: file exists exception
+		int numLines = getNumberOfLines(file);
+		String[][] rows = new String[(int) numLines][numColumns];
+		
+		BufferedReader bufferReader = null;
+		
+		try {
+			bufferReader = new BufferedReader(new FileReader(file));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} 
+	  
+		String line; 
+		
+		try {
+			for(int i = 0; (line = bufferReader.readLine()) != null; i++) {
+				String[] parsedLine = line.split(",");
+				rows[i] = parsedLine;
+			}
+		} catch (IOException e) {
+			
+			e.printStackTrace();
+		}
+		return rows;
+			
+	}
+	
+	public static String[][] loadSHOE(File shoeFile){
+		return loadCSV(shoeFile, 14);
+	}
+	
+	private static String[][] addHeader(String[] header, String[][] arrayData){
+		
+		String[][] dataWithHeader = new String[arrayData.length+1][5];
+		dataWithHeader[0] = header;
+		
+		for(int i = 0; i < arrayData.length; i++) {
+			dataWithHeader[i+1] = arrayData[i];
+		}
+		
+		return dataWithHeader;
+		
+	}
+	
+	public static String[][] loadReactome(File reactomeFile){
+		
+		if (!reactomeFile.exists()) return null;
+		
+
+		final String[] COLUMN_NAMES = {"Pathway", "Species", "% Coverage", "Pval", "FDR"};
+		
+		String[][] arrayData = loadCSV(reactomeFile, 5);
+		
+		String[][] reactomeData = addHeader(COLUMN_NAMES, arrayData);
+		
+		return reactomeData;
+		
+	}
+	
+	public static String[] loadEnsembleGenelistTxt(File ensembleGenelistFile) {
 		
 		if (!ensembleGenelistFile.exists()) return null;
 		
@@ -46,8 +111,13 @@ public class FileManager {
 	  
 		String gene; 
 		
-		for(int i = 0; (gene = bufferReader.readLine()) != null; i++) {
-			ensembleGenelist[i] = gene;
+		try {
+			for(int i = 0; (gene = bufferReader.readLine()) != null; i++) {
+				ensembleGenelist[i] = gene;
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
 		return ensembleGenelist;

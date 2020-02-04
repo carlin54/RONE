@@ -25,6 +25,8 @@ import jp.sbi.garuda.backend.net.exception.GarudaConnectionNotInitializedExcepti
 import jp.sbi.garuda.backend.net.exception.NetworkConnectionException;
 import toxicologygadget.backend.garudahandler.GarudaHandler;
 import toxicologygadget.filemanager.FileManager;
+import toxicologygadget.targetmine.TargetMineQueryClient;
+
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JFileChooser;
@@ -35,8 +37,7 @@ public class MainWindow implements ActionListener {
 	private GeneTable tbl_GeneTable;
 	private GarudaHandler garudaHandler;
 	private final Action fileOpenAction = new FileOpenAction();
-	
-	
+
 	
 	/**
 	 * Launch the application.
@@ -50,16 +51,18 @@ public class MainWindow implements ActionListener {
 				
 				int[] clusterResults;
 				String[] genelist;
+				
 				try {
-					
 					
 					clusterResults = FileManager.loadAGCTClusterResults(clusterResFile);
 					genelist = FileManager.loadEnsembleGenelistTxt(ensembleGenelistFile);
+					
+					// String[] targetMineResults = TargetMineQueryClient.query(genelist);
 				
 					MainWindow window = new MainWindow();
 					window.frame.setVisible(true);
 					
-					window.tbl_GeneTable.loadGenelist(genelist);
+					// window.tbl_GeneTable.loadGenelist(genelist);
 					
 					
 				} catch (Exception e) {

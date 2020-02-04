@@ -25,6 +25,7 @@ import jp.sbi.garuda.backend.plugin.pipeline.exceptions.PipelineNotInitializedEx
 import jp.sbi.garuda.backend.plugin.pipeline.responseCodes.GarudaPipelineResponseCode;
 import jp.sbi.garuda.backend.ui.GarudaGlassPanel;
 import toxicologygadget.backend.garudahandler.DiscoveryTouple;
+import toxicologygadget.filemanager.FileManager;
 
 public class GarudaHandler {
 
@@ -46,12 +47,10 @@ public class GarudaHandler {
 		
 		garudaBackend.activateGadget();
 		
-		//this.activateConnection();
+		garudaBackend.getCompatibleGadgetList("txt", "genelist");
 		
-		garudaBackend.getCompatibleGadgetList("txt", "txt");
-		
-		File file = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\AGCT_EnsemblyGenelist.txt");
-		garudaDiscover(file, "txt");
+		File file = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\EnsembleGenelist2.txt");
+		garudaDiscover(file, "genelist");
 	
 		
 		
@@ -141,6 +140,18 @@ public class GarudaHandler {
 			public void loadDataRequestReceivedAsFile(File file, String senderId, String senderName,
 					String originDeviceId, String currentDeviceId, String fileName, String fileFormat) {
 				// TODO Auto-generated method stub
+				System.out.print("loadDataRequestReceivedAsFile!");
+				
+				switch (senderName) {
+					case "GeneMapper": // TODO: maybe switch to senderId
+						String[][] shoeData = FileManager.loadSHOE(file);
+						
+						break;
+					case "Reactome gadget":
+						String[][] reactomeData = FileManager.loadReactome(file);
+						
+						break;
+				}
 				
 			}
 
@@ -148,7 +159,7 @@ public class GarudaHandler {
 			public void loadDataRequestReceivedAsStream(byte[] receivedData, String senderId, String senderName,
 					String originDeviceId, String currentDeviceId, String fileName, String fileFormat) {
 				// TODO Auto-generated method stub
-				
+				System.out.print("loadDataRequestReceivedAsStream!");
 			}
 		});
 		
