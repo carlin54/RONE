@@ -47,7 +47,7 @@ public class MainWindow implements ActionListener {
 			public void run() {
 				
 				File clusterResFile = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\AGCT_VisibleClustering.txt");
-				File ensembleGenelistFile = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\AGCT_EnsemblyGenelist.txt");
+				File ensembleGenelistFile = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\EnsembleGenelist1.txt");
 				
 				int[] clusterResults;
 				String[] genelist;
@@ -62,7 +62,7 @@ public class MainWindow implements ActionListener {
 					MainWindow window = new MainWindow();
 					window.frame.setVisible(true);
 					
-					// window.tbl_GeneTable.loadGenelist(genelist);
+					window.tbl_GeneTable.loadGenelist(genelist);
 					
 					
 				} catch (Exception e) {
@@ -117,23 +117,7 @@ public class MainWindow implements ActionListener {
 		
 		tbl_GeneTable = new GeneTable();
 		
-		/*tbl_GeneTable.setModel(new DefaultTableModel(
-				new Object[][] {
-					{null},
-					{null},
-					{null},
-					{null},
-					{null},
-					{null},
-					{null},
-					{null},
-					{null},
-					{null},
-				},
-				new String[] {
-					"New column"
-				}
-			));*/
+
 		
 		tbl_GeneTable.setBounds(141, 32, 575, 356);
 		frame.getContentPane().add(tbl_GeneTable);

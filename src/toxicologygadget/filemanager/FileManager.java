@@ -5,9 +5,6 @@ import java.util.regex.*;
 import toxicologygadget.ui.MainWindow;  
 
 public class FileManager {
-		
-
-	private static final Object[][] String = null;
 
 	private static int getNumberOfLines(File file) {
 		BufferedReader bufferReader = null;

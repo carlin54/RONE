@@ -26,37 +26,35 @@ import jp.sbi.garuda.backend.plugin.pipeline.responseCodes.GarudaPipelineRespons
 import jp.sbi.garuda.backend.ui.GarudaGlassPanel;
 import toxicologygadget.backend.garudahandler.DiscoveryTouple;
 import toxicologygadget.filemanager.FileManager;
+import toxicologygadget.ui.GeneTable;
 
 public class GarudaHandler {
 
 	private GarudaBackend garudaBackend;
 	private JFrame parentFrame;
-	
 	private GarudaBackendPipelinePlugin pipelinePlugin;
+	private GeneTable geneTable;
 	
 	public GarudaHandler (JFrame parentFrame) throws GarudaConnectionNotInitializedException, NetworkConnectionException
 	{
-		this.parentFrame = parentFrame ;
-
+		this.parentFrame = parentFrame;
+		
 		garudaBackend = new GarudaBackend(GarudaConstants.GARUDA_ID, GarudaConstants.GARUDA_NAME, this.parentFrame);
 
 		garudaBackend.addGarudaGlassPanel(this.parentFrame, null);
 		
-		initGarudaListeners ();
+		initGarudaListeners();
 		initPipeline();
 		
 		garudaBackend.activateGadget();
 		
 		garudaBackend.getCompatibleGadgetList("txt", "genelist");
 		
-		File file = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\EnsembleGenelist2.txt");
+		File file = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\EnsembleGenelist1.txt");
 		garudaDiscover(file, "genelist");
 	
-		
-		
 	}
 
-	
 	private void initPipeline () 
 	{
 		pipelinePlugin = new GarudaBackendPipelinePlugin() ;
@@ -134,7 +132,6 @@ public class GarudaHandler {
 	private void initGarudaListeners () {
 				
 		garudaBackend.getIncomingRequestHandler().addLoadDataRequestActionListener(new LoadDataRequestActionListener() {
-	
 
 			@Override
 			public void loadDataRequestReceivedAsFile(File file, String senderId, String senderName,
@@ -143,7 +140,8 @@ public class GarudaHandler {
 				System.out.print("loadDataRequestReceivedAsFile!");
 				
 				switch (senderName) {
-					case "GeneMapper": // TODO: maybe switch to senderId
+					// TODO: maybe switch to senderId
+					case "GeneMapper": 
 						String[][] shoeData = FileManager.loadSHOE(file);
 						
 						break;
@@ -151,6 +149,8 @@ public class GarudaHandler {
 						String[][] reactomeData = FileManager.loadReactome(file);
 						
 						break;
+						
+						
 				}
 				
 			}
