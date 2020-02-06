@@ -54,12 +54,22 @@ public class FileManager {
 			
 			e.printStackTrace();
 		}
+		
+		
+		System.out.print("\n");
+		for(int i = 0; i < rows.length; i++) {
+			for(int j = 0; j < rows[i].length; j++) {
+				System.out.print(rows[i][j] + ", ");
+			}
+			System.out.print("\n");
+		}
+		
 		return rows;
 			
 	}
 	
-	public static String[][] loadSHOE(File shoeFile){
-		return loadCSV(shoeFile, 14);
+	public static DataTable loadSHOE(File shoeFile){
+		return new DataTable(loadCSV(shoeFile, 14));
 	}
 	
 	private static String[][] addHeader(String[] header, String[][] arrayData){
@@ -113,7 +123,6 @@ public class FileManager {
 				ensembleGenelist[i] = gene;
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

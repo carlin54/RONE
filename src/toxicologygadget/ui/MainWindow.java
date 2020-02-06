@@ -24,6 +24,7 @@ import javax.swing.table.DefaultTableModel;
 import jp.sbi.garuda.backend.net.exception.GarudaConnectionNotInitializedException;
 import jp.sbi.garuda.backend.net.exception.NetworkConnectionException;
 import toxicologygadget.backend.garudahandler.GarudaHandler;
+import toxicologygadget.filemanager.DataTable;
 import toxicologygadget.filemanager.FileManager;
 import toxicologygadget.targetmine.TargetMineQueryClient;
 
@@ -47,18 +48,37 @@ public class MainWindow implements ActionListener {
 			public void run() {
 				
 				File clusterResFile = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\AGCT_VisibleClustering.txt");
-				File ensembleGenelistFile = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\EnsembleGenelist1.txt");
+				File ensembleGenelistFile = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\EnsembleGenelist2.txt");
 				
 				int[] clusterResults;
 				String[] genelist;
+				
+				String[][] dataA = {
+						{"Letter", "Number"},
+						{"A", "1"},
+						{"B", "2"},
+						{"C", "3"},
+						{"D", "4"},
+						{"E", "5"}
+				};
+				DataTable a = new DataTable(dataA);
+				
+				String[][] dataB = {
+						{"Letter", "TF"},
+						{"A", "ACAC"},
+						{"B", "GCGC"},
+						{"B", "HCHC"},
+						{"B", "YYYY"},
+						{"C", "BCBC"}
+				};
+				DataTable b = new DataTable(dataB);
+				DataTable c = DataTable.leftJoin(a, b, "Letter");
 				
 				try {
 					
 					clusterResults = FileManager.loadAGCTClusterResults(clusterResFile);
 					genelist = FileManager.loadEnsembleGenelistTxt(ensembleGenelistFile);
-					
-					// String[] targetMineResults = TargetMineQueryClient.query(genelist);
-				
+									
 					MainWindow window = new MainWindow();
 					window.frame.setVisible(true);
 					

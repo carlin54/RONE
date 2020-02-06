@@ -8,16 +8,15 @@ import javax.swing.table.TableModel;
 
 import antlr.collections.impl.Vector;
 import javafx.scene.control.TableColumn;
+import toxicologygadget.filemanager.DataTable;
+
 import java.util.ArrayList;
 
 public class GeneTable extends JTable {
 	
-	private ArrayList<String> header;
-	private ArrayList<ArrayList<Object>> dataList;
+	DataTable dataTable;
 	
 	public GeneTable(){
-		header = new ArrayList<String>();
-		dataList = new ArrayList<ArrayList<Object>>();
 	}
 	
 	private void clearTable() {
@@ -68,14 +67,11 @@ public class GeneTable extends JTable {
 		//else 
 		//	return;
 		
-		header.add("Genes");
-		ArrayList<Object> column = new ArrayList<Object>();
 		
-		for(int i = 0; i < genelist.length; i++) {
-			column.add(genelist[i]);
-		}
+		String[][] genelistData = new String[1][];
+		genelistData[0] = genelist;
 		
-		dataList.add(column);
+		dataTable = new DataTable(genelistData);
 		
 		updateTable();
 		
@@ -86,6 +82,7 @@ public class GeneTable extends JTable {
 	}
 	
 	public void importColumn(Object[] data, String columnIdentifier) {
+		
 		header.add(columnIdentifier);
 		
 		ArrayList<Object> column = new ArrayList<Object>(); 
@@ -95,6 +92,7 @@ public class GeneTable extends JTable {
 		
 		dataList.add(column);
 		updateTable();
+	
 	}
 	
 	public void importTable(Object[][] data, String[] columnIdentifier) {
@@ -103,6 +101,10 @@ public class GeneTable extends JTable {
 			importColumn(data[i], columnIdentifier[i]);
 		}
 			
+	}
+
+	public void importTable(DataTable importTable) {
+		dataTable = DataTable.leftJoin(dataTable, importTable, "Gene");
 	}
 	
 }

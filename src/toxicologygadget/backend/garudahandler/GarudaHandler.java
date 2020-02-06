@@ -25,6 +25,7 @@ import jp.sbi.garuda.backend.plugin.pipeline.exceptions.PipelineNotInitializedEx
 import jp.sbi.garuda.backend.plugin.pipeline.responseCodes.GarudaPipelineResponseCode;
 import jp.sbi.garuda.backend.ui.GarudaGlassPanel;
 import toxicologygadget.backend.garudahandler.DiscoveryTouple;
+import toxicologygadget.filemanager.DataTable;
 import toxicologygadget.filemanager.FileManager;
 import toxicologygadget.ui.GeneTable;
 
@@ -50,7 +51,7 @@ public class GarudaHandler {
 		
 		garudaBackend.getCompatibleGadgetList("txt", "genelist");
 		
-		File file = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\EnsembleGenelist1.txt");
+		File file = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\EnsembleGenelist2.txt");
 		garudaDiscover(file, "genelist");
 	
 	}
@@ -142,11 +143,14 @@ public class GarudaHandler {
 				switch (senderName) {
 					// TODO: maybe switch to senderId
 					case "GeneMapper": 
-						String[][] shoeData = FileManager.loadSHOE(file);
+						DataTable shoeTable = FileManager.loadSHOE(file);
+						geneTable.importTable(shoeTable);
 						
 						break;
 					case "Reactome gadget":
 						String[][] reactomeData = FileManager.loadReactome(file);
+						
+						DataTable dt = new DataTable(reactomeData);
 						
 						break;
 						
@@ -173,7 +177,7 @@ public class GarudaHandler {
 			
 			@Override
 			public void gadgetActivated() {
-				JOptionPane.showMessageDialog(parentFrame, "Connected to Garuda ", "Garuda connection", JOptionPane.INFORMATION_MESSAGE);
+				// JOptionPane.showMessageDialog(parentFrame, "Connected to Garuda ", "Garuda connection", JOptionPane.INFORMATION_MESSAGE);
 			}
 		}) ;
 		
