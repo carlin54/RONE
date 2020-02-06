@@ -53,27 +53,6 @@ public class MainWindow implements ActionListener {
 				int[] clusterResults;
 				String[] genelist;
 				
-				String[][] dataA = {
-						{"Letter", "Number"},
-						{"A", "1"},
-						{"B", "2"},
-						{"C", "3"},
-						{"D", "4"},
-						{"E", "5"}
-				};
-				DataTable a = new DataTable(dataA);
-				
-				String[][] dataB = {
-						{"Letter", "TF"},
-						{"A", "ACAC"},
-						{"B", "GCGC"},
-						{"B", "HCHC"},
-						{"B", "YYYY"},
-						{"C", "BCBC"}
-				};
-				DataTable b = new DataTable(dataB);
-				DataTable c = DataTable.leftJoin(a, b, "Letter");
-				
 				try {
 					
 					clusterResults = FileManager.loadAGCTClusterResults(clusterResFile);
@@ -83,7 +62,6 @@ public class MainWindow implements ActionListener {
 					window.frame.setVisible(true);
 					
 					window.tbl_GeneTable.loadGenelist(genelist);
-					
 					
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -99,7 +77,7 @@ public class MainWindow implements ActionListener {
 		initialize();
 		
 		try {
-			this.garudaHandler = new GarudaHandler(this.frame);
+			this.garudaHandler = new GarudaHandler(this.frame, this.tbl_GeneTable);
 			
 			
 			
@@ -137,8 +115,6 @@ public class MainWindow implements ActionListener {
 		
 		tbl_GeneTable = new GeneTable();
 		
-
-		
 		tbl_GeneTable.setBounds(141, 32, 575, 356);
 		frame.getContentPane().add(tbl_GeneTable);
 		
@@ -147,8 +123,6 @@ public class MainWindow implements ActionListener {
 		
 		JMenu mnFile = new JMenu("File");
 		menuBar.add(mnFile);
-		
-	
 		
 		JMenuItem mntmOpen = new JMenuItem("Open");
 		mntmOpen.setAction(fileOpenAction);

@@ -36,9 +36,10 @@ public class GarudaHandler {
 	private GarudaBackendPipelinePlugin pipelinePlugin;
 	private GeneTable geneTable;
 	
-	public GarudaHandler (JFrame parentFrame) throws GarudaConnectionNotInitializedException, NetworkConnectionException
+	public GarudaHandler (JFrame parentFrame, GeneTable geneTable) throws GarudaConnectionNotInitializedException, NetworkConnectionException
 	{
 		this.parentFrame = parentFrame;
+		this.geneTable = geneTable;
 		
 		garudaBackend = new GarudaBackend(GarudaConstants.GARUDA_ID, GarudaConstants.GARUDA_NAME, this.parentFrame);
 

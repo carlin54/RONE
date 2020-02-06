@@ -20,8 +20,7 @@ public class GeneTable extends JTable {
 	}
 	
 	private void clearTable() {
-		header = new ArrayList<String>();
-		dataList = new ArrayList<ArrayList<Object>>();
+		dataTable = new DataTable();
 		
 		DefaultTableModel model = (DefaultTableModel) this.getModel();
 		model.setRowCount(0);
@@ -40,18 +39,21 @@ public class GeneTable extends JTable {
 		
 		DefaultTableModel model = new DefaultTableModel();
 		
-		for(int i = 0; i < header.size(); i++) {
-			model.addColumn(header.get(i));	
+		String[] identifiers = dataTable.getColumnIdentifiers();
+				
+		for(int i = 0; i < identifiers.length; i++) {
+			model.addColumn(identifiers[i]);	
 		}
 		
-		int rowWidth = dataList.size();
-		int columnHeight = dataList.get(0).size();
+
+		ArrayList<ArrayList<Object>> table = dataTable.getTable();
+		int rowWidth = table.get(0).size();
+		int columnHeight = table.size();
 		
 		for(int i = 0; i < columnHeight; i++) {
 			Object[] row = new Object[rowWidth];
 			for(int j = 0; j < rowWidth; j++) {
-				System.out.println("i: " + i + "j: " + j);
-				row[j] = dataList.get(j).get(i);				
+				row[j] = table.get(i).get(j);				
 			}
 			
 			model.addRow(row);
@@ -68,8 +70,12 @@ public class GeneTable extends JTable {
 		//	return;
 		
 		
-		String[][] genelistData = new String[1][];
-		genelistData[0] = genelist;
+		String[][] genelistData = new String[genelist.length][1];
+		genelistData[0][0] = "Gene";
+		for(int i = 1; i < genelist.length; i++) {
+			genelistData[i][0] = genelist[i-1];
+		}
+		
 		
 		dataTable = new DataTable(genelistData);
 		
@@ -105,6 +111,7 @@ public class GeneTable extends JTable {
 
 	public void importTable(DataTable importTable) {
 		dataTable = DataTable.leftJoin(dataTable, importTable, "Gene");
+		updateTable();
 	}
 	
 }

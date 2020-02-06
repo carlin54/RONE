@@ -10,6 +10,11 @@ public class DataTable {
 	private ArrayList<ArrayList<Object>> mTable;
 	private String[] mColumnIdentifiers;
 	
+	public DataTable(){
+		mTable = null;
+		mColumnIdentifiers = null;
+	}
+	
 	public DataTable(ArrayList<ArrayList<Object>> table, String[] columnIdentifiers){
 		mTable = table;
 		mColumnIdentifiers = columnIdentifiers;
@@ -70,6 +75,14 @@ public class DataTable {
 		
 		return aIndicies;
 		
+	}
+	
+	public ArrayList<ArrayList<Object>> getTable(){
+		return mTable;
+	}
+	
+	public String[] getColumnIdentifiers(){
+		return mColumnIdentifiers;
 	}
 	
 	public static DataTable leftJoin(DataTable a, DataTable b, String keyCol) {

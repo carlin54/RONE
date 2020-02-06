@@ -88,7 +88,6 @@ public class FileManager {
 	public static String[][] loadReactome(File reactomeFile){
 		
 		if (!reactomeFile.exists()) return null;
-		
 
 		final String[] COLUMN_NAMES = {"Pathway", "Species", "% Coverage", "Pval", "FDR"};
 		
@@ -162,7 +161,6 @@ public class FileManager {
 	}
 	
 	public static int[] loadAGCTClusterResults(File clusterFile) throws IOException {
-		
 	
 		int numberOfGenes = getNumberOfClusters(clusterFile);
 		int[] clusterResults = new int[numberOfGenes];
@@ -195,8 +193,6 @@ public class FileManager {
 			}
 			if (!foundCluster) return null;
 		}
-		
-		
 		
 		return clusterResults;
 		
