@@ -15,6 +15,13 @@ public class DataTable {
 		mColumnIdentifiers = null;
 	}
 	
+	public boolean containsColumn(String col) {
+		for(int i = 0; i < mColumnIdentifiers.length; i++) {
+			if(mColumnIdentifiers[i].equals(col)) return true;
+		}
+		return false;
+	}
+	
 	public DataTable(ArrayList<ArrayList<Object>> table, String[] columnIdentifiers){
 		mTable = table;
 		mColumnIdentifiers = columnIdentifiers;
@@ -77,9 +84,21 @@ public class DataTable {
 		
 	}
 	
+	public static ArrayList<Integer> rangeIndicies(int a, int b){
+		ArrayList<Integer> aIndicies = new ArrayList<Integer>();
+		
+		for(int i = a; i < b; i++) {
+			aIndicies.add(i);
+		}
+		
+		return aIndicies;
+		
+	}
+	
 	public ArrayList<ArrayList<Object>> getTable(){
 		return mTable;
 	}
+	
 	
 	public String[] getColumnIdentifiers(){
 		return mColumnIdentifiers;
@@ -94,9 +113,10 @@ public class DataTable {
 		int keyIndexA = a.columnIndex(keyCol);
 		int keyIndexB = b.columnIndex(keyCol);
 		
-		ArrayList<Integer> aColumnSelect = uniqueIndicies(a.mColumnIdentifiers, b.mColumnIdentifiers);
-		aColumnSelect.add(keyIndexA, 0);
-		ArrayList<Integer> bColumnSelect = uniqueIndicies(b.mColumnIdentifiers, a.mColumnIdentifiers);
+		ArrayList<Integer> aColumnSelect = rangeIndicies(0, a.getColumnIdentifiers().length);
+		ArrayList<Integer> bColumnSelect = rangeIndicies(0, b.getColumnIdentifiers().length);
+		
+		bColumnSelect.remove(b.columnIndex("Gene"));
 		
 		String[] newColumnIdentifiers = joinColumns(aColumnSelect, bColumnSelect, a.mColumnIdentifiers, b.mColumnIdentifiers);
 		ArrayList<Object> emptyArray = new ArrayList<Object>();
@@ -116,8 +136,6 @@ public class DataTable {
 			for(int j = i; j < b.mTable.size(); j++){
 				Object aKey = a.mTable.get(i).get(keyIndexA);
 				Object bKey = b.mTable.get(j).get(keyIndexB);
-				
-				
 				
 				if (aKey.equals(bKey)){
 					ArrayList<Object> leftRow = a.mTable.get(i);

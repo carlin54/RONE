@@ -2,6 +2,7 @@ package toxicologygadget.ui;
 
 import javax.swing.CellRendererPane;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -17,6 +18,8 @@ public class GeneTable extends JTable {
 	DataTable dataTable;
 	
 	public GeneTable(){
+	
+		
 	}
 	
 	private void clearTable() {
@@ -27,12 +30,17 @@ public class GeneTable extends JTable {
 	}
 	
 	private boolean clearTableConfirmation() {
-		int n = JOptionPane.showConfirmDialog(
-			    this,
-			    "Are you sure you would like to clear the current table?",
-			    "Import Genelist",
-			    JOptionPane.YES_NO_OPTION);
-		return n == 0;
+		if(dataTable != null) {
+			int n = JOptionPane.showConfirmDialog(
+				    this,
+				    "Are you sure you would like to clear the current table?",
+				    "Import Genelist",
+				    JOptionPane.YES_NO_OPTION);
+			return n == 0;
+		}else {
+			return true;
+		}
+
 	}
 	
 	private void updateTable() {
@@ -62,12 +70,14 @@ public class GeneTable extends JTable {
 		this.setModel(model);
 	}
 	
+    public boolean isCellEditable(int row, int column) {                
+        return false;               
+    }
+	
 	public void loadGenelist(String[] genelist) {
 		
-		//if(clearTableConfirmation())
-		//	clearTable();
-		//else 
-		//	return;
+		if(!clearTableConfirmation())
+			return;
 		
 		
 		String[][] genelistData = new String[genelist.length][1];
@@ -108,9 +118,20 @@ public class GeneTable extends JTable {
 		}
 			
 	}
-
+	
+	
+	
 	public void importTable(DataTable importTable) {
-		dataTable = DataTable.leftJoin(dataTable, importTable, "Gene");
+		
+		if(dataTable == null) {
+			if(dataTable.containsColumn("Gene")) {
+				
+			}
+		}else{
+			dataTable = DataTable.leftJoin(dataTable, importTable, "Gene");
+		}
+		
+		
 		updateTable();
 	}
 	

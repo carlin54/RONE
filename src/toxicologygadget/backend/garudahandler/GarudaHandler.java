@@ -1,9 +1,11 @@
 package toxicologygadget.backend.garudahandler;
 
+import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
@@ -53,7 +55,7 @@ public class GarudaHandler {
 		garudaBackend.getCompatibleGadgetList("txt", "genelist");
 		
 		File file = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\EnsembleGenelist2.txt");
-		garudaDiscover(file, "genelist");
+		garudaDiscover(file, "ensemble");
 	
 	}
 
@@ -197,7 +199,11 @@ public class GarudaHandler {
 			
 			@Override
 			public void gotCompatibleGadgetList(List<CompatibleGadgetDetails> gadgetList) {
+				
 				getGarudaGlassPanel().showPanel(gadgetList);
+				GarudaGlassPanel a = getGarudaGlassPanel();
+				int i = 0;
+				
 			}
 			
 			@Override
