@@ -160,7 +160,7 @@ public class FileManager {
 		return referenceString;
 	}
 	
-	public static int[] loadAGCTClusterResults(File clusterFile) throws IOException {
+	public static int[] loadAGCTClusterResults(File clusterFile)  {
 	
 		int numberOfGenes = getNumberOfClusters(clusterFile);
 		int[] clusterResults = new int[numberOfGenes];
@@ -175,23 +175,30 @@ public class FileManager {
 		} 
 		
 		
-		line = bufferReader.readLine();
-		line = bufferReader.readLine();
-		while ((line = bufferReader.readLine()) != null){
-			int i = 0;
-			boolean foundCluster = false;
-			for (i = 0; i < line.length(); i++) {
-				if(line.charAt(i) == '|') {
-					String clustString = line.substring(i+1);
-					int cluster = Integer.parseInt(clustString);
-					clusterResults[clustIndex] = cluster;
-					clustIndex = clustIndex + 1;
-					foundCluster = true;
-					System.out.println(cluster); 
-					break;
-				}				
+		
+		try {
+			line = bufferReader.readLine();
+			line = bufferReader.readLine();
+			while ((line = bufferReader.readLine()) != null){
+				int i = 0;
+				boolean foundCluster = false;
+				for (i = 0; i < line.length(); i++) {
+					if(line.charAt(i) == '|') {
+						String clustString = line.substring(i+1);
+						int cluster = Integer.parseInt(clustString);
+						clusterResults[clustIndex] = cluster;
+						clustIndex = clustIndex + 1;
+						foundCluster = true;
+						System.out.println(cluster); 
+						break;
+					}				
+				}
+				if (!foundCluster) return null;
 			}
-			if (!foundCluster) return null;
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
 		return clusterResults;

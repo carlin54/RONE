@@ -99,7 +99,6 @@ public class DataTable {
 		return mTable;
 	}
 	
-	
 	public String[] getColumnIdentifiers(){
 		return mColumnIdentifiers;
 	}

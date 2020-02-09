@@ -118,9 +118,7 @@ public class GeneTable extends JTable {
 		}
 			
 	}
-	
-	
-	
+		
 	public void importTable(DataTable importTable) {
 		
 		if(dataTable == null) {
