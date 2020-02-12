@@ -6,6 +6,7 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.regex.*;
 import toxicologygadget.ui.MainWindow;  
 
@@ -142,11 +143,8 @@ public class FileManager {
 		String referenceString = null;
 		BufferedReader bufferReader = null;
 		
-		try {
-			bufferReader = new BufferedReader(new FileReader(clusterResultsFile));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} 
+		bufferReader = new BufferedReader(new FileReader(clusterResultsFile));
+		
 		
 		String line; 
 		line = bufferReader.readLine();
@@ -154,8 +152,7 @@ public class FileManager {
 		if(line != null) {
 			if(line.length() >= STRING_COMMAND_REFERENCE.length()) {
 				referenceString = line.substring(STRING_COMMAND_REFERENCE.length()-1);
-				//@ TODO: remove output
-				System.out.println(referenceString);
+
 			}else{
 				//@ TODO: add exception handling
 				System.out.println("Error Processing AGCT file - command not found!");
@@ -237,6 +234,74 @@ public class FileManager {
 
 		
 		return file;
+	}
+	
+	private static ArrayList<Object> loadAGCTScenarioColumns(){
+		return null;
+		
+	}
+	
+	public static DataTable loadAGCTScenario(File file) throws IOException {
+		
+	
+		final String ORDERED_LIST_HANDLE = "@Ordered_List_Names_Begin";
+		String referenceString = null;
+		BufferedReader bufferReader = null;
+		
+		bufferReader = new BufferedReader(new FileReader(file));
+		
+		ArrayList<Object> genes = new ArrayList<Object>();
+		
+		String line; 
+		line = bufferReader.readLine();
+		while((line = bufferReader.readLine()) != null) {
+			if(line.equals(ORDERED_LIST_HANDLE)) {
+				line = bufferReader.readLine();
+				String[] str = line.split("\\|");
+				
+				for(String s : str) {
+					genes.add(s);
+				}
+				
+				
+			}
+		}
+		
+		ArrayList<Object> clusters = new ArrayList<Object>();
+		final String DATA_HANDLE = "@DATA|";
+		bufferReader = new BufferedReader(new FileReader(file));
+		while((line = bufferReader.readLine()) != null) {
+			if(line.equals(DATA_HANDLE)) 
+				
+				break;
+		}
+		
+		while((line = bufferReader.readLine()) != null) {
+			String[] parse = line.split("\\|");
+			clusters.add(parse[1]);
+		}
+		
+		if(clusters.size() == genes.size()) {
+			
+			ArrayList<ArrayList<Object>> table = new ArrayList<ArrayList<Object>>();
+			for(int i = 0; i < clusters.size(); i++) {
+				ArrayList<Object> row = new ArrayList<Object>();
+				row.add(genes.get(i));
+				row.add(clusters.get(i));
+				table.add(row);
+			}
+			
+			ArrayList<String> identifiers = new ArrayList<String>();
+			identifiers.add("Gene");
+			identifiers.add("Clusters");
+			
+			return new DataTable(table, identifiers);
+			
+		}else {
+			// TODO: throw
+		}
+		
+		return null;
 	}
 	
 }

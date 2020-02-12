@@ -18,7 +18,7 @@ public class GeneTable extends JTable {
 	DataTable dataTable;
 	
 	public GeneTable(){
-	
+		dataTable = new DataTable();
 	}
 	
 	public boolean isCellEditable(int row, int column) {                
@@ -50,10 +50,10 @@ public class GeneTable extends JTable {
 		
 		DefaultTableModel model = new DefaultTableModel();
 		
-		String[] identifiers = dataTable.getColumnIdentifiers();
+		ArrayList<String> identifiers = dataTable.getIdentifiers();
 				
-		for(int i = 0; i < identifiers.length; i++) {
-			model.addColumn(identifiers[i]);	
+		for(int i = 0; i < identifiers.size(); i++) {
+			model.addColumn(identifiers.get(i));	
 		}
 		
 
@@ -117,15 +117,16 @@ public class GeneTable extends JTable {
 		}
 			
 	}
-		
+	
+	
 	public void importTable(DataTable importTable) {
 		
-		if(dataTable == null) {
-			if(dataTable.containsColumn("Gene")) {
-				
+		if(dataTable.columnCount() == 0) {
+			dataTable = importTable;
+		}else {
+			if(importTable.containsColumn("Gene")) {
+				dataTable = DataTable.leftJoin(dataTable, importTable, "Gene");
 			}
-		}else{
-			dataTable = DataTable.leftJoin(dataTable, importTable, "Gene");
 		}
 		
 		

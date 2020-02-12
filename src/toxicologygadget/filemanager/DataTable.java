@@ -2,34 +2,37 @@ package toxicologygadget.filemanager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 public class DataTable {
 	
 	private ArrayList<ArrayList<Object>> mTable;
-	private String[] mColumnIdentifiers;
+	private ArrayList<String> mIdentifiers;
 	
 	public DataTable(){
-		mTable = null;
-		mColumnIdentifiers = null;
+		mTable = new ArrayList<ArrayList<Object>>();
+		mIdentifiers = new ArrayList<String>();
 	}
 	
 	public boolean containsColumn(String col) {
-		for(int i = 0; i < mColumnIdentifiers.length; i++) {
-			if(mColumnIdentifiers[i].equals(col)) return true;
+		for(int i = 0; i < mIdentifiers.size(); i++) {
+			if(mIdentifiers.get(i).equals(col)) return true;
 		}
 		return false;
 	}
 	
-	public DataTable(ArrayList<ArrayList<Object>> table, String[] columnIdentifiers){
+	public DataTable(ArrayList<ArrayList<Object>> table, ArrayList<String> columnIdentifiers){
 		mTable = table;
-		mColumnIdentifiers = columnIdentifiers;
+		mIdentifiers = columnIdentifiers;
 	}
 	
 	public DataTable(String[][] table){
 		
-		mColumnIdentifiers = table[0];
+		mIdentifiers = new ArrayList<String> ();
+		
+		Collections.addAll(mIdentifiers, table[0]);
 
 		mTable = new ArrayList<ArrayList<Object>>();
 		
@@ -47,16 +50,16 @@ public class DataTable {
 	}
 	
 	public boolean hasColumn(String col) {
-		for(int i = 0; i < mColumnIdentifiers.length; i++) {
-			if(mColumnIdentifiers[i].equals(col)) 
+		for(int i = 0; i < mIdentifiers.size(); i++) {
+			if(mIdentifiers.get(i).equals(col)) 
 				return true;
 		}
 		return false;
 	}
 	
 	public int columnIndex(String col){
-		for(int i = 0; i < mColumnIdentifiers.length; i++) {
-			if(mColumnIdentifiers[i].equals(col)) 
+		for(int i = 0; i < mIdentifiers.size(); i++) {
+			if(mIdentifiers.get(i).equals(col)) 
 				return i;
 		}
 		return -1;
@@ -95,8 +98,8 @@ public class DataTable {
 		
 	}
 	
-	public String[] getColumnIdentifiers(){
-		return mColumnIdentifiers;
+	public ArrayList<String> getIdentifiers(){
+		return mIdentifiers;
 	}
 	
 	public static DataTable leftJoin(DataTable a, DataTable b, String keyCol) {
@@ -108,12 +111,12 @@ public class DataTable {
 		int keyIndexA = a.columnIndex(keyCol);
 		int keyIndexB = b.columnIndex(keyCol);
 		
-		ArrayList<Integer> aColumnSelect = rangeIndicies(0, a.getColumnIdentifiers().length);
-		ArrayList<Integer> bColumnSelect = rangeIndicies(0, b.getColumnIdentifiers().length);
+		ArrayList<Integer> aColumnSelect = rangeIndicies(0, a.getIdentifiers().size());
+		ArrayList<Integer> bColumnSelect = rangeIndicies(0, b.getIdentifiers().size());
 		
-		bColumnSelect.remove(b.columnIndex("Gene"));
+		bColumnSelect.remove(b.columnIndex(keyCol));
 		
-		String[] newColumnIdentifiers = joinColumns(aColumnSelect, bColumnSelect, a.mColumnIdentifiers, b.mColumnIdentifiers);
+		ArrayList<String> newColumnIdentifiers = joinIdentifiers(aColumnSelect, bColumnSelect, a.getIdentifiers(), b.getIdentifiers());
 		ArrayList<Object> emptyArray = new ArrayList<Object>();
 		
 		for(int i = 0; i < bColumnSelect.size(); i++) {
@@ -155,26 +158,10 @@ public class DataTable {
 		
 	}
 
+
 	public void addRow(ArrayList<Object> row) {
 		//TODO: add exception handling
 		mTable.add(row);
-	}
-	
-	public void addColumn(String identifier, ArrayList<Object> column) {
-		//TODO: Add exception handling
-		Integer len = mColumnIdentifiers.length;
-		String[] newIdentifiers = new String[len + 1];
-		
-		for(int i = 0; i < len; i++) {
-			newIdentifiers[i] = mColumnIdentifiers[i];
-		}
-		newIdentifiers[len] = identifier; 
-		
-		for(int i = 0; i < mTable.size(); i++) {
-			Object addObject = column.get(i);
-			mTable.get(i).add(addObject);
-		}
-		
 	}
 	
 	public int rowCount() {
@@ -182,7 +169,7 @@ public class DataTable {
 	}
 	
 	public int columnCount() {
-		return mColumnIdentifiers.length;
+		return mIdentifiers.size();
 	}
 	
 	public Object get(int row, int col) {
@@ -202,22 +189,22 @@ public class DataTable {
 		return row;
 	}
 	
-	private static String[] joinColumns(ArrayList<Integer> aColumnSelect, 
-										ArrayList<Integer> bColumnSelect,
-										String[] leftCol, 
-										String[] rightCol) 
+	private static ArrayList<String> joinIdentifiers(ArrayList<Integer> aColumnSelect, 
+												 	ArrayList<Integer> bColumnSelect,
+												 ArrayList<String> leftCol, 
+												 ArrayList<String> rightCol) 
 	{
 		
 		ArrayList<String> row = new ArrayList<String>();
 		for(Integer i : aColumnSelect) {
-			row.add(leftCol[i]);
+			row.add(leftCol.get(i));
 		}
 		
 		for(Integer i : bColumnSelect) {
-			row.add(rightCol[i]);
+			row.add(rightCol.get(i));
 		}
 		
-		return row.toArray(new String[row.size()]);
+		return row;
 		
 	}	
 	

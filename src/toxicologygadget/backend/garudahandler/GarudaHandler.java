@@ -37,7 +37,6 @@ public class GarudaHandler {
 	private JFrame parentFrame;
 	private GarudaBackendPipelinePlugin pipelinePlugin;
 	private GeneTable geneTable;
-	private int numDiscoveries;
 	
 	
 	public GarudaHandler (JFrame parentFrame, GeneTable geneTable) throws GarudaConnectionNotInitializedException, NetworkConnectionException
