@@ -1,6 +1,11 @@
 package toxicologygadget.filemanager;
 
-import java.io.*; 
+import java.io.*;
+import java.net.URLDecoder;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.regex.*;
 import toxicologygadget.ui.MainWindow;  
 
@@ -209,6 +214,30 @@ public class FileManager {
 		return (int) (clusterFile.length() - 2);
 	}
 	
+	public static File writeOutTable(DataTable writeOut) {
+		return null;
+	}
+	
+	private static String getJarPath() {
+		File jarDir = new File(ClassLoader.getSystemClassLoader().getResource(".").getPath());
+		return jarDir.getAbsolutePath();
+	}
+	
+	public static File writeOutString(String data, String fileName) throws IOException {
+		
+		String path = getJarPath() + "\\" + fileName;
+		File file = new File(path);
+		
+		if(file.exists())
+			file.delete();
+		
+		FileWriter fr = new FileWriter(file, true);
+		fr.write(data);
+		fr.close();
+
+		
+		return file;
+	}
 	
 }
 

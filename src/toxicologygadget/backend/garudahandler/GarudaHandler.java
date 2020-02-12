@@ -37,6 +37,8 @@ public class GarudaHandler {
 	private JFrame parentFrame;
 	private GarudaBackendPipelinePlugin pipelinePlugin;
 	private GeneTable geneTable;
+	private int numDiscoveries;
+	
 	
 	public GarudaHandler (JFrame parentFrame, GeneTable geneTable) throws GarudaConnectionNotInitializedException, NetworkConnectionException
 	{
@@ -54,8 +56,9 @@ public class GarudaHandler {
 		
 		garudaBackend.getCompatibleGadgetList("txt", "genelist");
 		
-		File file = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\EnsembleGenelist2.txt");
-		garudaDiscover(file, "ensemble");
+		
+		//File file = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\EnsembleGenelist2.txt");
+		//garudaDiscover(file, "ensemble");
 	
 	}
 
@@ -201,8 +204,6 @@ public class GarudaHandler {
 			public void gotCompatibleGadgetList(List<CompatibleGadgetDetails> gadgetList) {
 				
 				getGarudaGlassPanel().showPanel(gadgetList);
-				GarudaGlassPanel a = getGarudaGlassPanel();
-				int i = 0;
 				
 			}
 			

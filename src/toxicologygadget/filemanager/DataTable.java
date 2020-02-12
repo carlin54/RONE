@@ -95,10 +95,6 @@ public class DataTable {
 		
 	}
 	
-	public ArrayList<ArrayList<Object>> getTable(){
-		return mTable;
-	}
-	
 	public String[] getColumnIdentifiers(){
 		return mColumnIdentifiers;
 	}
@@ -159,6 +155,40 @@ public class DataTable {
 		
 	}
 
+	public void addRow(ArrayList<Object> row) {
+		//TODO: add exception handling
+		mTable.add(row);
+	}
+	
+	public void addColumn(String identifier, ArrayList<Object> column) {
+		//TODO: Add exception handling
+		Integer len = mColumnIdentifiers.length;
+		String[] newIdentifiers = new String[len + 1];
+		
+		for(int i = 0; i < len; i++) {
+			newIdentifiers[i] = mColumnIdentifiers[i];
+		}
+		newIdentifiers[len] = identifier; 
+		
+		for(int i = 0; i < mTable.size(); i++) {
+			Object addObject = column.get(i);
+			mTable.get(i).add(addObject);
+		}
+		
+	}
+	
+	public int rowCount() {
+		return mTable.size();
+	}
+	
+	public int columnCount() {
+		return mColumnIdentifiers.length;
+	}
+	
+	public Object get(int row, int col) {
+		return mTable.get(row).get(col);
+	}
+	
 	private static ArrayList<Object> joinRows(ArrayList<Integer> aColumnSelect, ArrayList<Integer> bColumnSelect,
 											  ArrayList<Object> leftRow, 		ArrayList<Object> rightRow) {
 		ArrayList<Object> row = new ArrayList<Object>();
@@ -190,6 +220,7 @@ public class DataTable {
 		return row.toArray(new String[row.size()]);
 		
 	}	
+	
 	
 	
 }

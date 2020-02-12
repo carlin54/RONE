@@ -19,8 +19,11 @@ public class GeneTable extends JTable {
 	
 	public GeneTable(){
 	
-		
 	}
+	
+	public boolean isCellEditable(int row, int column) {                
+        return false;               
+    }
 	
 	private void clearTable() {
 		dataTable = new DataTable();
@@ -54,25 +57,25 @@ public class GeneTable extends JTable {
 		}
 		
 
-		ArrayList<ArrayList<Object>> table = dataTable.getTable();
-		int rowWidth = table.get(0).size();
-		int columnHeight = table.size();
+		int numRows = dataTable.rowCount();
+		int numCols = dataTable.columnCount();
 		
-		for(int i = 0; i < columnHeight; i++) {
-			Object[] row = new Object[rowWidth];
-			for(int j = 0; j < rowWidth; j++) {
-				row[j] = table.get(i).get(j);				
+		for(int iRow = 0; iRow < numRows; iRow++) {
+			Object[] row = new Object[numCols];
+			for(int iCol = 0; iCol < numCols; iCol++) {
+				row[iCol] = dataTable.get(iRow, iCol);				
 			}
-			
 			model.addRow(row);
 		}
+		
+		
 		
 		this.setModel(model);
 	}
 	
-    public boolean isCellEditable(int row, int column) {                
-        return false;               
-    }
+	public boolean hasColumn(String col) {
+		return dataTable.hasColumn(col);
+	}
 	
 	public void loadGenelist(String[] genelist) {
 		
@@ -97,18 +100,14 @@ public class GeneTable extends JTable {
 		
 	}
 	
+	public void importRow(Object[] data) {
+		
+	}
+	
 	public void importColumn(Object[] data, String columnIdentifier) {
 		
-		header.add(columnIdentifier);
 		
-		ArrayList<Object> column = new ArrayList<Object>(); 
-		for(int i = 0; i < data.length; i++) {
-			column.add(data[i]);
-		}
-		
-		dataList.add(column);
 		updateTable();
-	
 	}
 	
 	public void importTable(Object[][] data, String[] columnIdentifier) {
@@ -131,6 +130,20 @@ public class GeneTable extends JTable {
 		
 		
 		updateTable();
+	}
+	
+	public String getGenelistStringTxt() {
+		String genelist = new String(); 
+		
+		int numRows = dataTable.rowCount();
+		int geneColIndex = dataTable.columnIndex("Gene");
+		
+		for(int iRow = 0; iRow < numRows-1; iRow++) {
+			genelist = genelist + dataTable.get(iRow, geneColIndex) + "\n";
+		}
+		genelist = genelist + dataTable.get(numRows-1, geneColIndex);
+		
+		return genelist;
 	}
 	
 }

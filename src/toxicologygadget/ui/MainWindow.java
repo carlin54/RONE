@@ -30,6 +30,7 @@ import org.json.JSONObject;
 
 import jp.sbi.garuda.backend.net.exception.GarudaConnectionNotInitializedException;
 import jp.sbi.garuda.backend.net.exception.NetworkConnectionException;
+import jp.sbi.garuda.backend.ui.GarudaGlassPanel;
 import toxicologygadget.backend.garudahandler.GarudaHandler;
 import toxicologygadget.filemanager.DataTable;
 import toxicologygadget.filemanager.FileManager;
@@ -55,18 +56,23 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JTabbedPane;
 import javax.swing.JSplitPane;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.SwingConstants;
 
 public class MainWindow implements ActionListener {
 
 	private JFrame frmToxicologyGadget;
 	private GarudaHandler garudaHandler;
 	private final Action fileOpenAction = new FileOpenAction();
+	private final GarudaDiscoverActionGeneList garudaDiscoverAction = new GarudaDiscoverActionGeneList();
+	
 	//private GeneTable geneTable;
 	private GeneTable geneTable;
 	private TargetMineQueryThread targetMineQueryThread;
 	private MainWindowTargetMineCallback targetMineCallback;
 	private PercellomeQueryThread percellomeQueryThread;
 	private MainWindowPercellomeCallback percellomeCallback;
+	
 	
 	private class MainWindowTargetMineCallback implements QueryThreadCallback {
 
@@ -100,7 +106,6 @@ public class MainWindow implements ActionListener {
 		
 	}
 	
-	
 	/**
 	 * Initialize the contents of the frame.
 	 */
@@ -124,8 +129,21 @@ public class MainWindow implements ActionListener {
 		
 		JMenuItem mntmSave = new JMenuItem("Save");
 		mnFile.add(mntmSave);
+		
+		JMenu mnGaruda = new JMenu("Garuda");
+		menuBar.add(mnGaruda);
+		
+		JMenuItem mntmNewMenuItem = new JMenuItem("Discover");
+		mntmNewMenuItem.setAction(garudaDiscoverAction);
+		mnGaruda.add(mntmNewMenuItem);
+		
+		JMenu mnOtherTools = new JMenu("Tools");
+		menuBar.add(mnOtherTools);
+
 
 		this.geneTable = new GeneTable();
+		geneTable.setCellSelectionEnabled(true);
+		geneTable.setColumnSelectionAllowed(true);
 		
 		this.targetMineCallback = new MainWindowTargetMineCallback();
 		this.targetMineQueryThread = new TargetMineQueryThread(targetMineCallback);
@@ -195,13 +213,36 @@ public class MainWindow implements ActionListener {
 			gbc_tabbedPane.gridy = 0;
 			frmToxicologyGadget.getContentPane().add(tabbedPane, gbc_tabbedPane);
 			
+			JTabbedPane fileTabbedPane = new JTabbedPane(JTabbedPane.TOP);
+			tabbedPane.addTab("File", null, fileTabbedPane, null);
+			
+			JSplitPane splitPane_6 = new JSplitPane();
+			splitPane_6.setOrientation(JSplitPane.VERTICAL_SPLIT);
+			fileTabbedPane.addTab("Table", null, splitPane_6, null);
+			
+			JSplitPane splitPane_7 = new JSplitPane();
+			splitPane_7.setOrientation(JSplitPane.VERTICAL_SPLIT);
+			fileTabbedPane.addTab("Load / Save", null, splitPane_7, null);
+			
+			JButton btnNewButton = new JButton("New button");
+			splitPane_7.setLeftComponent(btnNewButton);
+			
+			JTabbedPane garudaTabPanel = new JTabbedPane(JTabbedPane.TOP);
+			tabbedPane.addTab("Garuda", null, garudaTabPanel, null);
+			
 			JSplitPane splitPane = new JSplitPane();
 			splitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
-			tabbedPane.addTab("New tab", null, splitPane, null);
+			garudaTabPanel.addTab("Percellome", null, splitPane, null);
+			
+			JComboBox comboBox = new JComboBox();
+			splitPane.setLeftComponent(comboBox);
 			
 			JSplitPane splitPane_1 = new JSplitPane();
 			splitPane_1.setOrientation(JSplitPane.VERTICAL_SPLIT);
 			splitPane.setRightComponent(splitPane_1);
+			
+			JComboBox comboBox_1 = new JComboBox();
+			splitPane_1.setLeftComponent(comboBox_1);
 			
 			JSplitPane splitPane_2 = new JSplitPane();
 			splitPane_2.setOrientation(JSplitPane.VERTICAL_SPLIT);
@@ -210,11 +251,39 @@ public class MainWindow implements ActionListener {
 			JComboBox comboBox_2 = new JComboBox();
 			splitPane_2.setLeftComponent(comboBox_2);
 			
-			JComboBox comboBox_1 = new JComboBox();
-			splitPane_1.setLeftComponent(comboBox_1);
+			JSplitPane splitPane_3 = new JSplitPane();
+			splitPane_3.setOrientation(JSplitPane.VERTICAL_SPLIT);
+			splitPane_2.setRightComponent(splitPane_3);
 			
-			JComboBox comboBox = new JComboBox();
-			splitPane.setLeftComponent(comboBox);
+			JButton button = new JButton("Search Selected");
+			splitPane_3.setLeftComponent(button);
+			
+			JPanel panel = new JPanel();
+			splitPane_3.setRightComponent(panel);
+			
+			JSplitPane splitPane_8 = new JSplitPane();
+			splitPane_8.setOrientation(JSplitPane.VERTICAL_SPLIT);
+			garudaTabPanel.addTab("New tab", null, splitPane_8, null);
+			
+			JTabbedPane otherToolsTabbedPane = new JTabbedPane(JTabbedPane.TOP);
+			tabbedPane.addTab("Other Tools", null, otherToolsTabbedPane, null);
+			
+			JSplitPane splitPane_4 = new JSplitPane();
+			splitPane_4.setOrientation(JSplitPane.VERTICAL_SPLIT);
+			otherToolsTabbedPane.addTab("TargetMine", null, splitPane_4, null);
+			
+			JSplitPane splitPane_5 = new JSplitPane();
+			splitPane_5.setOrientation(JSplitPane.VERTICAL_SPLIT);
+			splitPane_4.setRightComponent(splitPane_5);
+			
+			JLabel lblNewLabel_1 = new JLabel("Complete (0) of (100)...");
+			lblNewLabel_1.setHorizontalAlignment(SwingConstants.CENTER);
+			lblNewLabel_1.setAlignmentX(Component.CENTER_ALIGNMENT);
+			splitPane_5.setLeftComponent(lblNewLabel_1);
+			
+			JButton btnTargetMineSearchSelected = new JButton("Search Selected");
+			btnTargetMineSearchSelected.setActionCommand("Search Selected");
+			splitPane_4.setLeftComponent(btnTargetMineSearchSelected);
 			
 			Component verticalGlue = Box.createVerticalGlue();
 			GridBagConstraints gbc_verticalGlue = new GridBagConstraints();
@@ -231,6 +300,9 @@ public class MainWindow implements ActionListener {
 			frmToxicologyGadget.getContentPane().add(lblNewLabel, gbc_lblNewLabel);
 			//header.setBackground(Color.yellow);
 			
+			
+			
+			
 		} catch (GarudaConnectionNotInitializedException | NetworkConnectionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -243,18 +315,21 @@ public class MainWindow implements ActionListener {
 		
 		File clusterResFile = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\AGCT_VisibleClustering.txt");
 		File ensembleGenelistFile = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\PercellomeTestDataSmall.txt");
+				
 		
 		int[] clusterResults = FileManager.loadAGCTClusterResults(clusterResFile);
 		String[] genelist = FileManager.loadEnsembleGenelistTxt(ensembleGenelistFile);
 		
 		geneTable.loadGenelist(genelist);
 		
+		
+		
 		// targetMineQueryThread.setGenelist(genelist);
 		// targetMineQueryThread.start();
 		
-		percellomeQueryThread.setGenelist(genelist);
-		percellomeQueryThread.setProjectId(87);
-		percellomeQueryThread.start();
+		// percellomeQueryThread.setGenelist(genelist);
+		// percellomeQueryThread.setProjectId(87);
+		// percellomeQueryThread.start();
 		
 	}
 
@@ -295,8 +370,6 @@ public class MainWindow implements ActionListener {
 		
 		final JFileChooser fc = new JFileChooser();
 		
-
-		
 		public FileOpenAction() {
 			putValue(NAME, "Open");
 			putValue(SHORT_DESCRIPTION, "Some short description");
@@ -323,6 +396,43 @@ public class MainWindow implements ActionListener {
 				loadFile(file, content);
 			}
 			
+		}
+	}
+	
+	private boolean hasGenelist() {
+		return this.geneTable.hasColumn("Gene");
+	}
+	
+	private class GarudaDiscoverActionGeneList extends AbstractAction {
+		public GarudaDiscoverActionGeneList() {
+			putValue(NAME, "Discover Genelist");
+			putValue(SHORT_DESCRIPTION, "Some short description");
+			
+	
+		}
+		public void actionPerformed(ActionEvent ae) {
+			
+			System.out.println(ae.getActionCommand());
+			
+			if(hasGenelist()) {
+				String data = geneTable.getGenelistStringTxt();
+				String fileName = "genelist.txt";
+				File file = null;
+				try {
+					file = FileManager.writeOutString(data, fileName);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				GarudaGlassPanel g = garudaHandler.getGarudaGlassPanel();
+				g.showPanel();
+				
+				garudaHandler.garudaDiscover(file, "ensemble");
+				
+			}else {
+				JOptionPane.showMessageDialog(frmToxicologyGadget, "No genelist avaliable!");
+			}
 		}
 	}
 }
