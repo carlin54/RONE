@@ -105,33 +105,26 @@ public class FileManager {
 		
 	}
 	
-	public static String[] loadEnsembleGenelistTxt(File ensembleGenelistFile) {
+	public static DataTable loadListFile(File listFile, String header) throws IOException {
 		
-		if (!ensembleGenelistFile.exists()) return null;
+		if (!listFile.exists()) return null;
 		
 		//TODO: file exists exception
-		int numGenes = getNumberOfLines(ensembleGenelistFile);
-		String[] ensembleGenelist = new String[(int) numGenes];
-		
-		BufferedReader bufferReader = null;
-		
-		try {
-			bufferReader = new BufferedReader(new FileReader(ensembleGenelistFile));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} 
-	  
-		String gene; 
-		
-		try {
-			for(int i = 0; (gene = bufferReader.readLine()) != null; i++) {
-				ensembleGenelist[i] = gene;
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
+		ArrayList<String> list = new ArrayList<String>();
+				
+		BufferedReader bufferReader = new BufferedReader(new FileReader(listFile));
+	
+		String line; 
+		while((line = bufferReader.readLine()) != null) {
+			list.add(line);
 		}
 		
-		return ensembleGenelist;
+		ArrayList<String> id = new ArrayList<String>();
+		id.add(header);
+		ArrayList<ArrayList<Object>> tb = new ArrayList<ArrayList<Object>>();
+		DataTable dt = new DataTable(tb, id);
+		
+		return dt;
 		
 		
 	}

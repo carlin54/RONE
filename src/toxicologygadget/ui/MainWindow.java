@@ -49,6 +49,8 @@ import javax.swing.JButton;
 import javax.swing.border.LineBorder;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+
 import java.awt.Component;
 import javax.swing.Box;
 import javax.swing.JRadioButton;
@@ -69,11 +71,14 @@ public class MainWindow implements ActionListener {
 	private final GarudaDiscoverActionEnsemble garudaDiscoverActionEnsemble = new GarudaDiscoverActionEnsemble();
 	
 	//private GeneTable geneTable;
-	private GeneTable geneTable;
+	private ToxicologyTable geneTable;
 	private TargetMineQueryThread targetMineQueryThread;
 	private MainWindowTargetMineCallback targetMineCallback;
 	private PercellomeQueryThread percellomeQueryThread;
 	private MainWindowPercellomeCallback percellomeCallback;
+	private final Action action = new SwingAction();
+	private final Action action_1 = new TargetMineImportAction();
+	private final Action action_2 = new PercellomeImportAction();
 	
 	
 	private class MainWindowTargetMineCallback implements QueryThreadCallback {
@@ -87,6 +92,12 @@ public class MainWindow implements ActionListener {
 		@Override
 		public void unsuccessfulSearch(String error) {
 			System.out.println("unsuccessfulSearch()");
+		}
+
+		@Override
+		public void status(int complete, int unsuccessful, int total) {
+			// TODO Auto-generated method stub
+			
 		}
 		
 		
@@ -103,6 +114,12 @@ public class MainWindow implements ActionListener {
 		@Override
 		public void unsuccessfulSearch(String error) {
 			System.out.println("unsuccessfulSearch()");
+		}
+
+		@Override
+		public void status(int complete, int total, int unsuccessful) {
+			// TODO Auto-generated method stub
+			
 		}
 		
 		
@@ -136,18 +153,34 @@ public class MainWindow implements ActionListener {
 		menuBar.add(mnGaruda);
 		
 		JMenuItem mntmNewMenuItem = new JMenuItem("Discover");
-		mntmNewMenuItem.setAction(garudaDiscoverActionGenelist);
-		mnGaruda.add(mntmNewMenuItem);
 		
-		JMenuItem menuItem = new JMenuItem("Discover");
-		menuItem.setAction(garudaDiscoverActionEnsemble);
-		mnGaruda.add(menuItem);
+		JMenu mnDiscover = new JMenu("Discover");
+		mnGaruda.add(mnDiscover);
+		
+		JMenuItem mntmDiscoverGenelist = new JMenuItem("New menu item");
+		mntmDiscoverGenelist.setAction(garudaDiscoverActionGenelist);
+		mnDiscover.add(mntmDiscoverGenelist);
+		
+		JMenuItem mntmDiscoverEnsemble = new JMenuItem("New menu item");
+		mntmDiscoverEnsemble.setAction(garudaDiscoverActionEnsemble);
+		mnDiscover.add(mntmDiscoverEnsemble);
+		
+		JPopupMenu popupMenu = new JPopupMenu("Discover");
+		popupMenu.add(mntmNewMenuItem);
 		
 		JMenu mnOtherTools = new JMenu("Tools");
 		menuBar.add(mnOtherTools);
+		
+		JMenuItem mntmPercellomeMenuItem = new JMenuItem("Import Percellome");
+		mntmPercellomeMenuItem.setAction(action_2);
+		mnOtherTools.add(mntmPercellomeMenuItem);
+		
+		JMenuItem mntmTargetMineMenuItem = new JMenuItem("Import TargetMine");
+		mntmTargetMineMenuItem.setAction(action_1);
+		mnOtherTools.add(mntmTargetMineMenuItem);
 
 
-		this.geneTable = new GeneTable();
+		this.geneTable = new ToxicologyTable();
 		geneTable.setCellSelectionEnabled(true);
 		geneTable.setColumnSelectionAllowed(true);
 		
@@ -214,13 +247,13 @@ public class MainWindow implements ActionListener {
 		File clusterResFile = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\AGCT_VisibleClustering.txt");
 		File ensembleGenelistFile = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\PercellomeTestDataSmall.txt");
 				
-		File file = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\AGCT_Scenario.txt");
+		File file = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\GeneSymbols.txt");
 		
-		int[] clusterResults = FileManager.loadAGCTClusterResults(clusterResFile);
-		String[] genelist = FileManager.loadEnsembleGenelistTxt(ensembleGenelistFile);
+		// int[] clusterResults = FileManager.loadAGCTClusterResults(clusterResFile);
+		// String[] genelist = FileManager.loadListFile(ensembleGenelistFile);
 		
 		try {
-			DataTable agctScenario = FileManager.loadAGCTScenario(file);
+			DataTable agctScenario = FileManager.loadListFile(file, "Gene");
 			geneTable.importTable(agctScenario);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -261,10 +294,16 @@ public class MainWindow implements ActionListener {
 		case "Genelist":
 				// TODO: Add ensemble genelist
 				if(isTxtExtention(file)) {
-					String[] ensembleGenelist = FileManager.loadEnsembleGenelistTxt(file);
-					if(ensembleGenelist != null) {
-						geneTable.loadGenelist(ensembleGenelist);
+					DataTable ensembleGenelist = null;
+					try {
+						ensembleGenelist = FileManager.loadListFile(file, "Gene");
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
+					
+					geneTable.importTable(ensembleGenelist);
+				
 				}
 				
 			break;
@@ -328,7 +367,7 @@ public class MainWindow implements ActionListener {
 	
 	private class GarudaDiscoverActionGenelist extends AbstractAction {
 		public GarudaDiscoverActionGenelist() {
-			putValue(NAME, "Discover Genelist");
+			putValue(NAME, "Genelist");
 			putValue(SHORT_DESCRIPTION, "Some short description");
 			
 	
@@ -340,14 +379,14 @@ public class MainWindow implements ActionListener {
 			if(hasGenelist()) {
 				discover("genelist");
 			}else {
-				JOptionPane.showMessageDialog(frmToxicologyGadget, "No genelist avaliable!");
+				JOptionPane.showMessageDialog(frmToxicologyGadget, "No genes avaliable!");
 			}
 		}
 	}
 	
 	private class GarudaDiscoverActionEnsemble extends AbstractAction {
 		public GarudaDiscoverActionEnsemble() {
-			putValue(NAME, "Discover Ensemble");
+			putValue(NAME, "Ensemble");
 			putValue(SHORT_DESCRIPTION, "Some short description");
 			
 	
@@ -359,8 +398,75 @@ public class MainWindow implements ActionListener {
 			if(hasGenelist()) {
 				discover("ensemble");
 			}else {
-				JOptionPane.showMessageDialog(frmToxicologyGadget, "No genelist avaliable!");
+				JOptionPane.showMessageDialog(frmToxicologyGadget, "No genes avaliable!");
 			}
+		}
+	}
+	private class SwingAction extends AbstractAction {
+		public SwingAction() {
+			putValue(NAME, "SwingAction");
+			putValue(SHORT_DESCRIPTION, "Some short description");
+		}
+		public void actionPerformed(ActionEvent e) {
+		}
+	}
+	
+	private String[] getArrayFromRows(int[] rows, int col) {
+		String[] ret = new String[rows.length];
+		for(int i = 0; i < rows.length; i++) {
+			int j = rows[i];
+			ret[j] = (String) geneTable.getModel().getValueAt(j, col);
+			
+		}
+		
+		return ret;
+	}
+	
+	private class TargetMineImportAction extends AbstractAction {
+		public TargetMineImportAction() {
+			putValue(NAME, "Import TargetMine");
+			putValue(SHORT_DESCRIPTION, "Some short description");
+			
+			
+			
+			
+			
+		}
+		public void actionPerformed(ActionEvent e) {
+			
+			
+			int[] cols = geneTable.getSelectedColumns();
+			
+			if(cols.length > 1) {
+				// TODO: dialoge box
+				return;
+			}
+			
+			if(targetMineQueryThread.isRunning())
+				targetMineQueryThread.stopRunning();
+			
+			int[] rows = geneTable.getSelectedRows();
+			String[] genelist = getArrayFromRows(rows, cols[0]);
+			
+			try {
+				targetMineQueryThread.join();
+			} catch (InterruptedException ie) {
+				// TODO Auto-generated catch block
+				ie.printStackTrace();
+			}
+			
+			targetMineQueryThread.setGenelist(genelist);
+			targetMineQueryThread.start();
+			
+			
+		}
+	}
+	private class PercellomeImportAction extends AbstractAction {
+		public PercellomeImportAction() {
+			putValue(NAME, "Import Percellome");
+			putValue(SHORT_DESCRIPTION, "Some short description");
+		}
+		public void actionPerformed(ActionEvent e) {
 		}
 	}
 }

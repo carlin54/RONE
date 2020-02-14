@@ -1,24 +1,60 @@
 package toxicologygadget.ui;
 
 import javax.swing.CellRendererPane;
+import javax.swing.JComponent;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import javax.swing.table.TableModel;
 
 import antlr.collections.impl.Vector;
 import javafx.scene.control.TableColumn;
 import toxicologygadget.filemanager.DataTable;
 
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.MenuItem;
+import java.awt.PopupMenu;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
+import java.util.Enumeration;
 
-public class GeneTable extends JTable {
+public class ToxicologyTable extends JTable {
 	
 	DataTable dataTable;
 	
-	public GeneTable(){
+	public ToxicologyTable(){
 		dataTable = new DataTable();
+		
+        
+		this.tableHeader.addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                JTableHeader h = (JTableHeader) e.getSource();
+                int i = h.columnAtPoint(e.getPoint());
+                Object o = h.getColumnModel().getColumn(i).getHeaderValue();
+                Object selectedColumn;
+                if (i < 0) {
+                    selectedColumn = null;
+                    return;
+                }
+                selectedColumn = o;
+                h.getColumnModel().getColumn(i).setHeaderValue("Clicked");
+                
+
+                
+            }
+        });
 	}
 	
 	public boolean isCellEditable(int row, int column) {                
@@ -67,10 +103,10 @@ public class GeneTable extends JTable {
 			}
 			model.addRow(row);
 		}
-		
-		
-		
 		this.setModel(model);
+		
+		
+		this.setAutoCreateRowSorter(true);
 	}
 	
 	public boolean hasColumn(String col) {
@@ -118,7 +154,6 @@ public class GeneTable extends JTable {
 			
 	}
 	
-	
 	public void importTable(DataTable importTable) {
 		
 		if(dataTable.columnCount() == 0) {
@@ -145,6 +180,10 @@ public class GeneTable extends JTable {
 		genelist = genelist + dataTable.get(numRows-1, geneColIndex);
 		
 		return genelist;
+	}
+	
+	public Object getCell(int row, int col) {
+		return dataTable.get(row, col);
 	}
 	
 }

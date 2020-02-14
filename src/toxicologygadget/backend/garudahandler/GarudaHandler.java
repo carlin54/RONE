@@ -29,17 +29,17 @@ import jp.sbi.garuda.backend.ui.GarudaGlassPanel;
 import toxicologygadget.backend.garudahandler.DiscoveryTouple;
 import toxicologygadget.filemanager.DataTable;
 import toxicologygadget.filemanager.FileManager;
-import toxicologygadget.ui.GeneTable;
+import toxicologygadget.ui.ToxicologyTable;
 
 public class GarudaHandler {
 
 	private GarudaBackend garudaBackend;
 	private JFrame parentFrame;
 	private GarudaBackendPipelinePlugin pipelinePlugin;
-	private GeneTable geneTable;
+	private ToxicologyTable geneTable;
 	
 	
-	public GarudaHandler (JFrame parentFrame, GeneTable geneTable) throws GarudaConnectionNotInitializedException, NetworkConnectionException
+	public GarudaHandler (JFrame parentFrame, ToxicologyTable geneTable) throws GarudaConnectionNotInitializedException, NetworkConnectionException
 	{
 		this.parentFrame = parentFrame;
 		this.geneTable = geneTable;
