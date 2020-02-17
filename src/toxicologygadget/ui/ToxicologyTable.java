@@ -77,6 +77,14 @@ public class ToxicologyTable extends JTable {
         });
 	}
 	
+	public boolean isEmpty() {
+		return dataTable.isEmpty();
+	} 
+	
+	public boolean hasSelection() {
+		return this.getSelectedRowCount() > 0;
+	}
+	
 	public boolean isCellEditable(int row, int column) {                
         return false;               
     }
@@ -152,17 +160,7 @@ public class ToxicologyTable extends JTable {
 		
 	} 
 	
-	public void loadClusters(int[] clusters) {
-		
-	}
-	
-	public void importRow(Object[] data) {
-		
-	}
-	
 	public void importColumn(Object[] data, String columnIdentifier) {
-		
-		
 		updateTable();
 	}
 	

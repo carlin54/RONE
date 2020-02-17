@@ -16,6 +16,10 @@ public class Database {
 		mIdentifiers = new ArrayList<String>();
 	}
 	
+	public boolean isEmpty() {
+		return mTable.isEmpty();
+	}
+	
 	public boolean containsColumn(String col) {
 		for(int i = 0; i < mIdentifiers.size(); i++) {
 			if(mIdentifiers.get(i).equals(col)) return true;

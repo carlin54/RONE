@@ -292,7 +292,9 @@ public class MainWindow implements ActionListener {
 		case "Genelist":
 				// TODO: Add ensemble genelist
 				if(isTxtExtention(file)) {
+					
 					Database ensembleGenelist = null;
+					
 					try {
 						ensembleGenelist = FileManager.loadListFile(file, "Gene");
 					} catch (IOException e) {
@@ -346,8 +348,9 @@ public class MainWindow implements ActionListener {
 		return this.toxicologyTable.hasColumn("Gene");
 	}
 	
-	private void discover(String contence, String extension) {
+	private void startDiscovery(String contence, String extension) {
 		String[] data = toxicologyTable.getSelected();
+		
 		String list = new String("");
 		for(int i = 0; i < data.length; i++) {
 			list += data[i] + "\n";
@@ -362,47 +365,66 @@ public class MainWindow implements ActionListener {
 			e.printStackTrace();
 		}
 		
-		//GarudaGlassPanel g = garudaHandler.getGarudaGlassPanel();
-		//g.showPanel();
-		
 		garudaHandler.garudaDiscover(file, contence);
 	}
+	
+	boolean hasValidSelection() {
+		
+		if(toxicologyTable.isEmpty()) {
+			JOptionPane.showMessageDialog(frmToxicologyGadget, "The table is empty, there is nothing to export.");
+			return false;
+		}
+		
+		if(!toxicologyTable.hasSelection()) {
+			JOptionPane.showMessageDialog(frmToxicologyGadget, "Please make a selection.");
+			return false;
+		}
+		
+		return true;
+	}
+	
 	
 	private class GarudaDiscoverActionGenelist extends AbstractAction {
 		public GarudaDiscoverActionGenelist() {
 			putValue(NAME, "Genelist");
 			putValue(SHORT_DESCRIPTION, "Some short description");
 			
-	
+			
+			
+			
 		}
 		public void actionPerformed(ActionEvent ae) {
 			
-			System.out.println(ae.getActionCommand());
 			
-			if(hasGenelist()) {
-				discover("genelist", "txt");
-			}else {
-				JOptionPane.showMessageDialog(frmToxicologyGadget, "No genes avaliable!");
-			}
+			if(!hasValidSelection()) 
+				return;
+
+			startDiscovery("genelist", "txt");
+			
 		}
 	}
 	
+	
+	
+	
 	private class GarudaDiscoverActionEnsemble extends AbstractAction {
+		
 		public GarudaDiscoverActionEnsemble() {
 			putValue(NAME, "Ensemble");
 			putValue(SHORT_DESCRIPTION, "Some short description");
 			
 	
 		}
+		
 		public void actionPerformed(ActionEvent ae) {
 			
 			System.out.println(ae.getActionCommand());
 			
-			if(hasGenelist()) {
-				discover("ensemble");
-			}else {
-				JOptionPane.showMessageDialog(frmToxicologyGadget, "No genes avaliable!");
-			}
+			if(!hasValidSelection()) 
+				return;
+			
+			startDiscovery("ensemble", "txt");
+			
 		}
 	}
 
@@ -446,6 +468,7 @@ public class MainWindow implements ActionListener {
 			putValue(SHORT_DESCRIPTION, "Some short description");
 		}
 		public void actionPerformed(ActionEvent e) {
+			
 		}
 	}
 }
