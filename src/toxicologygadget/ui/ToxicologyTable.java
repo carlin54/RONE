@@ -14,7 +14,7 @@ import javax.swing.table.TableModel;
 
 import antlr.collections.impl.Vector;
 import javafx.scene.control.TableColumn;
-import toxicologygadget.filemanager.DataTable;
+import toxicologygadget.filemanager.Database;
 
 import java.awt.Component;
 import java.awt.Cursor;
@@ -27,13 +27,33 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class ToxicologyTable extends JTable {
 	
-	DataTable dataTable;
+	Database dataTable;
+	
+	public String[] getSelected() {
+		
+		int[] rows = this.getSelectedRows();
+		int[] cols = this.getSelectedColumns();
+		
+		Set<String> tree_set = new TreeSet<String>(); 
+		for(int i = 0; i < rows.length; i++) {
+			for(int j = 0; j < cols.length; j++) {
+				int k = rows[i];
+				String cell = (String) getModel().getValueAt(k, cols[j]);
+				tree_set.add(cell);
+			}
+		}
+		
+		int len = tree_set.size();
+		return tree_set.toArray(new String[len]);
+	}
 	
 	public ToxicologyTable(){
-		dataTable = new DataTable();
+		dataTable = new Database();
 		
         
 		this.tableHeader.addMouseListener(new MouseAdapter() {
@@ -62,7 +82,7 @@ public class ToxicologyTable extends JTable {
     }
 	
 	private void clearTable() {
-		dataTable = new DataTable();
+		dataTable = new Database();
 		
 		DefaultTableModel model = (DefaultTableModel) this.getModel();
 		model.setRowCount(0);
@@ -126,7 +146,7 @@ public class ToxicologyTable extends JTable {
 		}
 		
 		
-		dataTable = new DataTable(genelistData);
+		dataTable = new Database(genelistData);
 		
 		updateTable();
 		
@@ -154,13 +174,13 @@ public class ToxicologyTable extends JTable {
 			
 	}
 	
-	public void importTable(DataTable importTable) {
+	public void importTable(Database importTable) {
 		
 		if(dataTable.columnCount() == 0) {
 			dataTable = importTable;
 		}else {
 			if(importTable.containsColumn("Gene")) {
-				dataTable = DataTable.leftJoin(dataTable, importTable, "Gene");
+				dataTable = Database.leftJoin(dataTable, importTable, "Gene");
 			}
 		}
 		

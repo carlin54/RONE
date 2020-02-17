@@ -2,11 +2,11 @@ package toxicologygadget.query;
 
 import java.util.ArrayList;
 
-import toxicologygadget.filemanager.DataTable;
+import toxicologygadget.filemanager.Database;
 
 public class Percellome {
 	
-	DataTable projects;
+	Database projects;
 	
 	public static void initialize() {
 		

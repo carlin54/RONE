@@ -12,7 +12,7 @@ import java.util.List;
 import org.intermine.webservice.client.core.ServiceFactory;
 import org.intermine.webservice.client.services.QueryService;
 
-import toxicologygadget.filemanager.DataTable;
+import toxicologygadget.filemanager.Database;
 
 import org.intermine.metadata.ConstraintOp;
 import org.intermine.metadata.Model;
@@ -88,6 +88,8 @@ public class TargetMineQueryThread extends Thread
         		rowList.add(row[i]);
         	
         	results.add(rowList);
+        	
+        	
         }
         
 		return results;
@@ -115,6 +117,7 @@ public class TargetMineQueryThread extends Thread
     }
     
     public void run(){ 
+    	
     	processRunning = true;
     	stopProcess = false;
     	String[] columnIdentifiers = 
@@ -128,7 +131,6 @@ public class TargetMineQueryThread extends Thread
     	
     	for(int i = 0; i < genelist.length; i = i + stepSize) {
     		if(stopProcess) break;
-    		
     		String search = makeSearch(i, i+stepSize);
     		ArrayList<ArrayList<Object>> stepResults = query(search);
     		table.addAll(stepResults);
@@ -137,7 +139,7 @@ public class TargetMineQueryThread extends Thread
     	if(stopProcess) {
     		callback.unsuccessfulSearch("process terminated");
     	} else {
-    		DataTable targetMineTable = new DataTable(table, columnList);
+    		Database targetMineTable = new Database(table, columnList);
     		callback.completeSearch(targetMineTable);
     	}
     	

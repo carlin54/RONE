@@ -15,7 +15,7 @@ import org.json.JSONObject;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import toxicologygadget.filemanager.DataTable;
+import toxicologygadget.filemanager.Database;
 
 public class PercellomeQueryThread extends Thread {
 	
@@ -127,7 +127,7 @@ public class PercellomeQueryThread extends Thread {
 		
 		String[] columnIdentifiers = parseColumnIdentifiers(individualDataJSON);
 		
-		DataTable individualDataTable = new DataTable(individualData, columnIdentifiers);
+		Database individualDataTable = new Database(individualData, columnIdentifiers);
 		
 		callback.completeSearch(individualDataTable);
 		

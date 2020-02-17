@@ -27,7 +27,7 @@ import jp.sbi.garuda.backend.plugin.pipeline.exceptions.PipelineNotInitializedEx
 import jp.sbi.garuda.backend.plugin.pipeline.responseCodes.GarudaPipelineResponseCode;
 import jp.sbi.garuda.backend.ui.GarudaGlassPanel;
 import toxicologygadget.backend.garudahandler.DiscoveryTouple;
-import toxicologygadget.filemanager.DataTable;
+import toxicologygadget.filemanager.Database;
 import toxicologygadget.filemanager.FileManager;
 import toxicologygadget.ui.ToxicologyTable;
 
@@ -36,13 +36,13 @@ public class GarudaHandler {
 	private GarudaBackend garudaBackend;
 	private JFrame parentFrame;
 	private GarudaBackendPipelinePlugin pipelinePlugin;
-	private ToxicologyTable geneTable;
+	private ToxicologyTable toxicologyTable;
 	
 	
 	public GarudaHandler (JFrame parentFrame, ToxicologyTable geneTable) throws GarudaConnectionNotInitializedException, NetworkConnectionException
 	{
 		this.parentFrame = parentFrame;
-		this.geneTable = geneTable;
+		this.toxicologyTable = geneTable;
 		
 		garudaBackend = new GarudaBackend(GarudaConstants.GARUDA_ID, GarudaConstants.GARUDA_NAME, this.parentFrame);
 
@@ -148,14 +148,13 @@ public class GarudaHandler {
 				switch (senderName) {
 					// TODO: maybe switch to senderId
 					case "GeneMapper": 
-						DataTable shoeTable = FileManager.loadSHOE(file);
-						geneTable.importTable(shoeTable);
+						Database shoeTable = FileManager.loadCSV(file);
+						toxicologyTable.importTable(shoeTable);
 						
 						break;
 					case "Reactome gadget":
-						String[][] reactomeData = FileManager.loadReactome(file);
+						Database reactomeData = FileManager.loadCSV(file);
 						
-						DataTable dt = new DataTable(reactomeData);
 						
 						break;
 						

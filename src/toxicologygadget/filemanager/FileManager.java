@@ -7,6 +7,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.regex.*;
 import toxicologygadget.ui.MainWindow;  
 
@@ -33,13 +35,13 @@ public class FileManager {
 	  
 	}
 	
-	public static String[][] loadCSV(File file, int numColumns){
+	public static Database loadCSV(File file){
 		
 		if (!file.exists()) return null;
 		
 		//TODO: file exists exception
-		int numLines = getNumberOfLines(file);
-		String[][] rows = new String[(int) numLines][numColumns];
+		ArrayList<ArrayList<Object>> data = new ArrayList<ArrayList<Object>>();
+		ArrayList<String> identifiers = new ArrayList<String>();
 		
 		BufferedReader bufferReader = null;
 		
@@ -52,9 +54,14 @@ public class FileManager {
 		String line; 
 		
 		try {
-			for(int i = 0; (line = bufferReader.readLine()) != null; i++) {
-				String[] parsedLine = line.split(",");
-				rows[i] = parsedLine;
+			line = bufferReader.readLine();
+			String[] parsedLine = line.split(",");
+			identifiers.addAll(Arrays.asList(parsedLine));
+			while((line = bufferReader.readLine()) != null) {
+				parsedLine = line.split(",");
+				ArrayList<Object> row = new ArrayList<Object>();
+				row.addAll(Arrays.asList(parsedLine));
+				data.add(row);
 			}
 		} catch (IOException e) {
 			
@@ -62,71 +69,31 @@ public class FileManager {
 		}
 		
 		
-		System.out.print("\n");
-		for(int i = 0; i < rows.length; i++) {
-			for(int j = 0; j < rows[i].length; j++) {
-				System.out.print(rows[i][j] + ", ");
-			}
-			System.out.print("\n");
-		}
-		
-		return rows;
+		return new Database(data, identifiers);
 			
 	}
 	
-	public static DataTable loadSHOE(File shoeFile){
-		return new DataTable(loadCSV(shoeFile, 14));
-	}
-	
-	private static String[][] addHeader(String[] header, String[][] arrayData){
-		
-		String[][] dataWithHeader = new String[arrayData.length+1][5];
-		dataWithHeader[0] = header;
-		
-		for(int i = 0; i < arrayData.length; i++) {
-			dataWithHeader[i+1] = arrayData[i];
-		}
-		
-		return dataWithHeader;
-		
-	}
-	
-	public static String[][] loadReactome(File reactomeFile){
-		
-		if (!reactomeFile.exists()) return null;
-
-		final String[] COLUMN_NAMES = {"Pathway", "Species", "% Coverage", "Pval", "FDR"};
-		
-		String[][] arrayData = loadCSV(reactomeFile, 5);
-		
-		String[][] reactomeData = addHeader(COLUMN_NAMES, arrayData);
-		
-		return reactomeData;
-		
-	}
-	
-	public static DataTable loadListFile(File listFile, String header) throws IOException {
+	public static Database loadListFile(File listFile, String header) throws IOException {
 		
 		if (!listFile.exists()) return null;
 		
 		//TODO: file exists exception
-		ArrayList<String> list = new ArrayList<String>();
 				
 		BufferedReader bufferReader = new BufferedReader(new FileReader(listFile));
-	
+		ArrayList<ArrayList<Object>> tb = new ArrayList<ArrayList<Object>>();
 		String line; 
+		
 		while((line = bufferReader.readLine()) != null) {
-			list.add(line);
+			ArrayList<Object> row = new ArrayList<Object>();
+			row.add(line);
+			tb.add(row);
 		}
 		
-		ArrayList<String> id = new ArrayList<String>();
+		ArrayList<String> id = new ArrayList<String>(); 
 		id.add(header);
-		ArrayList<ArrayList<Object>> tb = new ArrayList<ArrayList<Object>>();
-		DataTable dt = new DataTable(tb, id);
+		Database dt = new Database(tb, id);
 		
 		return dt;
-		
-		
 	}
 	
 	public static String loadAGCTReferenceString(File clusterResultsFile) throws IOException {
@@ -204,7 +171,7 @@ public class FileManager {
 		return (int) (clusterFile.length() - 2);
 	}
 	
-	public static File writeOutTable(DataTable writeOut) {
+	public static File writeOutTable(Database writeOut) {
 		return null;
 	}
 	
@@ -234,7 +201,7 @@ public class FileManager {
 		
 	}
 	
-	public static DataTable loadAGCTScenario(File file) throws IOException {
+	public static Database loadAGCTScenario(File file) throws IOException {
 		
 	
 		final String ORDERED_LIST_HANDLE = "@Ordered_List_Names_Begin";
@@ -288,7 +255,7 @@ public class FileManager {
 			identifiers.add("Gene");
 			identifiers.add("Clusters");
 			
-			return new DataTable(table, identifiers);
+			return new Database(table, identifiers);
 			
 		}else {
 			// TODO: throw

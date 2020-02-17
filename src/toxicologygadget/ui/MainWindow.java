@@ -8,11 +8,15 @@ import java.awt.Button;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
+import java.awt.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.LinkedList;
+import java.util.Set;
+import java.util.TreeSet;
 import java.awt.GridLayout;
 import javax.swing.JLabel;
 import javax.swing.JMenuBar;
@@ -32,7 +36,7 @@ import jp.sbi.garuda.backend.net.exception.GarudaConnectionNotInitializedExcepti
 import jp.sbi.garuda.backend.net.exception.NetworkConnectionException;
 import jp.sbi.garuda.backend.ui.GarudaGlassPanel;
 import toxicologygadget.backend.garudahandler.GarudaHandler;
-import toxicologygadget.filemanager.DataTable;
+import toxicologygadget.filemanager.Database;
 import toxicologygadget.filemanager.FileManager;
 import toxicologygadget.filemanager.JsonReader;
 import toxicologygadget.query.PercellomeQueryThread;
@@ -71,21 +75,19 @@ public class MainWindow implements ActionListener {
 	private final GarudaDiscoverActionEnsemble garudaDiscoverActionEnsemble = new GarudaDiscoverActionEnsemble();
 	
 	//private GeneTable geneTable;
-	private ToxicologyTable geneTable;
+	private ToxicologyTable toxicologyTable;
 	private TargetMineQueryThread targetMineQueryThread;
 	private MainWindowTargetMineCallback targetMineCallback;
 	private PercellomeQueryThread percellomeQueryThread;
 	private MainWindowPercellomeCallback percellomeCallback;
-	private final Action action = new SwingAction();
 	private final Action action_1 = new TargetMineImportAction();
 	private final Action action_2 = new PercellomeImportAction();
-	
 	
 	private class MainWindowTargetMineCallback implements QueryThreadCallback {
 
 		@Override
-		public void completeSearch(DataTable results) {
-			geneTable.importTable(results);
+		public void completeSearch(Database results) {
+			toxicologyTable.importTable(results);
 			
 		}
 
@@ -106,8 +108,8 @@ public class MainWindow implements ActionListener {
 	private class MainWindowPercellomeCallback implements QueryThreadCallback {
 
 		@Override
-		public void completeSearch(DataTable results) {
-			geneTable.importTable(results);
+		public void completeSearch(Database results) {
+			toxicologyTable.importTable(results);
 			
 		}
 
@@ -129,6 +131,7 @@ public class MainWindow implements ActionListener {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
+		
 		frmToxicologyGadget = new JFrame();
 		frmToxicologyGadget.setTitle("Toxicology Gadget");
 		frmToxicologyGadget.setBounds(100, 100, 812, 555);
@@ -178,20 +181,12 @@ public class MainWindow implements ActionListener {
 		JMenuItem mntmTargetMineMenuItem = new JMenuItem("Import TargetMine");
 		mntmTargetMineMenuItem.setAction(action_1);
 		mnOtherTools.add(mntmTargetMineMenuItem);
-
-
-		this.geneTable = new ToxicologyTable();
-		geneTable.setCellSelectionEnabled(true);
-		geneTable.setColumnSelectionAllowed(true);
 		
 		this.targetMineCallback = new MainWindowTargetMineCallback();
 		this.targetMineQueryThread = new TargetMineQueryThread(targetMineCallback);
 		
 		this.percellomeCallback = new MainWindowPercellomeCallback();
 		this.percellomeQueryThread = new PercellomeQueryThread(percellomeCallback);
-		
-		
-
 		
 	}
 		
@@ -221,18 +216,20 @@ public class MainWindow implements ActionListener {
 		initialize();
 		
 		try {
-			frmToxicologyGadget.getContentPane().setLayout(new MigLayout("", "[590px]", "[417px]"));
-			this.garudaHandler = new GarudaHandler(this.frmToxicologyGadget, this.geneTable);
 			
-			JScrollPane scrollPane = new JScrollPane();
-			frmToxicologyGadget.getContentPane().add(scrollPane, "cell 0 0,grow");
-			
-			geneTable.setFillsViewportHeight(true);
-			scrollPane.setViewportView(geneTable);
-			//header.setBackground(Color.yellow);
-			
-			
-			
+				frmToxicologyGadget.getContentPane().setLayout(new BoxLayout(frmToxicologyGadget.getContentPane(), BoxLayout.X_AXIS));
+		
+				this.toxicologyTable = new ToxicologyTable();
+				toxicologyTable.setCellSelectionEnabled(true);
+				toxicologyTable.setColumnSelectionAllowed(true);
+				this.garudaHandler = new GarudaHandler(this.frmToxicologyGadget, this.toxicologyTable);
+				
+				JScrollPane scrollPane = new JScrollPane();
+				frmToxicologyGadget.getContentPane().add(scrollPane);
+				
+				toxicologyTable.setFillsViewportHeight(true);
+				scrollPane.setViewportView(toxicologyTable);
+				
 			
 		} catch (GarudaConnectionNotInitializedException | NetworkConnectionException e) {
 			// TODO Auto-generated catch block
@@ -253,11 +250,12 @@ public class MainWindow implements ActionListener {
 		// String[] genelist = FileManager.loadListFile(ensembleGenelistFile);
 		
 		try {
-			DataTable agctScenario = FileManager.loadListFile(file, "Gene");
-			geneTable.importTable(agctScenario);
+			Database agctScenario = FileManager.loadListFile(file, "Gene");
+			toxicologyTable.importTable(agctScenario);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
 		
 		// geneTable.loadGenelist(genelist);
 		
@@ -294,7 +292,7 @@ public class MainWindow implements ActionListener {
 		case "Genelist":
 				// TODO: Add ensemble genelist
 				if(isTxtExtention(file)) {
-					DataTable ensembleGenelist = null;
+					Database ensembleGenelist = null;
 					try {
 						ensembleGenelist = FileManager.loadListFile(file, "Gene");
 					} catch (IOException e) {
@@ -302,7 +300,7 @@ public class MainWindow implements ActionListener {
 						e.printStackTrace();
 					}
 					
-					geneTable.importTable(ensembleGenelist);
+					toxicologyTable.importTable(ensembleGenelist);
 				
 				}
 				
@@ -345,22 +343,27 @@ public class MainWindow implements ActionListener {
 	}
 	
 	private boolean hasGenelist() {
-		return this.geneTable.hasColumn("Gene");
+		return this.toxicologyTable.hasColumn("Gene");
 	}
 	
-	private void discover(String contence) {
-		String data = geneTable.getGenelistStringTxt();
-		String fileName = "genelist.txt";
+	private void discover(String contence, String extension) {
+		String[] data = toxicologyTable.getSelected();
+		String list = new String("");
+		for(int i = 0; i < data.length; i++) {
+			list += data[i] + "\n";
+		}
+		
+		String fileName = contence + "." + extension;
 		File file = null;
 		try {
-			file = FileManager.writeOutString(data, fileName);
+			file = FileManager.writeOutString(list, fileName);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		GarudaGlassPanel g = garudaHandler.getGarudaGlassPanel();
-		g.showPanel();
+		//GarudaGlassPanel g = garudaHandler.getGarudaGlassPanel();
+		//g.showPanel();
 		
 		garudaHandler.garudaDiscover(file, contence);
 	}
@@ -377,7 +380,7 @@ public class MainWindow implements ActionListener {
 			System.out.println(ae.getActionCommand());
 			
 			if(hasGenelist()) {
-				discover("genelist");
+				discover("genelist", "txt");
 			}else {
 				JOptionPane.showMessageDialog(frmToxicologyGadget, "No genes avaliable!");
 			}
@@ -402,65 +405,41 @@ public class MainWindow implements ActionListener {
 			}
 		}
 	}
-	private class SwingAction extends AbstractAction {
-		public SwingAction() {
-			putValue(NAME, "SwingAction");
-			putValue(SHORT_DESCRIPTION, "Some short description");
-		}
-		public void actionPerformed(ActionEvent e) {
-		}
-	}
-	
-	private String[] getArrayFromRows(int[] rows, int col) {
-		String[] ret = new String[rows.length];
-		for(int i = 0; i < rows.length; i++) {
-			int j = rows[i];
-			ret[j] = (String) geneTable.getModel().getValueAt(j, col);
-			
-		}
-		
-		return ret;
-	}
-	
+
+
 	private class TargetMineImportAction extends AbstractAction {
+		
 		public TargetMineImportAction() {
 			putValue(NAME, "Import TargetMine");
 			putValue(SHORT_DESCRIPTION, "Some short description");
-			
-			
-			
-			
-			
 		}
+		
 		public void actionPerformed(ActionEvent e) {
 			
+			String[] genelist = toxicologyTable.getSelected();
 			
-			int[] cols = geneTable.getSelectedColumns();
-			
-			if(cols.length > 1) {
-				// TODO: dialoge box
+			if(genelist.length < 1) {
+				// TODO: dialog box
 				return;
 			}
 			
 			if(targetMineQueryThread.isRunning())
 				targetMineQueryThread.stopRunning();
 			
-			int[] rows = geneTable.getSelectedRows();
-			String[] genelist = getArrayFromRows(rows, cols[0]);
-			
 			try {
+				//TODO: add thread stop dialog
 				targetMineQueryThread.join();
 			} catch (InterruptedException ie) {
-				// TODO Auto-generated catch block
 				ie.printStackTrace();
 			}
 			
+			targetMineQueryThread = new TargetMineQueryThread(targetMineCallback);
 			targetMineQueryThread.setGenelist(genelist);
 			targetMineQueryThread.start();
 			
-			
 		}
 	}
+	
 	private class PercellomeImportAction extends AbstractAction {
 		public PercellomeImportAction() {
 			putValue(NAME, "Import Percellome");

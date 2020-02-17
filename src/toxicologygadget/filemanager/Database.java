@@ -6,12 +6,12 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class DataTable {
+public class Database {
 	
 	private ArrayList<ArrayList<Object>> mTable;
 	private ArrayList<String> mIdentifiers;
 	
-	public DataTable(){
+	public Database(){
 		mTable = new ArrayList<ArrayList<Object>>();
 		mIdentifiers = new ArrayList<String>();
 	}
@@ -23,12 +23,12 @@ public class DataTable {
 		return false;
 	}
 	
-	public DataTable(ArrayList<ArrayList<Object>> table, ArrayList<String> columnIdentifiers){
+	public Database(ArrayList<ArrayList<Object>> table, ArrayList<String> columnIdentifiers){
 		mTable = table;
 		mIdentifiers = columnIdentifiers;
 	}
 	
-	public DataTable(String[][] table){
+	public Database(String[][] table){
 		
 		mIdentifiers = new ArrayList<String> ();
 		
@@ -102,7 +102,7 @@ public class DataTable {
 		return mIdentifiers;
 	}
 	
-	public static DataTable leftJoin(DataTable a, DataTable b, String keyCol) {
+	public static Database leftJoin(Database a, Database b, String keyCol) {
 		
 		// TODO: Make exceptions
 		if(!a.hasColumn(keyCol) || !b.hasColumn(keyCol)) 
@@ -154,7 +154,7 @@ public class DataTable {
 			
 		}
 		
-		return new DataTable(newTable, newColumnIdentifiers);
+		return new Database(newTable, newColumnIdentifiers);
 		
 	}
 
@@ -190,9 +190,9 @@ public class DataTable {
 	}
 	
 	private static ArrayList<String> joinIdentifiers(ArrayList<Integer> aColumnSelect, 
-												 	ArrayList<Integer> bColumnSelect,
-												 ArrayList<String> leftCol, 
-												 ArrayList<String> rightCol) 
+												 	 ArrayList<Integer> bColumnSelect,
+												 	 ArrayList<String> leftCol, 
+												 	 ArrayList<String> rightCol) 
 	{
 		
 		ArrayList<String> row = new ArrayList<String>();
