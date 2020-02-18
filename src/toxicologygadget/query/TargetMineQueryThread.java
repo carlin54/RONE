@@ -12,7 +12,7 @@ import java.util.List;
 import org.intermine.webservice.client.core.ServiceFactory;
 import org.intermine.webservice.client.services.QueryService;
 
-import toxicologygadget.filemanager.Database;
+import toxicologygadget.filemanager.Table;
 
 import org.intermine.metadata.ConstraintOp;
 import org.intermine.metadata.Model;
@@ -46,6 +46,8 @@ public class TargetMineQueryThread extends Thread
     public void setGenelist(String[] geneList){
     		this.genelist = geneList;
      }
+    
+    
     
     public TargetMineQueryThread(QueryThreadCallback callback){
     	this.callback = callback;
@@ -117,33 +119,31 @@ public class TargetMineQueryThread extends Thread
     }
     
     public void run(){ 
-    	
+    	System.out.println("TargetMineQueryThread.run()");
     	processRunning = true;
     	stopProcess = false;
     	String[] columnIdentifiers = 
-    		{"Gene", "Secondary Identifier", "Organism Name", 
-    		 "GO Identifier", "GO Name", "GO Code", "GO Namespace"};
+    		{"Gene", "Secondary Identifier (TM)", "Organism Name (TM)", 
+    		 "GO Identifier (TM)", "GO Name (TM)", "GO Code (TM)", "GO Namespace (TM)"};
     	ArrayList<String> columnList = new ArrayList<String>();
     	Collections.addAll(columnList, columnIdentifiers);
     	
     	ArrayList<ArrayList<Object>> table = new ArrayList<ArrayList<Object>>();
-     
     	
     	for(int i = 0; i < genelist.length; i = i + stepSize) {
     		if(stopProcess) break;
     		String search = makeSearch(i, i+stepSize);
     		ArrayList<ArrayList<Object>> stepResults = query(search);
     		table.addAll(stepResults);
+    		System.out.println(i+1 + " : " + genelist.length);
     	}
     	
     	if(stopProcess) {
     		callback.unsuccessfulSearch("process terminated");
     	} else {
-    		Database targetMineTable = new Database(table, columnList);
+    		Table targetMineTable = new Table(table, columnList);
     		callback.completeSearch(targetMineTable);
     	}
-    	
-    	
     	
       
     }

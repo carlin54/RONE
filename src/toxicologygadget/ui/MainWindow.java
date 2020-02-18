@@ -36,7 +36,7 @@ import jp.sbi.garuda.backend.net.exception.GarudaConnectionNotInitializedExcepti
 import jp.sbi.garuda.backend.net.exception.NetworkConnectionException;
 import jp.sbi.garuda.backend.ui.GarudaGlassPanel;
 import toxicologygadget.backend.garudahandler.GarudaHandler;
-import toxicologygadget.filemanager.Database;
+import toxicologygadget.filemanager.Table;
 import toxicologygadget.filemanager.FileManager;
 import toxicologygadget.filemanager.JsonReader;
 import toxicologygadget.query.PercellomeQueryThread;
@@ -86,7 +86,7 @@ public class MainWindow implements ActionListener {
 	private class MainWindowTargetMineCallback implements QueryThreadCallback {
 
 		@Override
-		public void completeSearch(Database results) {
+		public void completeSearch(Table results) {
 			toxicologyTable.importTable(results);
 			
 		}
@@ -108,7 +108,7 @@ public class MainWindow implements ActionListener {
 	private class MainWindowPercellomeCallback implements QueryThreadCallback {
 
 		@Override
-		public void completeSearch(Database results) {
+		public void completeSearch(Table results) {
 			toxicologyTable.importTable(results);
 			
 		}
@@ -250,7 +250,7 @@ public class MainWindow implements ActionListener {
 		// String[] genelist = FileManager.loadListFile(ensembleGenelistFile);
 		
 		try {
-			Database agctScenario = FileManager.loadListFile(file, "Gene");
+			Table agctScenario = FileManager.loadListFile(file, "Gene");
 			toxicologyTable.importTable(agctScenario);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -293,7 +293,7 @@ public class MainWindow implements ActionListener {
 				// TODO: Add ensemble genelist
 				if(isTxtExtention(file)) {
 					
-					Database ensembleGenelist = null;
+					Table ensembleGenelist = null;
 					
 					try {
 						ensembleGenelist = FileManager.loadListFile(file, "Gene");
@@ -348,8 +348,9 @@ public class MainWindow implements ActionListener {
 		return this.toxicologyTable.hasColumn("Gene");
 	}
 	
+	
 	private void startDiscovery(String contence, String extension) {
-		String[] data = toxicologyTable.getSelected();
+		String[] data = toxicologyTable.getUniqueSelected();
 		
 		String list = new String("");
 		for(int i = 0; i < data.length; i++) {
@@ -405,8 +406,6 @@ public class MainWindow implements ActionListener {
 	}
 	
 	
-	
-	
 	private class GarudaDiscoverActionEnsemble extends AbstractAction {
 		
 		public GarudaDiscoverActionEnsemble() {
@@ -438,7 +437,7 @@ public class MainWindow implements ActionListener {
 		
 		public void actionPerformed(ActionEvent e) {
 			
-			String[] genelist = toxicologyTable.getSelected();
+			String[] genelist = toxicologyTable.getUniqueSelected();
 			
 			if(genelist.length < 1) {
 				// TODO: dialog box
@@ -461,6 +460,7 @@ public class MainWindow implements ActionListener {
 			
 		}
 	}
+	
 	
 	private class PercellomeImportAction extends AbstractAction {
 		public PercellomeImportAction() {

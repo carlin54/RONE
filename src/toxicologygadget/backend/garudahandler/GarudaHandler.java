@@ -27,8 +27,9 @@ import jp.sbi.garuda.backend.plugin.pipeline.exceptions.PipelineNotInitializedEx
 import jp.sbi.garuda.backend.plugin.pipeline.responseCodes.GarudaPipelineResponseCode;
 import jp.sbi.garuda.backend.ui.GarudaGlassPanel;
 import toxicologygadget.backend.garudahandler.DiscoveryTouple;
-import toxicologygadget.filemanager.Database;
+import toxicologygadget.filemanager.Table;
 import toxicologygadget.filemanager.FileManager;
+import toxicologygadget.ui.ImportDataDialog;
 import toxicologygadget.ui.ToxicologyTable;
 
 public class GarudaHandler {
@@ -147,13 +148,19 @@ public class GarudaHandler {
 				
 				switch (senderName) {
 					// TODO: maybe switch to senderId
-					case "GeneMapper": 
-						Database shoeTable = FileManager.loadCSV(file);
+					case "GeneMapper":
+						
+						String[] s = new String[2];
+						
+						ImportDataDialog myApp = new ImportDataDialog(parentFrame, s, s) ;
+					    myApp.setVisible(true);	
+						
+						Table shoeTable = FileManager.loadCSV(file);
 						toxicologyTable.importTable(shoeTable);
 						
 						break;
 					case "Reactome gadget":
-						Database reactomeData = FileManager.loadCSV(file);
+						Table reactomeData = FileManager.loadCSV(file);
 						
 						
 						break;

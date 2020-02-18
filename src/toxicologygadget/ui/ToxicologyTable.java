@@ -14,7 +14,7 @@ import javax.swing.table.TableModel;
 
 import antlr.collections.impl.Vector;
 import javafx.scene.control.TableColumn;
-import toxicologygadget.filemanager.Database;
+import toxicologygadget.filemanager.Table;
 
 import java.awt.Component;
 import java.awt.Cursor;
@@ -27,12 +27,13 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.TreeSet;
 
 public class ToxicologyTable extends JTable {
 	
-	Database dataTable;
+	Table dataTable;
 	
 	public String[] getSelected() {
 		
@@ -52,8 +53,32 @@ public class ToxicologyTable extends JTable {
 		return tree_set.toArray(new String[len]);
 	}
 	
+	public String[] getUniqueSelected() {
+		
+		int[] rows = this.getSelectedRows();
+		int[] cols = this.getSelectedColumns();
+		
+		LinkedList<String> unique = new LinkedList<String>(); 
+	
+		String last_added = null;
+		for(int i = 0; i < rows.length; i++) {
+			for(int j = 0; j < cols.length; j++) {
+				int k = rows[i];
+				String cell = (String) getModel().getValueAt(k, cols[j]);
+				if(!cell.equals(last_added) && !unique.contains(cell)) {
+					unique.add(cell);
+					last_added = cell;
+				}
+				
+					
+			}
+		}
+		int len = unique.size();
+		return unique.toArray(new String[len]);
+	}
+	
 	public ToxicologyTable(){
-		dataTable = new Database();
+		dataTable = new Table();
 		
         
 		this.tableHeader.addMouseListener(new MouseAdapter() {
@@ -69,9 +94,6 @@ public class ToxicologyTable extends JTable {
                     return;
                 }
                 selectedColumn = o;
-                h.getColumnModel().getColumn(i).setHeaderValue("Clicked");
-                
-
                 
             }
         });
@@ -90,7 +112,7 @@ public class ToxicologyTable extends JTable {
     }
 	
 	private void clearTable() {
-		dataTable = new Database();
+		dataTable = new Table();
 		
 		DefaultTableModel model = (DefaultTableModel) this.getModel();
 		model.setRowCount(0);
@@ -119,8 +141,6 @@ public class ToxicologyTable extends JTable {
 		for(int i = 0; i < identifiers.size(); i++) {
 			model.addColumn(identifiers.get(i));	
 		}
-		
-
 		int numRows = dataTable.rowCount();
 		int numCols = dataTable.columnCount();
 		
@@ -132,8 +152,6 @@ public class ToxicologyTable extends JTable {
 			model.addRow(row);
 		}
 		this.setModel(model);
-		
-		
 		this.setAutoCreateRowSorter(true);
 	}
 	
@@ -154,7 +172,7 @@ public class ToxicologyTable extends JTable {
 		}
 		
 		
-		dataTable = new Database(genelistData);
+		dataTable = new Table(genelistData);
 		
 		updateTable();
 		
@@ -172,13 +190,13 @@ public class ToxicologyTable extends JTable {
 			
 	}
 	
-	public void importTable(Database importTable) {
+	public void importTable(Table importTable) {
 		
 		if(dataTable.columnCount() == 0) {
 			dataTable = importTable;
 		}else {
 			if(importTable.containsColumn("Gene")) {
-				dataTable = Database.leftJoin(dataTable, importTable, "Gene");
+				dataTable = Table.leftJoin(dataTable, importTable, "Gene");
 			}
 		}
 		

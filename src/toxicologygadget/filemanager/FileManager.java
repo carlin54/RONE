@@ -35,7 +35,7 @@ public class FileManager {
 	  
 	}
 	
-	public static Database loadCSV(File file){
+	public static Table loadCSV(File file){
 		
 		if (!file.exists()) return null;
 		
@@ -69,11 +69,11 @@ public class FileManager {
 		}
 		
 		
-		return new Database(data, identifiers);
+		return new Table(data, identifiers);
 			
 	}
 	
-	public static Database loadListFile(File listFile, String header) throws IOException {
+	public static Table loadListFile(File listFile, String header) throws IOException {
 		
 		if (!listFile.exists()) return null;
 		
@@ -91,7 +91,7 @@ public class FileManager {
 		
 		ArrayList<String> id = new ArrayList<String>(); 
 		id.add(header);
-		Database dt = new Database(tb, id);
+		Table dt = new Table(tb, id);
 		
 		return dt;
 	}
@@ -171,7 +171,7 @@ public class FileManager {
 		return (int) (clusterFile.length() - 2);
 	}
 	
-	public static File writeOutTable(Database writeOut) {
+	public static File writeOutTable(Table writeOut) {
 		return null;
 	}
 	
@@ -201,7 +201,7 @@ public class FileManager {
 		
 	}
 	
-	public static Database loadAGCTScenario(File file) throws IOException {
+	public static Table loadAGCTScenario(File file) throws IOException {
 		
 	
 		final String ORDERED_LIST_HANDLE = "@Ordered_List_Names_Begin";
@@ -255,7 +255,7 @@ public class FileManager {
 			identifiers.add("Gene");
 			identifiers.add("Clusters");
 			
-			return new Database(table, identifiers);
+			return new Table(table, identifiers);
 			
 		}else {
 			// TODO: throw

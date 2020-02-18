@@ -6,12 +6,12 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Database {
+public class Table {
 	
 	private ArrayList<ArrayList<Object>> mTable;
 	private ArrayList<String> mIdentifiers;
 	
-	public Database(){
+	public Table(){
 		mTable = new ArrayList<ArrayList<Object>>();
 		mIdentifiers = new ArrayList<String>();
 	}
@@ -27,12 +27,12 @@ public class Database {
 		return false;
 	}
 	
-	public Database(ArrayList<ArrayList<Object>> table, ArrayList<String> columnIdentifiers){
+	public Table(ArrayList<ArrayList<Object>> table, ArrayList<String> columnIdentifiers){
 		mTable = table;
 		mIdentifiers = columnIdentifiers;
 	}
 	
-	public Database(String[][] table){
+	public Table(String[][] table){
 		
 		mIdentifiers = new ArrayList<String> ();
 		
@@ -106,7 +106,7 @@ public class Database {
 		return mIdentifiers;
 	}
 	
-	public static Database leftJoin(Database a, Database b, String keyCol) {
+	public static Table leftJoin(Table a, Table b, String keyCol) {
 		
 		// TODO: Make exceptions
 		if(!a.hasColumn(keyCol) || !b.hasColumn(keyCol)) 
@@ -115,10 +115,30 @@ public class Database {
 		int keyIndexA = a.columnIndex(keyCol);
 		int keyIndexB = b.columnIndex(keyCol);
 		
+		// the old way
 		ArrayList<Integer> aColumnSelect = rangeIndicies(0, a.getIdentifiers().size());
 		ArrayList<Integer> bColumnSelect = rangeIndicies(0, b.getIdentifiers().size());
-		
 		bColumnSelect.remove(b.columnIndex(keyCol));
+		
+		Set<String> abID = new HashSet<String>();
+		abID.addAll(a.getIdentifiers());
+		abID.addAll(b.getIdentifiers());
+		
+		// the new way
+		aColumnSelect = new ArrayList<Integer>();
+		bColumnSelect = new ArrayList<Integer>();
+		ArrayList<String> aid = a.getIdentifiers();
+		ArrayList<String> bid = b.getIdentifiers();
+		
+		for(Integer i = 0; i < a.getIdentifiers().size(); i++) {
+			String o = aid.get(i);
+			if(!bid.contains(o)) {
+				aColumnSelect.add(i);
+			}
+		}
+		bColumnSelect = rangeIndicies(0, b.getIdentifiers().size());
+		bColumnSelect.remove(keyIndexB);
+		aColumnSelect.add(keyIndexA);
 		
 		ArrayList<String> newColumnIdentifiers = joinIdentifiers(aColumnSelect, bColumnSelect, a.getIdentifiers(), b.getIdentifiers());
 		ArrayList<Object> emptyArray = new ArrayList<Object>();
@@ -129,7 +149,6 @@ public class Database {
 		
 		
 		ArrayList<ArrayList<Object>> newTable = new ArrayList<ArrayList<Object>>();
-		
 		
 		for(int i = 0; i < a.mTable.size(); i++){
 			
@@ -152,13 +171,16 @@ public class Database {
 			
 			if(!match) {
 				ArrayList<Object> row = (ArrayList<Object>) a.mTable.get(i).clone();
+				
+				
+				
 				row.addAll(emptyArray);
 				newTable.add(row);
 			}
 			
 		}
 		
-		return new Database(newTable, newColumnIdentifiers);
+		return new Table(newTable, newColumnIdentifiers);
 		
 	}
 

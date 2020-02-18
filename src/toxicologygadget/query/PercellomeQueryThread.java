@@ -15,14 +15,13 @@ import org.json.JSONObject;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import toxicologygadget.filemanager.Database;
+import toxicologygadget.filemanager.Table;
 
 public class PercellomeQueryThread extends Thread {
 	
 	
 	static final String ROOT = "http://percellome.nihs.go.jp/PDBR/v1.dll/ds/rest/tools/";
 	static final String TEST_CONNECTIVITY = "http://percellome.nihs.go.jp/PDBR/v1.dll/ds/rest/tools/test";
-	
 	
 	QueryThreadCallback callback;
 	int projectId;
@@ -41,8 +40,6 @@ public class PercellomeQueryThread extends Thread {
 	public void setProjectId(int projectId) {
 		this.projectId = projectId;
 	}
-	
-	
 	
 	private static URL individualDataURL(String gene, int projectId) throws MalformedURLException {
 		String s = "http://percellome.nihs.go.jp/PDBR/v1.dll/ds/rest/tools/IdvData/" + projectId + "/" + gene;
@@ -67,7 +64,8 @@ public class PercellomeQueryThread extends Thread {
 		Matcher m = p.matcher(individualDataJSON);
 		
 		while (m.find()) {    
-			identifiers.add(m.group());
+			String id = m.group() + " (P)";
+			identifiers.add(id);
         }  
 		
 		return identifiers.toArray(new String[identifiers.size()]);
@@ -127,7 +125,7 @@ public class PercellomeQueryThread extends Thread {
 		
 		String[] columnIdentifiers = parseColumnIdentifiers(individualDataJSON);
 		
-		Database individualDataTable = new Database(individualData, columnIdentifiers);
+		Table individualDataTable = new Table(individualData, columnIdentifiers);
 		
 		callback.completeSearch(individualDataTable);
 		
