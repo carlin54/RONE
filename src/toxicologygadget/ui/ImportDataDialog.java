@@ -22,10 +22,15 @@ public class ImportDataDialog extends JDialog implements ActionListener {
    private String[] data;
    private JComboBox<String> columnSelectA;
    private JComboBox<String> columnSelectB;
+   
    private JButton btnOk;
    private JButton btnCancel;
-   public ImportDataDialog(Frame parent, String[] columnA, String[] columnB) {
+   
+   public ImportDataDialog(Frame parent, String fromWhere, String[] columnA, String[] columnB) {
       super(parent, "Pick Constraint", true);
+      
+      this.setTitle("Import " + fromWhere);
+      
       Point loc = parent.getLocation();
       setLocation(loc.x+80,loc.y+80);
       data = new String[2]; // set to amount of data items
@@ -78,6 +83,8 @@ public class ImportDataDialog extends JDialog implements ActionListener {
       panel.add(btnCancel,gbc);
       getContentPane().add(panel);
       pack();
+      
+      data = new String[2];
    }
    
    public void actionPerformed(ActionEvent ae) {
@@ -88,6 +95,7 @@ public class ImportDataDialog extends JDialog implements ActionListener {
       }
       else {
          data[0] = null;
+         data[1] = null;
       }
       dispose();
    }
@@ -97,4 +105,7 @@ public class ImportDataDialog extends JDialog implements ActionListener {
       return data;
    }
    
+   public String[] getData() {
+	   return this.data;
+   }
 }

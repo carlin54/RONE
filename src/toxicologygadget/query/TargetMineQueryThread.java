@@ -9,6 +9,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.JFrame;
+
 import org.intermine.webservice.client.core.ServiceFactory;
 import org.intermine.webservice.client.services.QueryService;
 
@@ -28,6 +30,7 @@ public class TargetMineQueryThread extends Thread
     private static final String ROOT = "https://targetmine.mizuguchilab.org/targetmine/service";
     private String[] genelist;
     private QueryThreadCallback callback;
+    private JFrame parent;
     private boolean processRunning;
     private boolean stopProcess;
     private int stepSize;
@@ -118,6 +121,10 @@ public class TargetMineQueryThread extends Thread
     	this.stepSize = stepSize;
     }
     
+    private int numGenesToSearch(int i) {
+    	return ((i+stepSize > genelist.length) ? genelist.length : i+stepSize);
+    }
+    
     public void run(){ 
     	System.out.println("TargetMineQueryThread.run()");
     	processRunning = true;
@@ -129,20 +136,24 @@ public class TargetMineQueryThread extends Thread
     	Collections.addAll(columnList, columnIdentifiers);
     	
     	ArrayList<ArrayList<Object>> table = new ArrayList<ArrayList<Object>>();
-    	
+    	int totalFound = 0;
+    	ArrayList<ArrayList<Object>> stepResults = null;
+    	callback.startSearch(genelist.length);
     	for(int i = 0; i < genelist.length; i = i + stepSize) {
     		if(stopProcess) break;
     		String search = makeSearch(i, i+stepSize);
-    		ArrayList<ArrayList<Object>> stepResults = query(search);
+    		stepResults = query(search);
     		table.addAll(stepResults);
-    		System.out.println(i+1 + " : " + genelist.length);
+    		totalFound = totalFound + stepResults.size();
+    		int genesSearched = numGenesToSearch(i) ;
+    		callback.statusUpdate(genesSearched, genelist.length, totalFound);
     	}
     	
     	if(stopProcess) {
-    		callback.unsuccessfulSearch("process terminated");
+    		callback.completeSearch(null, QueryThreadCallback.statusCodeFinishStopped);
     	} else {
     		Table targetMineTable = new Table(table, columnList);
-    		callback.completeSearch(targetMineTable);
+    		callback.completeSearch(targetMineTable, QueryThreadCallback.statusCodeFinishSuccess);
     	}
     	
       

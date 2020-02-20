@@ -14,6 +14,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.TreeSet;
@@ -84,45 +85,80 @@ public class MainWindow implements ActionListener {
 	private final Action action_2 = new PercellomeImportAction();
 	
 	private class MainWindowTargetMineCallback implements QueryThreadCallback {
-
+		
+		TargetMineStatusWindow targetMineStatusWindow;
+		
 		@Override
-		public void completeSearch(Table results) {
-			toxicologyTable.importTable(results);
+		public void startSearch(int number) {
+			targetMineStatusWindow = new TargetMineStatusWindow(number);
+			targetMineStatusWindow.setVisible(true);
+		}
+		
+		@Override
+		public void completeSearch(Table results, int status) {
+			
+			if(status != QueryThreadCallback.statusCodeFinishSuccess) 
+				return;
+			
+			int res_len = results.getIdentifiers().size();
+			String[] res_id = results.getIdentifiers().toArray(new String[res_len]);
+			
+			int tox_len = toxicologyTable.getIdentifiers().size();
+			String[] tox_id = toxicologyTable.getIdentifiers().toArray(new String[tox_len]);
+			String fromWhere = "TargetMine";
+			ImportDataDialog importSelection = new ImportDataDialog(frmToxicologyGadget, fromWhere, tox_id, res_id) ;
+			importSelection.setVisible(true);	
+			
+			String[] data = importSelection.getData();
+			
+			if(data[0] != null) {
+				String keyTox = data[0];
+				String keyRes = data[1];
+				toxicologyTable.importTable(keyTox, keyRes, results);
+			}
+			targetMineStatusWindow.setVisible(false);
+			targetMineStatusWindow.dispose();
+			targetMineStatusWindow = null;
 			
 		}
 
 		@Override
-		public void unsuccessfulSearch(String error) {
-			System.out.println("unsuccessfulSearch()");
-		}
-
-		@Override
-		public void status(int complete, int unsuccessful, int total) {
-			// TODO Auto-generated method stub
+		public void statusUpdate(int complete, int total, int totalFound) {
 			
+			targetMineStatusWindow.updateSearch(complete, total, totalFound);
+			System.out.println("Complete: " + complete + "\t Total: " + total + "\t Results: " + totalFound);
 		}
 		
 		
 	}
 	
 	private class MainWindowPercellomeCallback implements QueryThreadCallback {
-
+		
+		
+		
 		@Override
-		public void completeSearch(Table results) {
-			toxicologyTable.importTable(results);
+		public void completeSearch(Table results, int status) {
+			
+			int res_len = results.getIdentifiers().size();
+			String[] res_id = results.getIdentifiers().toArray(new String[res_len]);
+			
+			int tox_len = toxicologyTable.getIdentifiers().size();
+			String[] tox_id = toxicologyTable.getIdentifiers().toArray(new String[tox_len]);
+			
+			ImportDataDialog importSelection = new ImportDataDialog(frmToxicologyGadget, tox_id, res_id) ;
+			importSelection.setVisible(true);	
+			
+			String[] data = importSelection.getData();
+			
+			if(data[0] != null) {
+				String keyTox = data[0];
+				String keyRes = data[0];
+				toxicologyTable.importTable(keyTox, keyRes, results);
+			}
+			
 			
 		}
-
-		@Override
-		public void unsuccessfulSearch(String error) {
-			System.out.println("unsuccessfulSearch()");
-		}
-
-		@Override
-		public void status(int complete, int total, int unsuccessful) {
-			// TODO Auto-generated method stub
-			
-		}
+		
 		
 		
 	}
@@ -229,29 +265,24 @@ public class MainWindow implements ActionListener {
 				
 				toxicologyTable.setFillsViewportHeight(true);
 				scrollPane.setViewportView(toxicologyTable);
-				
 			
 		} catch (GarudaConnectionNotInitializedException | NetworkConnectionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-
-		
 		// JSONObject res = new JSONObject(a);
 		
-		
-		File clusterResFile = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\AGCT_VisibleClustering.txt");
 		File ensembleGenelistFile = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\PercellomeTestDataSmall.txt");
-				
-		File file = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\GeneSymbols.txt");
 		
-		// int[] clusterResults = FileManager.loadAGCTClusterResults(clusterResFile);
-		// String[] genelist = FileManager.loadListFile(ensembleGenelistFile);
+		File clusterResFile = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\AGCT_Scenario.txt");
+		File geneSymbolsFile = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\EnsembleGenelist2.txt");
 		
 		try {
-			Table agctScenario = FileManager.loadListFile(file, "Gene");
-			toxicologyTable.importTable(agctScenario);
+			Table agctScenario = FileManager.loadAGCTScenario(clusterResFile);
+			Table geneSymbols = FileManager.loadListFile(geneSymbolsFile, "Gene");
+			
+			toxicologyTable.importTable(geneSymbols);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

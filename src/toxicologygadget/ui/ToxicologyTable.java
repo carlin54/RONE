@@ -33,7 +33,11 @@ import java.util.TreeSet;
 
 public class ToxicologyTable extends JTable {
 	
-	Table dataTable;
+	private Table dataTable;
+	
+	public ArrayList<String> getIdentifiers() {
+		return dataTable.getIdentifiers();
+	}
 	
 	public String[] getSelected() {
 		
@@ -188,6 +192,18 @@ public class ToxicologyTable extends JTable {
 			importColumn(data[i], columnIdentifier[i]);
 		}
 			
+	}
+	
+	public void importTable(String keyA, String keyB, Table importTable) {
+		
+		
+		if(this.dataTable.columnCount() == 0) return;
+		
+		Table tableA = this.dataTable;
+		Table tableB = importTable;
+		
+		this.dataTable = Table.leftJoin(tableA, tableB, keyA, keyB);
+		updateTable();
 	}
 	
 	public void importTable(Table importTable) {

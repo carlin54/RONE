@@ -35,7 +35,20 @@ public class FileManager {
 	  
 	}
 	
-	public static Table loadCSV(File file){
+	public static String[] loadCSVIdentifiers(File file) throws IOException {
+		
+		ArrayList<String> identifiers = new ArrayList<String>();
+		
+		BufferedReader bufferReader = new BufferedReader(new FileReader(file));
+		String line = bufferReader.readLine();
+		String[] parsedLine = line.split(",");
+		identifiers.addAll(Arrays.asList(parsedLine));
+		
+		int len = identifiers.size();
+		return identifiers.toArray(new String[len]);
+	}
+	
+	public static Table loadCSV(File file) throws IOException{
 		
 		if (!file.exists()) return null;
 		
@@ -44,29 +57,21 @@ public class FileManager {
 		ArrayList<String> identifiers = new ArrayList<String>();
 		
 		BufferedReader bufferReader = null;
-		
-		try {
-			bufferReader = new BufferedReader(new FileReader(file));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} 
+	
+		bufferReader = new BufferedReader(new FileReader(file));
 	  
 		String line; 
-		
-		try {
-			line = bufferReader.readLine();
-			String[] parsedLine = line.split(",");
-			identifiers.addAll(Arrays.asList(parsedLine));
-			while((line = bufferReader.readLine()) != null) {
-				parsedLine = line.split(",");
-				ArrayList<Object> row = new ArrayList<Object>();
-				row.addAll(Arrays.asList(parsedLine));
-				data.add(row);
-			}
-		} catch (IOException e) {
-			
-			e.printStackTrace();
+	
+		line = bufferReader.readLine();
+		String[] parsedLine = line.split(",");
+		identifiers.addAll(Arrays.asList(parsedLine));
+		while((line = bufferReader.readLine()) != null) {
+			parsedLine = line.split(",");
+			ArrayList<Object> row = new ArrayList<Object>();
+			row.addAll(Arrays.asList(parsedLine));
+			data.add(row);
 		}
+		
 		
 		
 		return new Table(data, identifiers);
@@ -252,8 +257,8 @@ public class FileManager {
 			}
 			
 			ArrayList<String> identifiers = new ArrayList<String>();
-			identifiers.add("Gene");
-			identifiers.add("Clusters");
+			identifiers.add("Probe ID");
+			identifiers.add("Cluster");
 			
 			return new Table(table, identifiers);
 			

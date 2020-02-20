@@ -136,6 +136,24 @@ public class GarudaHandler {
 			pipelinePlugin.sendPipelineFailedToGadgetResponse(pipelineResponseCode);
 	}
 	
+	private void loadTable(Table incomingTable, String fromWhere) {
+		int inc_len = incomingTable.getIdentifiers().size();
+		String[] inc_id = incomingTable.getIdentifiers().toArray(new String[inc_len]);
+		
+		int tox_len = toxicologyTable.getIdentifiers().size();
+		String[] tox_id = toxicologyTable.getIdentifiers().toArray(new String[tox_len]);
+		
+		ImportDataDialog importSelection = new ImportDataDialog(parentFrame, fromWhere, tox_id, inc_id) ;
+		importSelection.setVisible(true);	
+		
+		String[] data = importSelection.getData();
+		if(data[0] != null) {
+			String keyTox = data[0];
+			String keyInc = data[1];
+			toxicologyTable.importTable(keyTox, keyInc, incomingTable);
+		}
+	}
+	
 	private void initGarudaListeners () {
 				
 		garudaBackend.getIncomingRequestHandler().addLoadDataRequestActionListener(new LoadDataRequestActionListener() {
@@ -150,18 +168,23 @@ public class GarudaHandler {
 					// TODO: maybe switch to senderId
 					case "GeneMapper":
 						
-						String[] s = new String[2];
-						
-						ImportDataDialog myApp = new ImportDataDialog(parentFrame, s, s) ;
-					    myApp.setVisible(true);	
-						
+					try {
 						Table shoeTable = FileManager.loadCSV(file);
-						toxicologyTable.importTable(shoeTable);
-						
+						loadTable(shoeTable, "SHOE");
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 						break;
 					case "Reactome gadget":
-						Table reactomeData = FileManager.loadCSV(file);
-						
+					
+						try {
+							Table reactomeTable = FileManager.loadCSV(file);
+							loadTable(reactomeTable, "Reactome");
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 						
 						break;
 						
