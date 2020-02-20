@@ -97,25 +97,27 @@ public class MainWindow implements ActionListener {
 		@Override
 		public void completeSearch(Table results, int status) {
 			
-			if(status != QueryThreadCallback.statusCodeFinishSuccess) 
-				return;
+			if(status == QueryThreadCallback.statusCodeFinishSuccess) {
+				
+				int res_len = results.getIdentifiers().size();
+				String[] res_id = results.getIdentifiers().toArray(new String[res_len]);
+				
+				int tox_len = toxicologyTable.getIdentifiers().size();
+				String[] tox_id = toxicologyTable.getIdentifiers().toArray(new String[tox_len]);
+				String fromWhere = "TargetMine";
+				ImportDataDialog importSelection = new ImportDataDialog(frmToxicologyGadget, fromWhere, tox_id, res_id) ;
+				importSelection.setVisible(true);	
+				
+				String[] data = importSelection.getData();
+				
+				if(data[0] != null) {
+					String keyTox = data[0];
+					String keyRes = data[1];
+					toxicologyTable.importTable(keyTox, keyRes, results);
+				}
 			
-			int res_len = results.getIdentifiers().size();
-			String[] res_id = results.getIdentifiers().toArray(new String[res_len]);
-			
-			int tox_len = toxicologyTable.getIdentifiers().size();
-			String[] tox_id = toxicologyTable.getIdentifiers().toArray(new String[tox_len]);
-			String fromWhere = "TargetMine";
-			ImportDataDialog importSelection = new ImportDataDialog(frmToxicologyGadget, fromWhere, tox_id, res_id) ;
-			importSelection.setVisible(true);	
-			
-			String[] data = importSelection.getData();
-			
-			if(data[0] != null) {
-				String keyTox = data[0];
-				String keyRes = data[1];
-				toxicologyTable.importTable(keyTox, keyRes, results);
 			}
+			
 			targetMineStatusWindow.setVisible(false);
 			targetMineStatusWindow.dispose();
 			targetMineStatusWindow = null;
