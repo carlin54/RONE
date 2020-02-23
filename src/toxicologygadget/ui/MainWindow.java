@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.TreeSet;
@@ -71,9 +72,14 @@ public class MainWindow implements ActionListener {
 
 	private JFrame frmToxicologyGadget;
 	private GarudaHandler garudaHandler;
-	private final Action fileOpenAction = new FileOpenAction();
+	private final Action fileImportAction = new FileImportAction();
+	private final Action fileClearTableAction = new FileClearTableAction();
+	private final Action percellomeImportAction =  new PercellomeImportAction();
+	private final Action targetMineImportAction = new TargetMineImportAction();
+	
 	private final GarudaDiscoverActionGenelist garudaDiscoverActionGenelist = new GarudaDiscoverActionGenelist();
 	private final GarudaDiscoverActionEnsemble garudaDiscoverActionEnsemble = new GarudaDiscoverActionEnsemble();
+	
 	
 	//private GeneTable geneTable;
 	private ToxicologyTable toxicologyTable;
@@ -81,8 +87,6 @@ public class MainWindow implements ActionListener {
 	private MainWindowTargetMineCallback targetMineCallback;
 	private PercellomeQueryThread percellomeQueryThread;
 	private MainWindowPercellomeCallback percellomeCallback;
-	private final Action action_1 = new TargetMineImportAction();
-	private final Action action_2 = new PercellomeImportAction();
 	
 	private class MainWindowTargetMineCallback implements QueryThreadCallback {
 		
@@ -136,8 +140,6 @@ public class MainWindow implements ActionListener {
 	
 	private class MainWindowPercellomeCallback implements QueryThreadCallback {
 		
-		
-		
 		@Override
 		public void completeSearch(Table results, int status) {
 			
@@ -181,14 +183,18 @@ public class MainWindow implements ActionListener {
 		JMenu mnFile = new JMenu("File");
 		menuBar.add(mnFile);
 		
-		JMenuItem mntmOpen = new JMenuItem("Open");
-		mntmOpen.setAction(fileOpenAction);
+		JMenuItem mntmOpen = new JMenuItem("Import");
+		mntmOpen.setAction(fileImportAction);
 		mnFile.add(mntmOpen);
 		
 		mntmOpen.addActionListener(this);
 		
-		JMenuItem mntmSave = new JMenuItem("Save");
+		JMenuItem mntmSave = new JMenuItem("Export");
 		mnFile.add(mntmSave);
+		
+		JMenuItem menuItem = new JMenuItem("Clear Table");
+		menuItem.setAction(fileClearTableAction);
+		mnFile.add(menuItem);
 		
 		JMenu mnGaruda = new JMenu("Garuda");
 		menuBar.add(mnGaruda);
@@ -213,11 +219,11 @@ public class MainWindow implements ActionListener {
 		menuBar.add(mnOtherTools);
 		
 		JMenuItem mntmPercellomeMenuItem = new JMenuItem("Import Percellome");
-		mntmPercellomeMenuItem.setAction(action_2);
+		mntmPercellomeMenuItem.setAction(percellomeImportAction);
 		mnOtherTools.add(mntmPercellomeMenuItem);
 		
 		JMenuItem mntmTargetMineMenuItem = new JMenuItem("Import TargetMine");
-		mntmTargetMineMenuItem.setAction(action_1);
+		mntmTargetMineMenuItem.setAction(targetMineImportAction);
 		mnOtherTools.add(mntmTargetMineMenuItem);
 		
 		this.targetMineCallback = new MainWindowTargetMineCallback();
@@ -273,21 +279,21 @@ public class MainWindow implements ActionListener {
 			e.printStackTrace();
 		}
 		
-		// JSONObject res = new JSONObject(a);
+		/* JSONObject res = new JSONObject(a);
 		
-		File ensembleGenelistFile = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\PercellomeTestDataSmall.txt");
+		// File ensembleGenelistFile = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\PercellomeTestDataSmall.txt");
 		
-		File clusterResFile = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\AGCT_Scenario.txt");
-		File geneSymbolsFile = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\EnsembleGenelist2.txt");
+		// File clusterResFile = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\AGCT_Scenario.txt");
+		// File geneSymbolsFile = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\EnsembleGenelist2.txt");
 		
-		try {
-			Table agctScenario = FileManager.loadAGCTScenario(clusterResFile);
-			Table geneSymbols = FileManager.loadListFile(geneSymbolsFile, "Gene");
+		// try {
+			// Table agctScenario = FileManager.loadAGCTScenario(clusterResFile);
+			// Table geneSymbols = FileManager.loadListFile(geneSymbolsFile, "Gene");
 			
-			toxicologyTable.importTable(geneSymbols);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+			// toxicologyTable.importTable("Gene", "Gene", geneSymbols);
+		// } catch (IOException e) {
+		// 	e.printStackTrace();
+		// }
 		
 		
 		// geneTable.loadGenelist(genelist);
@@ -301,6 +307,7 @@ public class MainWindow implements ActionListener {
 		// percellomeQueryThread.setProjectId(87);
 		// percellomeQueryThread.start();
 		
+		*/
 	}
 
 	@Override
@@ -312,43 +319,101 @@ public class MainWindow implements ActionListener {
 	private boolean isTxtExtention(File file) {
 		String path = file.getPath();
 		int len = path.length();
-		System.out.println(path.substring(len-4, len-1));
-		return path.substring(len-3, len).contentEquals(".txt");
+		System.out.println(path.substring(len-4, len));
+		return path.substring(len-4, len).contentEquals(".txt");
+	}
+	
+	private void loadTable(Table incomingTable, String fromWhere) {
+		
+		if(toxicologyTable.isEmpty()) {
+			toxicologyTable.setTable(incomingTable);
+			
+		}else {
+			int inc_len = incomingTable.getIdentifiers().size();
+			String[] inc_id = incomingTable.getIdentifiers().toArray(new String[inc_len]);
+			
+			int tox_len = toxicologyTable.getIdentifiers().size();
+			String[] tox_id = toxicologyTable.getIdentifiers().toArray(new String[tox_len]);
+			
+			ImportDataDialog importSelection = new ImportDataDialog(frmToxicologyGadget, fromWhere, tox_id, inc_id) ;
+			importSelection.setVisible(true);	
+			
+			String[] data = importSelection.getData();
+			if(data[0] != null) {
+				String keyTox = data[0];
+				String keyInc = data[1];
+				toxicologyTable.importTable(keyTox, keyInc, incomingTable);
+			}
+		}
+		
+	}
+	
+	private void loadList(File file, String header) {
+		Table listTable = null;
+		
+		try {
+			listTable = FileManager.loadListFile(file, "Ensemble");
+			// TODO: Error
+			loadTable(listTable, "Import File");
+			
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage(), "Failure", JOptionPane.ERROR_MESSAGE);
+			e.printStackTrace();
+		}
+	}
+	
+	private void loadAGCTScenario(File file) {
+		Table scenario;
+		try {
+			scenario = FileManager.loadAGCTScenario(file);
+		} catch (IOException e) {
+			// TODO: Add exceptions
+			e.printStackTrace();
+		}
+		loadTable(scenario, "Import File");
+	}
+	
+	private void loadCSV(File file) {
+		
+	}
+	
+	private void loadTxt(File file) {
+		
 	}
 	
 	private void loadFile(File file, String contents) {
 		
 		if(!file.exists()) return;
 		
-		
 		switch (contents) {
 		case "Genelist":
-				// TODO: Add ensemble genelist
-				if(isTxtExtention(file)) {
-					
-					Table ensembleGenelist = null;
-					
-					try {
-						ensembleGenelist = FileManager.loadListFile(file, "Gene");
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					
-					toxicologyTable.importTable(ensembleGenelist);
-				
-				}
-				
+			loadList(file, "Gene");
+			break;
+			
+		case "Ensemble":
+			loadList(file, "Ensemble");
+			break;
+			
+		case "AGCT Scenario":
+			loadAGCTScenario(file);
+			break;
+			
+		case "CSV": 
+			loadCSV(file);
+			break;
+			
+		case "Tab":
+			loadTab(file);
 			break;
 		}
 		
 	}
 	
-	private class FileOpenAction extends AbstractAction {
+	private class FileImportAction extends AbstractAction {
 		
 		final JFileChooser fc = new JFileChooser();
 		
-		public FileOpenAction() {
+		public FileImportAction() {
 			putValue(NAME, "Open");
 			putValue(SHORT_DESCRIPTION, "Some short description");
 		}
@@ -361,7 +426,7 @@ public class MainWindow implements ActionListener {
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				File file = fc.getSelectedFile();
 				
-				Object[] possibilities = {"Genelist", "Cluster", "Ensemble"};
+				Object[] possibilities = {"AGCT Scenario", "Genelist", "Ensemble"};
 				String content = (String)JOptionPane.showInputDialog(
 				                    frmToxicologyGadget,
 				                    "Complete the sentence:\n",
@@ -377,11 +442,6 @@ public class MainWindow implements ActionListener {
 		}
 	}
 	
-	private boolean hasGenelist() {
-		return this.toxicologyTable.hasColumn("Gene");
-	}
-	
-	
 	private void startDiscovery(String contence, String extension) {
 		String[] data = toxicologyTable.getUniqueSelected();
 		
@@ -390,27 +450,34 @@ public class MainWindow implements ActionListener {
 			list += data[i] + "\n";
 		}
 		
-		String fileName = contence + "." + extension;
+		int time = (int) new Date().getTime();
+		
+		String fileName = contence + "_" + time + "." + extension;
 		File file = null;
+		
 		try {
 			file = FileManager.writeOutString(list, fileName);
+			garudaHandler.garudaDiscover(file, contence);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			
+			JOptionPane.showMessageDialog(
+			        null, e.getMessage(), "Failure", JOptionPane.ERROR_MESSAGE);
+			
 		}
 		
-		garudaHandler.garudaDiscover(file, contence);
+		
 	}
 	
 	boolean hasValidSelection() {
 		
 		if(toxicologyTable.isEmpty()) {
-			JOptionPane.showMessageDialog(frmToxicologyGadget, "The table is empty, there is nothing to export.");
+			JOptionPane.showMessageDialog(frmToxicologyGadget, "There is no data in the table.");
 			return false;
 		}
 		
 		if(!toxicologyTable.hasSelection()) {
-			JOptionPane.showMessageDialog(frmToxicologyGadget, "Please make a selection.");
+			JOptionPane.showMessageDialog(frmToxicologyGadget, "Select data from the table to use.");
 			return false;
 		}
 		
@@ -428,7 +495,6 @@ public class MainWindow implements ActionListener {
 			
 		}
 		public void actionPerformed(ActionEvent ae) {
-			
 			
 			if(!hasValidSelection()) 
 				return;
@@ -450,8 +516,6 @@ public class MainWindow implements ActionListener {
 		
 		public void actionPerformed(ActionEvent ae) {
 			
-			System.out.println(ae.getActionCommand());
-			
 			if(!hasValidSelection()) 
 				return;
 			
@@ -472,8 +536,7 @@ public class MainWindow implements ActionListener {
 			
 			String[] genelist = toxicologyTable.getUniqueSelected();
 			
-			if(genelist.length < 1) {
-				// TODO: dialog box
+			if(!hasValidSelection()) {
 				return;
 			}
 			
@@ -494,14 +557,37 @@ public class MainWindow implements ActionListener {
 		}
 	}
 	
-	
 	private class PercellomeImportAction extends AbstractAction {
 		public PercellomeImportAction() {
 			putValue(NAME, "Import Percellome");
 			putValue(SHORT_DESCRIPTION, "Some short description");
 		}
 		public void actionPerformed(ActionEvent e) {
+			JOptionPane.showMessageDialog(frmToxicologyGadget, "To be implemented.");
+		}
+	}
+	
+	private class FileClearTableAction extends AbstractAction {
+		
+		public FileClearTableAction() {
+			putValue(NAME, "Clear");
+			putValue(SHORT_DESCRIPTION, "Some short description");
+		}
+		
+		public void actionPerformed(ActionEvent e) {
+			
+			if(!toxicologyTable.isEmpty()) {
+				int result = JOptionPane.showConfirmDialog(null,
+						"Are you sure you would like to discard the current table?", "Clear Confirm", JOptionPane.YES_NO_OPTION);
+				
+				if(result != JOptionPane.YES_OPTION)
+					return;
+				
+			}
+			
+			toxicologyTable.clearTable();
 			
 		}
+		
 	}
 }

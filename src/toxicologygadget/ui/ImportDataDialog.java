@@ -62,9 +62,15 @@ public class ImportDataDialog extends JDialog implements ActionListener {
       gbc.gridy = 0;
       panel.add(columnSelectB, gbc);
       
-      int s = columnSelectA.getComponents().length;
-      
-    
+      // try to select columns with same identifier
+      for(int i = 0; i < columnA.length; i++) {
+          for(int j = i; j < columnB.length; j++) {
+        	  if(columnA[i].equals(columnB[j])) {
+        		  columnSelectA.setSelectedItem(columnA[i]);
+        		  columnSelectB.setSelectedItem(columnB[j]);
+        	  }
+          }    	  
+      }
       
       JLabel spacer = new JLabel(" ");
       gbc.gridx = 0;

@@ -54,7 +54,7 @@ public class GarudaHandler {
 		
 		garudaBackend.activateGadget();
 		
-		garudaBackend.getCompatibleGadgetList("txt", "genelist");
+		// garudaBackend.getCompatibleGadgetList("txt", "genelist");
 		
 		
 		//File file = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\EnsembleGenelist2.txt");
@@ -137,21 +137,29 @@ public class GarudaHandler {
 	}
 	
 	private void loadTable(Table incomingTable, String fromWhere) {
-		int inc_len = incomingTable.getIdentifiers().size();
-		String[] inc_id = incomingTable.getIdentifiers().toArray(new String[inc_len]);
 		
-		int tox_len = toxicologyTable.getIdentifiers().size();
-		String[] tox_id = toxicologyTable.getIdentifiers().toArray(new String[tox_len]);
-		
-		ImportDataDialog importSelection = new ImportDataDialog(parentFrame, fromWhere, tox_id, inc_id) ;
-		importSelection.setVisible(true);	
-		
-		String[] data = importSelection.getData();
-		if(data[0] != null) {
-			String keyTox = data[0];
-			String keyInc = data[1];
-			toxicologyTable.importTable(keyTox, keyInc, incomingTable);
+		if(toxicologyTable.isEmpty()) {
+			toxicologyTable.setTable(incomingTable);
+			
+		}else {
+			int inc_len = incomingTable.getIdentifiers().size();
+			String[] inc_id = incomingTable.getIdentifiers().toArray(new String[inc_len]);
+			
+			int tox_len = toxicologyTable.getIdentifiers().size();
+			String[] tox_id = toxicologyTable.getIdentifiers().toArray(new String[tox_len]);
+			
+			ImportDataDialog importSelection = new ImportDataDialog(parentFrame, fromWhere, tox_id, inc_id) ;
+			importSelection.setVisible(true);	
+			
+			String[] data = importSelection.getData();
+			if(data[0] != null) {
+				String keyTox = data[0];
+				String keyInc = data[1];
+				toxicologyTable.importTable(keyTox, keyInc, incomingTable);
+			}
 		}
+		
+		
 	}
 	
 	private void initGarudaListeners () {

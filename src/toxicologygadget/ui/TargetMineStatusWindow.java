@@ -26,21 +26,6 @@ public class TargetMineStatusWindow extends JFrame {
 	private JLabel lblComplete;
 	private JLabel lblGenes;
 	private JLabel lblNumResults;
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					TargetMineStatusWindow frame = new TargetMineStatusWindow();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
 
 	/**
 	 * Create the frame.

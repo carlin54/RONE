@@ -115,11 +115,17 @@ public class ToxicologyTable extends JTable {
         return false;               
     }
 	
-	private void clearTable() {
+	public void setTable(Table set) {
+		this.dataTable = set;
+		updateTable();
+	}
+	
+	public void clearTable() {
 		dataTable = new Table();
 		
 		DefaultTableModel model = (DefaultTableModel) this.getModel();
 		model.setRowCount(0);
+		model.setColumnCount(0);
 	}
 	
 	private boolean clearTableConfirmation() {
@@ -163,7 +169,7 @@ public class ToxicologyTable extends JTable {
 		return dataTable.hasColumn(col);
 	}
 	
-	public void loadGenelist(String[] genelist) {
+	/*public void loadGenelist(String[] genelist) {
 		
 		if(!clearTableConfirmation())
 			return;
@@ -180,40 +186,30 @@ public class ToxicologyTable extends JTable {
 		
 		updateTable();
 		
-	} 
+	}*/
 	
-	public void importColumn(Object[] data, String columnIdentifier) {
+	/*public void importColumn(Object[] data, String columnIdentifier) {
 		updateTable();
-	}
+	}*/
 	
-	public void importTable(Object[][] data, String[] columnIdentifier) {
+	/*public void importTable(Object[][] data, String[] columnIdentifier) {
 		
 		for(int i = 0; i < data.length; i++) {
 			importColumn(data[i], columnIdentifier[i]);
 		}
 			
-	}
+	}*/
 	
 	public void importTable(String keyA, String keyB, Table importTable) {
 		
 		
-		if(this.dataTable.columnCount() == 0) return;
-		
-		Table tableA = this.dataTable;
-		Table tableB = importTable;
-		
-		this.dataTable = Table.leftJoin(tableA, tableB, keyA, keyB);
-		updateTable();
-	}
-	
-	public void importTable(Table importTable) {
-		
-		if(dataTable.columnCount() == 0) {
-			dataTable = importTable;
+		if(this.dataTable.columnCount() == 0) { 
+			this.dataTable = importTable;
 		}else {
-			if(importTable.containsColumn("Gene")) {
-				dataTable = Table.leftJoin(dataTable, importTable, "Gene");
-			}
+			Table tableA = this.dataTable;
+			Table tableB = importTable;
+			
+			this.dataTable = Table.leftJoin(tableA, tableB, keyA, keyB);
 		}
 		
 		
