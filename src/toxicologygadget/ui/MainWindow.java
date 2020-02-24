@@ -11,10 +11,15 @@ import java.awt.Insets;
 import java.awt.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Set;
@@ -31,9 +36,11 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import jdk.nashorn.internal.parser.JSONParser;
 import jp.sbi.garuda.backend.net.exception.GarudaConnectionNotInitializedException;
 import jp.sbi.garuda.backend.net.exception.NetworkConnectionException;
 import jp.sbi.garuda.backend.ui.GarudaGlassPanel;
@@ -43,6 +50,7 @@ import toxicologygadget.filemanager.FileManager;
 import toxicologygadget.filemanager.JsonReader;
 import toxicologygadget.query.PercellomeQueryThread;
 import toxicologygadget.query.QueryThreadCallback;
+import toxicologygadget.query.ReactomeQueryThread;
 import toxicologygadget.query.TargetMineQueryThread;
 
 import javax.swing.AbstractAction;
@@ -74,8 +82,9 @@ public class MainWindow implements ActionListener {
 	private GarudaHandler garudaHandler;
 	private final Action fileImportAction = new FileImportAction();
 	private final Action fileClearTableAction = new FileClearTableAction();
-	private final Action percellomeImportAction =  new PercellomeImportAction();
+	private final Action reactomeImportAction =  new ReactomeImportAction();
 	private final Action targetMineImportAction = new TargetMineImportAction();
+	
 	
 	private final GarudaDiscoverActionGenelist garudaDiscoverActionGenelist = new GarudaDiscoverActionGenelist();
 	private final GarudaDiscoverActionEnsemble garudaDiscoverActionEnsemble = new GarudaDiscoverActionEnsemble();
@@ -85,8 +94,8 @@ public class MainWindow implements ActionListener {
 	private ToxicologyTable toxicologyTable;
 	private TargetMineQueryThread targetMineQueryThread;
 	private MainWindowTargetMineCallback targetMineCallback;
-	private PercellomeQueryThread percellomeQueryThread;
-	private MainWindowPercellomeCallback percellomeCallback;
+	private ReactomeQueryThread reactomeQueryThread;
+	private MainWindowReactomeCallback reactomeCallback;
 	
 	private class MainWindowTargetMineCallback implements QueryThreadCallback {
 		
@@ -149,21 +158,71 @@ public class MainWindow implements ActionListener {
 			int tox_len = toxicologyTable.getIdentifiers().size();
 			String[] tox_id = toxicologyTable.getIdentifiers().toArray(new String[tox_len]);
 			
-			ImportDataDialog importSelection = new ImportDataDialog(frmToxicologyGadget, tox_id, res_id) ;
+			ImportDataDialog importSelection = new ImportDataDialog(frmToxicologyGadget, "Percellome", tox_id, res_id) ;
 			importSelection.setVisible(true);	
 			
 			String[] data = importSelection.getData();
 			
 			if(data[0] != null) {
 				String keyTox = data[0];
-				String keyRes = data[0];
+				String keyRes = data[1];
 				toxicologyTable.importTable(keyTox, keyRes, results);
 			}
 			
 			
 		}
+
+		@Override
+		public void statusUpdate(int complete, int total, int totalFound) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void startSearch(int total) {
+			// TODO Auto-generated method stub
+			
+		}
 		
 		
+		
+	}
+	
+	private class MainWindowReactomeCallback implements QueryThreadCallback {
+		
+		@Override
+		public void completeSearch(Table results, int status) {
+			if(status == QueryThreadCallback.statusCodeFinishSuccess) {
+				
+				int res_len = results.getIdentifiers().size();
+				String[] res_id = results.getIdentifiers().toArray(new String[res_len]);
+				
+				int tox_len = toxicologyTable.getIdentifiers().size();
+				String[] tox_id = toxicologyTable.getIdentifiers().toArray(new String[tox_len]);
+				String fromWhere = "TargetMine";
+				ImportDataDialog importSelection = new ImportDataDialog(frmToxicologyGadget, fromWhere, tox_id, res_id) ;
+				importSelection.setVisible(true);	
+				
+				String[] data = importSelection.getData();
+				
+				if(data[0] != null) {
+					String keyTox = data[0];
+					String keyRes = data[1];
+					toxicologyTable.importTable(keyTox, keyRes, results);
+				}
+			
+			}
+		}
+
+		@Override
+		public void statusUpdate(int complete, int total, int totalFound) {
+			System.out.println("Complete: " + complete + "\t Total: " + "\t Found: " + totalFound);
+		}
+
+		@Override
+		public void startSearch(int total) {
+			
+		}
 		
 	}
 	
@@ -219,7 +278,7 @@ public class MainWindow implements ActionListener {
 		menuBar.add(mnOtherTools);
 		
 		JMenuItem mntmPercellomeMenuItem = new JMenuItem("Import Percellome");
-		mntmPercellomeMenuItem.setAction(percellomeImportAction);
+		mntmPercellomeMenuItem.setAction(reactomeImportAction);
 		mnOtherTools.add(mntmPercellomeMenuItem);
 		
 		JMenuItem mntmTargetMineMenuItem = new JMenuItem("Import TargetMine");
@@ -229,8 +288,8 @@ public class MainWindow implements ActionListener {
 		this.targetMineCallback = new MainWindowTargetMineCallback();
 		this.targetMineQueryThread = new TargetMineQueryThread(targetMineCallback);
 		
-		this.percellomeCallback = new MainWindowPercellomeCallback();
-		this.percellomeQueryThread = new PercellomeQueryThread(percellomeCallback);
+		this.reactomeCallback = new MainWindowReactomeCallback();
+		this.reactomeQueryThread = new ReactomeQueryThread(reactomeCallback);
 		
 	}
 		
@@ -258,7 +317,6 @@ public class MainWindow implements ActionListener {
 	 */
 	public MainWindow() {
 		initialize();
-		
 		try {
 			
 				frmToxicologyGadget.getContentPane().setLayout(new BoxLayout(frmToxicologyGadget.getContentPane(), BoxLayout.X_AXIS));
@@ -308,8 +366,9 @@ public class MainWindow implements ActionListener {
 		// percellomeQueryThread.start();
 		
 		*/
+		
 	}
-
+		
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
@@ -350,12 +409,9 @@ public class MainWindow implements ActionListener {
 	
 	private void loadList(File file, String header) {
 		Table listTable = null;
-		
 		try {
-			listTable = FileManager.loadListFile(file, "Ensemble");
-			// TODO: Error
-			loadTable(listTable, "Import File");
-			
+			listTable = FileManager.loadListFile(file, header);
+			toxicologyTable.setTable(listTable);
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(null, e.getMessage(), "Failure", JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
@@ -366,11 +422,12 @@ public class MainWindow implements ActionListener {
 		Table scenario;
 		try {
 			scenario = FileManager.loadAGCTScenario(file);
+			loadTable(scenario, "Import AGCT Scenario");
 		} catch (IOException e) {
-			// TODO: Add exceptions
+			JOptionPane.showMessageDialog(null, e.getMessage(), "Failure", JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
 		}
-		loadTable(scenario, "Import File");
+		
 	}
 	
 	private void loadCSV(File file) {
@@ -385,26 +442,27 @@ public class MainWindow implements ActionListener {
 		
 		if(!file.exists()) return;
 		
+		System.out.println(contents);
+		
 		switch (contents) {
-		case "Genelist":
-			loadList(file, "Gene");
-			break;
-			
-		case "Ensemble":
-			loadList(file, "Ensemble");
-			break;
-			
-		case "AGCT Scenario":
-			loadAGCTScenario(file);
-			break;
-			
-		case "CSV": 
-			loadCSV(file);
-			break;
-			
-		case "Tab":
-			loadTab(file);
-			break;
+			case "Genelist":
+				loadList(file, "Gene");
+				break;
+				
+			case "Ensemble":
+				loadList(file, "Ensemble");
+				break;
+				
+			case "AGCT Scenario":
+				loadAGCTScenario(file);
+				break;
+				
+			case "CSV": 
+				loadCSV(file);
+				break;
+				
+			case "Tab":
+				break;
 		}
 		
 	}
@@ -426,7 +484,7 @@ public class MainWindow implements ActionListener {
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				File file = fc.getSelectedFile();
 				
-				Object[] possibilities = {"AGCT Scenario", "Genelist", "Ensemble"};
+				Object[] possibilities = {"AGCT Scenario", "Genelist", "Ensemble", "CSV", "Tab Delimited Text"};
 				String content = (String)JOptionPane.showInputDialog(
 				                    frmToxicologyGadget,
 				                    "Complete the sentence:\n",
@@ -557,13 +615,33 @@ public class MainWindow implements ActionListener {
 		}
 	}
 	
-	private class PercellomeImportAction extends AbstractAction {
-		public PercellomeImportAction() {
-			putValue(NAME, "Import Percellome");
+	private class ReactomeImportAction extends AbstractAction {
+		public ReactomeImportAction() {
+			putValue(NAME, "Import Reactome");
 			putValue(SHORT_DESCRIPTION, "Some short description");
 		}
 		public void actionPerformed(ActionEvent e) {
-			JOptionPane.showMessageDialog(frmToxicologyGadget, "To be implemented.");
+			
+			String[] genelist = toxicologyTable.getUniqueSelected();
+			
+			if(!hasValidSelection()) {
+				return;
+			}
+			
+			if(reactomeQueryThread.isRunning())
+				reactomeQueryThread.stopRunning();
+			
+			try {
+				//TODO: add thread stop dialog
+				reactomeQueryThread.join();
+			} catch (InterruptedException ie) {
+				ie.printStackTrace();
+			}
+			
+			reactomeQueryThread = new ReactomeQueryThread(reactomeCallback);
+			reactomeQueryThread.setGenelist(genelist);
+			reactomeQueryThread.start();
+			
 		}
 	}
 	

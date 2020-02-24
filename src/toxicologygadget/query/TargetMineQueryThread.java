@@ -48,9 +48,7 @@ public class TargetMineQueryThread extends Thread
     
     public void setGenelist(String[] geneList){
     		this.genelist = geneList;
-     }
-    
-    
+    }
     
     public TargetMineQueryThread(QueryThreadCallback callback){
     	this.callback = callback;

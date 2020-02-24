@@ -146,6 +146,7 @@ public class ToxicologyTable extends JTable {
 		
 		DefaultTableModel model = new DefaultTableModel();
 		
+		
 		ArrayList<String> identifiers = dataTable.getIdentifiers();
 				
 		for(int i = 0; i < identifiers.size(); i++) {

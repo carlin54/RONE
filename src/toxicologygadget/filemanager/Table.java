@@ -32,6 +32,11 @@ public class Table {
 		mIdentifiers = columnIdentifiers;
 	}
 	
+	public Table(ArrayList<String> identifiers) {
+		mIdentifiers = identifiers;
+		mTable = new ArrayList<ArrayList<Object>>();
+	}
+	
 	public Table(String[][] table){
 		
 		mIdentifiers = new ArrayList<String> ();
@@ -154,11 +159,14 @@ public class Table {
 			
 			boolean match = false;
 			
-			for(int j = i; j < b.mTable.size(); j++){
+			for(int j = 0; j < b.mTable.size(); j++){
 				Object aKey = a.mTable.get(i).get(keyIndexA);
 				Object bKey = b.mTable.get(j).get(keyIndexB);
 				
+				System.out.println(aKey.toString() + " == " + bKey.toString());
+				
 				if (aKey.equals(bKey)){
+					System.out.print("Equal!");
 					ArrayList<Object> leftRow = a.mTable.get(i);
 					ArrayList<Object> rightRow = b.mTable.get(j);
 					ArrayList<Object> row = joinRows(aColumnSelect, bColumnSelect, leftRow, rightRow);
@@ -180,6 +188,15 @@ public class Table {
 		}
 		
 		return new Table(newTable, newColumnIdentifiers);
+	}
+	
+	public boolean addRow(ArrayList<Object> row) {
+		if(row.size() != columnCount()) {
+			return false; 
+		}else {
+			this.mTable.add(row);
+			return true;
+		}
 	}
 	
 	public static Table leftJoin(Table a, Table b, String keyCol) {
@@ -258,12 +275,6 @@ public class Table {
 		
 		return new Table(newTable, newColumnIdentifiers);
 		
-	}
-
-
-	public void addRow(ArrayList<Object> row) {
-		//TODO: add exception handling
-		mTable.add(row);
 	}
 	
 	public int rowCount() {
