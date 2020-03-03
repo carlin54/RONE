@@ -38,23 +38,30 @@ public class ReactomeQueryThread extends Thread {
 		return mProcessRunning;
 	};
 	
-	public String[] getCommand(String gene) {
-		String url= "\"https://reactome.org/AnalysisService/identifier/" + gene + "?interactors=false&pageSize=20&page=1&sortBy=ENTITIES_PVALUE&order=ASC&resource=TOTAL&pValue=1&includeDisease=true\"";
+	public String[] getCommand(String gene, int resultsPerPage, int pageNumber) {
+		String url= "\"https://reactome.org/AnalysisService/identifier/" 
+					+ gene 
+					+ "?interactors=false&pageSize=" 
+					+ resultsPerPage 
+					+ "&page=" 
+					+ pageNumber 
+					+ "&sortBy=ENTITIES_PVALUE&order=ASC&resource=TOTAL&pValue=1&includeDisease=true\"";
+		
 		return new String[] {"curl", "-X", "GET", url, "-H", "\"accept: application/json\""}; 
 	}
 	
-	public String query(String gene) {
+	public ArrayList<ArrayList<Object>> query(String gene) {
 		
 		String jsonQuery = null;
+		ArrayList<ArrayList<Object>> pathways = new ArrayList<ArrayList<Object>>();
 		try
 		{
-			int i = 1;
-			int stepSize = 100; 
-			int pathWaysFound = 0;
-			boolean fetchResults = true;
-			while(fetchResults) {
-				
-				String[] command = getCommand(gene);
+			int resultsPerPage = 1000; 
+			int pathwaysSearched = 0;
+			int numberOfPathways = 0;
+			int pageNumber = 1;
+			do {
+				String[] command = getCommand(gene, resultsPerPage, pageNumber);
 				ProcessBuilder process = new ProcessBuilder(command); 
 				Process p;
 				
@@ -69,11 +76,15 @@ public class ReactomeQueryThread extends Thread {
 				jsonQuery = builder.toString();
 				System.out.print(jsonQuery);
 				
-				int count = getPathwaysFound(jsonQuery);
-				String[] pathways = getPathways(jsonQuery);
+				numberOfPathways = getNumberOfPathways(jsonQuery);
+				ArrayList<ArrayList<Object>> searchResults = parseQuery(jsonQuery);
+				for(ArrayList<Object> o : searchResults) 
+					o.add(0, gene);
+				pathways.addAll(searchResults);
 				
-				i++;
-			}
+				pathwaysSearched = pathwaysSearched + resultsPerPage;
+				pageNumber++;
+			} while(pathwaysSearched < numberOfPathways);
 			
 		} catch (IOException e) {
 			// System.out.println(e.getMessage());
@@ -81,10 +92,10 @@ public class ReactomeQueryThread extends Thread {
 			return null; // <-- 
 		}
 		
-		return jsonQuery;
+		return pathways;
 	}
 	
-	private ArrayList<ArrayList<Object>> getPathways(String jsonQuery) {
+	private ArrayList<ArrayList<Object>> parseQuery(String jsonQuery) {
 		JSONObject jo;
 		JSONArray pathways;
 		
@@ -114,8 +125,6 @@ public class ReactomeQueryThread extends Thread {
 
 			
 			ArrayList<Object> row = new ArrayList<Object>();
-			
-			
 			try {
 				// "(R) Pathway" - "name":"Citric acid cycle (TCA cycle)"
 				row.add(pathway.getString("name"));
@@ -134,7 +143,9 @@ public class ReactomeQueryThread extends Thread {
 				
 				// "(R) FDR" - "fdr":0.10114749050397542
 				row.add(entities.getString("fdr"));
-			
+				
+				System.out.println(pathway.getString("name")  + " : " + species.getString("name") + " : " + pathway.getString("stId") + " : " + entities.getString("ratio"));
+				
 			} catch (JSONException e) {
 				e.printStackTrace();
 				continue;
@@ -148,7 +159,7 @@ public class ReactomeQueryThread extends Thread {
 		
 	}
 	
-	private int getPathwaysFound(String jsonQuery) {
+	private int getNumberOfPathways(String jsonQuery) {
 		try {
 			JSONObject jo = new JSONObject(jsonQuery);
 			return jo.getInt("pathwaysFound");
@@ -171,7 +182,8 @@ public class ReactomeQueryThread extends Thread {
 		return arrayEntries;
 	}
 	
-	private String[] parseQuery(String jsonQuery) {
+	
+	/*private String[] parseQuery(String jsonQuery) {
 				
 		JSONObject jsonResults;
 		String arrayEntries[] = null;
@@ -201,7 +213,7 @@ public class ReactomeQueryThread extends Thread {
 		arrayEntries = fixParsedQuery(arrayEntries);
 		
 		return arrayEntries;
-	}
+	}*/
 	
 	private ArrayList<Object> extractEntryData(String entry){
 
@@ -233,8 +245,8 @@ public class ReactomeQueryThread extends Thread {
 		return row;
 	}
 	
-	public boolean unsuccessful(Object ptr) {
-		return ptr == null;
+	public boolean unsuccessful(ArrayList<ArrayList<Object>> ptr) {
+		return ptr == null || ptr.size() == 0;
 	}
 	
 	private boolean stopProcess() {
@@ -285,22 +297,12 @@ public class ReactomeQueryThread extends Thread {
 			}
 			
 			String gene = mGenelist[i];
-			String jsonQuery = query(gene);
-			if(unsuccessful(jsonQuery)) continue;
+			ArrayList<ArrayList<Object>> queryResults = query(gene);
+			if(unsuccessful(queryResults)) continue;
 			
-			String entries[] = parseQuery(jsonQuery);
-			if(unsuccessful(entries)) continue;
-			
-			
-			for(int j = 0; j < entries.length; j++) {
-				ArrayList<Object> row = extractEntryData(entries[j]);
-				if(unsuccessful(row)) continue;
-				
-				row.add(0, gene);
-				row = cleanRow(row);
+			for(ArrayList<Object> row : queryResults) 
 				reactomeTable.addRow(row);
-				foundCounter = foundCounter + 1;
-			}
+			
 			
 		}
 		mCallback.statusUpdate(numGene, numGene, foundCounter);
