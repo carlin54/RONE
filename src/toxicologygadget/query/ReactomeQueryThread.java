@@ -5,9 +5,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import javax.swing.JFrame;
-
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -38,7 +39,7 @@ public class ReactomeQueryThread extends Thread {
 	};
 	
 	public String[] getCommand(String gene) {
-		String url="https://reactome.org/ContentService/search/query?query=" + gene + "&types=Pathway&cluster=true";
+		String url= "\"https://reactome.org/AnalysisService/identifier/" + gene + "?interactors=false&pageSize=20&page=1&sortBy=ENTITIES_PVALUE&order=ASC&resource=TOTAL&pValue=1&includeDisease=true\"";
 		return new String[] {"curl", "-X", "GET", url, "-H", "\"accept: application/json\""}; 
 	}
 	
@@ -47,21 +48,33 @@ public class ReactomeQueryThread extends Thread {
 		String jsonQuery = null;
 		try
 		{
-			String[] command = getCommand(gene);
-			ProcessBuilder process = new ProcessBuilder(command); 
-			Process p;
-			
-			p = process.start();
-			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-			StringBuilder builder = new StringBuilder();
-			String line = null;
-			while ( (line = reader.readLine()) != null) {
-				builder.append(line);
-				builder.append(System.getProperty("line.separator"));
+			int i = 1;
+			int stepSize = 100; 
+			int pathWaysFound = 0;
+			boolean fetchResults = true;
+			while(fetchResults) {
+				
+				String[] command = getCommand(gene);
+				ProcessBuilder process = new ProcessBuilder(command); 
+				Process p;
+				
+				p = process.start();
+				BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+				StringBuilder builder = new StringBuilder();
+				String line = null;
+				while ( (line = reader.readLine()) != null) {
+					builder.append(line);
+					builder.append(System.getProperty("line.separator"));
+				}
+				jsonQuery = builder.toString();
+				System.out.print(jsonQuery);
+				
+				int count = getPathwaysFound(jsonQuery);
+				String[] pathways = getPathways(jsonQuery);
+				
+				i++;
 			}
-			jsonQuery = builder.toString();
-			System.out.print(jsonQuery);
-		
+			
 		} catch (IOException e) {
 			// System.out.println(e.getMessage());
 			// e.printStackTrace();
@@ -69,6 +82,81 @@ public class ReactomeQueryThread extends Thread {
 		}
 		
 		return jsonQuery;
+	}
+	
+	private ArrayList<ArrayList<Object>> getPathways(String jsonQuery) {
+		JSONObject jo;
+		JSONArray pathways;
+		
+		try {
+			jo = new JSONObject(jsonQuery);		
+			pathways= jo.getJSONArray("pathways");
+		} catch (JSONException e) {
+			e.printStackTrace();
+			return null;
+		}
+		
+		ArrayList<ArrayList<Object>> rows = new ArrayList<ArrayList<Object>>();
+		
+		for(int i = 0; i < pathways.length(); i++) {
+			
+			JSONObject pathway;
+			JSONObject species;
+			JSONObject entities;
+			try {
+				pathway = pathways.getJSONObject(i);
+				species = pathway.getJSONObject("species");
+				entities = pathway.getJSONObject("entities");
+			} catch (JSONException e) {
+				e.printStackTrace();
+				continue;
+			}
+
+			
+			ArrayList<Object> row = new ArrayList<Object>();
+			
+			
+			try {
+				// "(R) Pathway" - "name":"Citric acid cycle (TCA cycle)"
+				row.add(pathway.getString("name"));
+				
+				// "(R) Species" - "name":"Homo sapiens"
+				row.add(species.getString("name"));
+							
+				// "(R) stId" - "stId":"R-HSA-71403"
+				row.add(pathway.getString("stId"));
+				
+				// "(R) Coverage" - "ratio":0.0013613068545803972
+				row.add(entities.getString("ratio"));
+				
+				// "(R) P-Value"- "pValue":0.030749978135627742
+				row.add(entities.getString("pValue"));
+				
+				// "(R) FDR" - "fdr":0.10114749050397542
+				row.add(entities.getString("fdr"));
+			
+			} catch (JSONException e) {
+				e.printStackTrace();
+				continue;
+			}
+			
+			rows.add(row);	
+		}
+		
+		return rows;
+		
+		
+	}
+	
+	private int getPathwaysFound(String jsonQuery) {
+		try {
+			JSONObject jo = new JSONObject(jsonQuery);
+			return jo.getInt("pathwaysFound");
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return -1;
+		}
 	}
 	
 	private String[] fixParsedQuery(String[] arrayEntries) {
@@ -180,13 +268,16 @@ public class ReactomeQueryThread extends Thread {
 		
 		mProcessRunning = true;
 		mStopProcess = false;
+		int numGene = mGenelist.length;
+		mCallback.startSearch(numGene);
 		ArrayList<String> identifiers = 
 				new ArrayList<String>(
-						Arrays.asList("Gene", "Name", "Species", "stId")); // what else do you want
+						Arrays.asList("Gene", "(R) Pathway", "(R) Species", "(R) stId", "(R) Coverage", "(R) P-Value", "(R) FDR")); // what else do you want
 		Table reactomeTable = new Table(identifiers);
 		int foundCounter = 0;
-		int numGene = mGenelist.length;
+		
 		for(int i = 0; i < numGene; i++) {
+			
 			mCallback.statusUpdate(i, numGene, foundCounter);
 			if(stopProcess()) {
 				mCallback.completeSearch(reactomeTable, QueryThreadCallback.statusCodeFinishUnsuccess);
@@ -212,7 +303,7 @@ public class ReactomeQueryThread extends Thread {
 			}
 			
 		}
-		
+		mCallback.statusUpdate(numGene, numGene, foundCounter);
 		mCallback.completeSearch(reactomeTable, QueryThreadCallback.statusCodeFinishSuccess);
 		mProcessRunning = false;
 		

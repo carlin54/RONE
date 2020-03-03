@@ -1,60 +1,38 @@
 package toxicologygadget.query;
 
-
-import java.io.IOException;
-import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-
-import javax.swing.JFrame;
 
 import org.intermine.webservice.client.core.ServiceFactory;
 import org.intermine.webservice.client.services.QueryService;
 
 import toxicologygadget.filemanager.Table;
 
-import org.intermine.metadata.ConstraintOp;
 import org.intermine.metadata.Model;
 import org.intermine.pathquery.Constraints;
 import org.intermine.pathquery.OrderDirection;
-import org.intermine.pathquery.PathConstraint;
 import org.intermine.pathquery.PathQuery;
-
-
 
 public class TargetMineQueryThread extends Thread
 {
     private static final String ROOT = "https://targetmine.mizuguchilab.org/targetmine/service";
-    private String[] genelist;
-    private QueryThreadCallback callback;
-    private JFrame parent;
-    private boolean processRunning;
-    private boolean stopProcess;
-    private int stepSize;
-  
-    
-    private static String formatGenelistForTargetMine(String[] genelist){
-    	String genestring = new String("");
-    	for(int i = 0; i < genelist.length-2; i++) {
-    		genestring += genestring + genelist[i] + ", ";
-    	}
-    	genestring = genestring + genelist[genelist.length-1];
-		return genestring;
-    	
-    }
+    private String[] mGenelist;
+    private QueryThreadCallback mCallback;
+    private boolean mProcessRunning;
+    private boolean mStopProcess;
+    private int mStepSize;
     
     public void setGenelist(String[] geneList){
-    		this.genelist = geneList;
+    	this.mGenelist = geneList;
     }
     
     public TargetMineQueryThread(QueryThreadCallback callback){
-    	this.callback = callback;
-    	this.processRunning = false;
-    	this.stopProcess = false;
-    	this.stepSize = 5;
+    	this.mCallback = callback;
+    	this.mProcessRunning = false;
+    	this.mStopProcess = false;
+    	this.mStepSize = 5;
     }
     
     public ArrayList<ArrayList<Object>> query(String genes) {
@@ -100,58 +78,69 @@ public class TargetMineQueryThread extends Thread
     
     private String makeSearch(int i, int j) {
     	String search = new String("");
-    	while(i < j && i < genelist.length) {
-    		search = search + genelist[i] + ", ";
+    	while(i < j && i < mGenelist.length) {
+    		search = search + mGenelist[i] + ", ";
     		i++;
     	}
     	return search;
     }
     
     public boolean isRunning() {
-		return processRunning;
+		return mProcessRunning;
     }
     
     public void stopRunning() {
-    	stopProcess = true;
+    	mStopProcess = true;
     }
     
     public void setStepSize(int stepSize) {
-    	this.stepSize = stepSize;
+    	this.mStepSize = stepSize;
     }
     
     private int numGenesToSearch(int i) {
-    	return ((i+stepSize > genelist.length) ? genelist.length : i+stepSize);
+    	return ((i+mStepSize > mGenelist.length) ? mGenelist.length : i+mStepSize);
     }
     
     public void run(){ 
     	System.out.println("TargetMineQueryThread.run()");
-    	processRunning = true;
-    	stopProcess = false;
+    	mProcessRunning = true;
+    	mStopProcess = false;
     	String[] columnIdentifiers = 
-    		{"Gene", "Secondary Identifier (TM)", "Organism Name (TM)", 
-    		 "GO Identifier (TM)", "GO Name (TM)", "GO Code (TM)", "GO Namespace (TM)"};
+    		{"(TM) Gene", "(TM) Secondary Identifier", "(TM) Organism Name", 
+    		 "(TM) GO Identifier", "(TM) GO Name", "(TM) GO Code", "(TM) GO Namespace"};
     	ArrayList<String> columnList = new ArrayList<String>();
     	Collections.addAll(columnList, columnIdentifiers);
     	
-    	ArrayList<ArrayList<Object>> table = new ArrayList<ArrayList<Object>>();
+    	Table targetMineTable = new Table(columnList);
+    	
     	int totalFound = 0;
     	ArrayList<ArrayList<Object>> stepResults = null;
-    	callback.startSearch(genelist.length);
-    	for(int i = 0; i < genelist.length; i = i + stepSize) {
-    		if(stopProcess) break;
-    		String search = makeSearch(i, i+stepSize);
+    	mCallback.startSearch(mGenelist.length);
+    	
+    	for(int i = 0; i < mGenelist.length; i = i + mStepSize) {
+    		if(mStopProcess) 
+    			break;
+    		
+    		String search = makeSearch(i, i+mStepSize);
+    		
     		stepResults = query(search);
-    		table.addAll(stepResults);
+    		
+    		Iterator<ArrayList<Object>> it = stepResults.iterator();
+    		while(it.hasNext()) {
+    			if(!targetMineTable.addRow(it.next())) {
+    				System.out.println("ERROR");
+    			}
+    		}
+    		
     		totalFound = totalFound + stepResults.size();
     		int genesSearched = numGenesToSearch(i) ;
-    		callback.statusUpdate(genesSearched, genelist.length, totalFound);
+    		mCallback.statusUpdate(genesSearched, mGenelist.length, totalFound);
     	}
     	
-    	if(stopProcess) {
-    		callback.completeSearch(null, QueryThreadCallback.statusCodeFinishStopped);
+    	if(mStopProcess) {
+    		mCallback.completeSearch(targetMineTable, QueryThreadCallback.statusCodeFinishStopped);
     	} else {
-    		Table targetMineTable = new Table(table, columnList);
-    		callback.completeSearch(targetMineTable, QueryThreadCallback.statusCodeFinishSuccess);
+    		mCallback.completeSearch(targetMineTable, QueryThreadCallback.statusCodeFinishSuccess);
     	}
     	
       

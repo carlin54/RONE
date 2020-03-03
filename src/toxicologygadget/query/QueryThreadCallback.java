@@ -1,7 +1,5 @@
 package toxicologygadget.query;
 
-import java.util.ArrayList;
-
 import toxicologygadget.filemanager.Table;
 
 public interface QueryThreadCallback {
