@@ -23,7 +23,7 @@ public class FileManager {
 		return identifiers.toArray(new String[len]);
 	}
 	
-	public static Table loadCSV(File file) throws IOException{
+	public static Table loadDataFile(File file, String seperator) throws IOException {
 		
 		if (!file.exists()) return null;
 		
@@ -37,10 +37,10 @@ public class FileManager {
 		String line; 
 	
 		line = bufferReader.readLine();
-		String[] parsedLine = line.split(",");
+		String[] parsedLine = line.split(seperator);
 		identifiers.addAll(Arrays.asList(parsedLine));
 		while((line = bufferReader.readLine()) != null) {
-			parsedLine = line.split(",");
+			parsedLine = line.split(seperator);
 			ArrayList<Object> row = new ArrayList<Object>();
 			row.addAll(Arrays.asList(parsedLine));
 			data.add(row);

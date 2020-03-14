@@ -1,10 +1,14 @@
 package toxicologygadget.filemanager;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
+
+import javax.swing.table.TableModel;
+
+import java.util.HashMap;
 
 public class Table {
 	
@@ -111,27 +115,30 @@ public class Table {
 		return mIdentifiers;
 	}
 	
-	public static Table leftJoin(Table a, Table b, String keyA, String keyB) {
+	
+	public ArrayList<Object> getRow(int i){
+		return this.mTable.get(i);
+	}
+	
+	public ArrayList<Object> getSelected(ArrayList<Integer> sel, ArrayList<Object> row){
+		ArrayList<Object> ret = new ArrayList<Object>();
+		for(Integer i : sel) {
+			ret.add(row.get(i));
+		}
+		return ret;
+	}
+	
+	// back burner
+	public static Table join(Table a, Table b, String keyA, String keyB) {
 		
-		// TODO: Make exceptions
 		if(!a.hasColumn(keyA) || !b.hasColumn(keyB)) 
 			return null; 
 		
-		int keyIndexA = a.columnIndex(keyA);
-		int keyIndexB = b.columnIndex(keyB);
+		int aKeyIndex = a.columnIndex(keyA);
+		int bKeyIndex = b.columnIndex(keyB);
 		
-		// the old way
-		ArrayList<Integer> aColumnSelect = rangeIndicies(0, a.getIdentifiers().size());
-		ArrayList<Integer> bColumnSelect = rangeIndicies(0, b.getIdentifiers().size());
-		bColumnSelect.remove(b.columnIndex(keyB));
-		
-		Set<String> abID = new HashSet<String>();
-		abID.addAll(a.getIdentifiers());
-		abID.addAll(b.getIdentifiers());
-		
-		// the new way
-		aColumnSelect = new ArrayList<Integer>();
-		bColumnSelect = new ArrayList<Integer>();
+		ArrayList<Integer> aColumnSelect = new ArrayList<Integer>();
+		ArrayList<Integer> bColumnSelect = new ArrayList<Integer>();
 		ArrayList<String> aid = a.getIdentifiers();
 		ArrayList<String> bid = b.getIdentifiers();
 		
@@ -142,52 +149,117 @@ public class Table {
 			}
 		}
 		bColumnSelect = rangeIndicies(0, b.getIdentifiers().size());
-		bColumnSelect.remove(keyIndexB);
-		aColumnSelect.add(keyIndexA);
+		bColumnSelect.remove(bKeyIndex);
+		aColumnSelect.add(aKeyIndex);
+		LinkedList<ArrayList<Object>> s; 
 		
-		ArrayList<String> newColumnIdentifiers = joinIdentifiers(aColumnSelect, bColumnSelect, a.getIdentifiers(), b.getIdentifiers());
-		ArrayList<Object> emptyArray = new ArrayList<Object>();
+		// compress table a into HashMap
+		HashMap<Object, LinkedList<ArrayList<Object>>[]> aHashMap = new HashMap<Object, LinkedList<ArrayList<Object>>[]>();
+		final int iA = 0;
+		final int iB = 0;
+		for(int i = 0; i < a.rowCount(); i++) {
+			ArrayList<Object> row = a.getRow(i);
+			Object key = row.get(aKeyIndex);
+			
+			if(aHashMap.containsKey(key)) {
+				LinkedList<ArrayList<Object>> stack = aHashMap.get(key)[0];
+				stack.add(row);
+			}else {
+				LinkedList<ArrayList<Object>>[] newStack = new LinkedList[2];
+				newStack[iA] = new LinkedList<ArrayList<Object>>();
+				newStack[iB] = null;
+				newStack[iA].add(row);
+				aHashMap.put(key, newStack);
+			}
+			
+		}
+		
+		// put table b into table a HashMap
+		for(int i = 0; i < b.rowCount(); i++) {
+			ArrayList<Object> row = b.getRow(i);
+			Object key = row.get(aKeyIndex);
+			
+			if(aHashMap.containsKey(key)) {
+				LinkedList<ArrayList<Object>>[] stack = aHashMap.get(key);
+				if(stack[iB] == null) {
+					stack[iB] = new LinkedList<ArrayList<Object>>();
+				}
+				stack[iB].add(row);
+			}
+			
+		}
+		
+		// join tables
+		
+		
+		
+		return null;
+	}
+	
+	public static Table leftJoin(Table a, Table b, String keyA, String keyB) {
+		
+		// TODO: Make exceptions
+		if(!a.hasColumn(keyA) || !b.hasColumn(keyB)) 
+			return null; 
+		
+		int keyIndexA = a.columnIndex(keyA);
+		int keyIndexB = b.columnIndex(keyB);
+		
+		// the new way
+		ArrayList<Integer> aColumnSelect = new ArrayList<Integer>();
+		ArrayList<Integer> bColumnSelect = new ArrayList<Integer>();
+		ArrayList<String> aid = a.getIdentifiers();
+		ArrayList<String> bid = b.getIdentifiers();
+		
+		for(Integer i = 0; i < aid.size(); i++) {
+			String o = aid.get(i);
+			if(i != keyIndexA && !bid.contains(o)) {
+				aColumnSelect.add(i);
+			}
+		}
+		bColumnSelect = rangeIndicies(0, b.getIdentifiers().size());
+		bColumnSelect.remove(keyIndexB);
+		aColumnSelect.add(0, keyIndexA);
+		
+		ArrayList<String> newColumnIdentifiers = joinIdentifiers(aColumnSelect, bColumnSelect, aid, bid);
+		
+		Table joinedTable = new Table(newColumnIdentifiers);
+		
+		ArrayList<Object> emptyArray = new ArrayList<Object>(); 
 		
 		for(int i = 0; i < bColumnSelect.size(); i++) {
 			emptyArray.add(null);
 		}
 		
-		
-		ArrayList<ArrayList<Object>> newTable = new ArrayList<ArrayList<Object>>();
-		
 		for(int i = 0; i < a.mTable.size(); i++){
 			
 			boolean match = false;
-			
 			for(int j = 0; j < b.mTable.size(); j++){
+				
 				Object aKey = a.mTable.get(i).get(keyIndexA);
 				Object bKey = b.mTable.get(j).get(keyIndexB);
 				
-				System.out.println(aKey.toString() + " == " + bKey.toString());
-				
 				if (aKey.equals(bKey)){
-					System.out.print("Equal!");
 					ArrayList<Object> leftRow = a.mTable.get(i);
 					ArrayList<Object> rightRow = b.mTable.get(j);
 					ArrayList<Object> row = joinRows(aColumnSelect, bColumnSelect, leftRow, rightRow);
-					newTable.add(row);
+					joinedTable.addRow(row);
 					assert(row.size() == (aColumnSelect.size() + bColumnSelect.size()));
 					match = true;
 				}
 				
-				
 			}
 			
 			if(!match) {
-				ArrayList<Object> row = (ArrayList<Object>) a.mTable.get(i).clone();
-				
+				ArrayList<Object> row = a.getRow(i);
 				row.addAll(emptyArray);
-				newTable.add(row);
+				assert(row.size() == (aColumnSelect.size() + bColumnSelect.size()));
+				joinedTable.addRow(row);
 			}
 			
 		}
 		
-		return new Table(newTable, newColumnIdentifiers);
+		return joinedTable;
 	}
 	
 	public boolean addRow(ArrayList<Object> row) {
@@ -290,7 +362,8 @@ public class Table {
 	}
 	
 	private static ArrayList<Object> joinRows(ArrayList<Integer> aColumnSelect, ArrayList<Integer> bColumnSelect,
-											  ArrayList<Object> leftRow, 		ArrayList<Object> rightRow) {
+											  ArrayList<Object>  leftRow, 		ArrayList<Object> rightRow) {
+		
 		ArrayList<Object> row = new ArrayList<Object>();
 		for(Integer i : aColumnSelect) {
 			row.add(leftRow.get(i));
@@ -300,6 +373,7 @@ public class Table {
 			row.add(rightRow.get(i));
 		}
 		return row;
+		
 	}
 	
 	private static ArrayList<String> joinIdentifiers(ArrayList<Integer> aColumnSelect, 

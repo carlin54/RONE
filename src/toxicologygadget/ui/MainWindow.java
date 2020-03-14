@@ -3,52 +3,22 @@ package toxicologygadget.ui;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
-import java.awt.GridBagLayout;
-import java.awt.Button;
-import java.awt.Color;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
-import java.awt.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.LinkedList;
-import java.util.Set;
-import java.util.TreeSet;
-import java.awt.GridLayout;
-import javax.swing.JLabel;
+
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import jdk.nashorn.internal.parser.JSONParser;
 import jp.sbi.garuda.backend.net.exception.GarudaConnectionNotInitializedException;
 import jp.sbi.garuda.backend.net.exception.NetworkConnectionException;
-import jp.sbi.garuda.backend.ui.GarudaGlassPanel;
 import toxicologygadget.backend.garudahandler.GarudaHandler;
 import toxicologygadget.filemanager.Table;
 import toxicologygadget.filemanager.FileManager;
-import toxicologygadget.filemanager.JsonReader;
-import toxicologygadget.query.PercellomeQueryThread;
 import toxicologygadget.query.QueryThreadCallback;
 import toxicologygadget.query.ReactomeQueryThread;
 import toxicologygadget.query.TargetMineQueryThread;
@@ -56,55 +26,38 @@ import toxicologygadget.query.TargetMineQueryThread;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JFileChooser;
-import java.awt.BorderLayout;
-import javax.swing.border.BevelBorder;
 import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.border.LineBorder;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
-import java.awt.Component;
-import javax.swing.Box;
-import javax.swing.JRadioButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JTabbedPane;
-import javax.swing.JSplitPane;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.SwingConstants;
-import net.miginfocom.swing.MigLayout;
 
 public class MainWindow implements ActionListener {
-
-	private JFrame frmToxicologyGadget;
-	private GarudaHandler garudaHandler;
-	private final Action fileImportAction = new FileImportAction();
-	private final Action fileClearTableAction = new FileClearTableAction();
-	private final Action reactomeImportAction =  new ReactomeImportAction();
-	private final Action targetMineImportAction = new TargetMineImportAction();
+	private MainWindow mMainWindow;
+	private JFrame mFrmToxicologyGadget;
+	private GarudaHandler mGarudaHandler;
+	private final Action mFileImportAction = new FileImportAction();
+	private final Action mFileClearTableAction = new FileClearTableAction();
+	private final Action mReactomeImportAction =  new ReactomeImportAction();
+	private final Action mTargetMineImportAction = new TargetMineImportAction();
 	
 	
-	private final GarudaDiscoverActionGenelist garudaDiscoverActionGenelist = new GarudaDiscoverActionGenelist();
-	private final GarudaDiscoverActionEnsemble garudaDiscoverActionEnsemble = new GarudaDiscoverActionEnsemble();
+	private final GarudaDiscoverActionGenelist mGarudaDiscoverActionGenelist = new GarudaDiscoverActionGenelist();
+	private final GarudaDiscoverActionEnsemble mGarudaDiscoverActionEnsemble = new GarudaDiscoverActionEnsemble();
 	
 	
-	//private GeneTable geneTable;
-	private ToxicologyTable toxicologyTable;
-	private TargetMineQueryThread targetMineQueryThread;
-	private MainWindowTargetMineCallback targetMineCallback;
-	private ReactomeQueryThread reactomeQueryThread;
-	private MainWindowReactomeCallback reactomeCallback;
+	private ToxicologyTable mToxicologyTable;
+	private TargetMineSearchDialog mTargetMineSearchDialog;
+	private MainWindowTargetMineCallback mTargetMineCallback;
+	private ReactomeQueryThread mReactomeQueryThread;
+	private MainWindowReactomeCallback mReactomeCallback;
 	
 	private class MainWindowTargetMineCallback implements QueryThreadCallback {
 		
-		TargetMineStatusWindow targetMineStatusWindow;
+		SearchStatusWindow mTargetMineStatusWindow;
 		
 		@Override
 		public void startSearch(int number) {
-			targetMineStatusWindow = new TargetMineStatusWindow(number);
-			targetMineStatusWindow.setVisible(true);
+			mTargetMineStatusWindow = new SearchStatusWindow("TargetMine", number);
+			mTargetMineStatusWindow.setVisible(true);
 		}
 		
 		@Override
@@ -115,10 +68,10 @@ public class MainWindow implements ActionListener {
 				int res_len = results.getIdentifiers().size();
 				String[] res_id = results.getIdentifiers().toArray(new String[res_len]);
 				
-				int tox_len = toxicologyTable.getIdentifiers().size();
-				String[] tox_id = toxicologyTable.getIdentifiers().toArray(new String[tox_len]);
+				int tox_len = mToxicologyTable.getIdentifiers().size();
+				String[] tox_id = mToxicologyTable.getIdentifiers().toArray(new String[tox_len]);
 				String fromWhere = "TargetMine";
-				ImportDataDialog importSelection = new ImportDataDialog(frmToxicologyGadget, fromWhere, tox_id, res_id) ;
+				ImportDataDialog importSelection = new ImportDataDialog(mFrmToxicologyGadget, fromWhere, tox_id, res_id) ;
 				importSelection.setVisible(true);	
 				
 				String[] data = importSelection.getData();
@@ -126,81 +79,42 @@ public class MainWindow implements ActionListener {
 				if(data[0] != null) {
 					String keyTox = data[0];
 					String keyRes = data[1];
-					toxicologyTable.importTable(keyTox, keyRes, results);
+					mToxicologyTable.importTable(keyTox, keyRes, results);
 				}
 			
 			}
 			
-			targetMineStatusWindow.setVisible(false);
-			targetMineStatusWindow.dispose();
-			targetMineStatusWindow = null;
+			mTargetMineStatusWindow.setVisible(false);
+			mTargetMineStatusWindow.dispose();
+			mTargetMineStatusWindow = null;
 			
 		}
 
 		@Override
 		public void statusUpdate(int complete, int total, int totalFound) {
-			
-			targetMineStatusWindow.updateSearch(complete, total, totalFound);
+			mTargetMineStatusWindow.updateSearch(complete, total, totalFound);
 			System.out.println("Complete: " + complete + "\t Total: " + total + "\t Results: " + totalFound);
 		}
 		
 		
 	}
-	
-	private class MainWindowPercellomeCallback implements QueryThreadCallback {
-		
-		@Override
-		public void completeSearch(Table results, int status) {
-			
-			int res_len = results.getIdentifiers().size();
-			String[] res_id = results.getIdentifiers().toArray(new String[res_len]);
-			
-			int tox_len = toxicologyTable.getIdentifiers().size();
-			String[] tox_id = toxicologyTable.getIdentifiers().toArray(new String[tox_len]);
-			
-			ImportDataDialog importSelection = new ImportDataDialog(frmToxicologyGadget, "Percellome", tox_id, res_id) ;
-			importSelection.setVisible(true);	
-			
-			String[] data = importSelection.getData();
-			
-			if(data[0] != null) {
-				String keyTox = data[0];
-				String keyRes = data[1];
-				toxicologyTable.importTable(keyTox, keyRes, results);
-			}
-			
-			
-		}
 
-		@Override
-		public void statusUpdate(int complete, int total, int totalFound) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void startSearch(int total) {
-			// TODO Auto-generated method stub
-			
-		}
-		
-		
-		
-	}
-	
 	private class MainWindowReactomeCallback implements QueryThreadCallback {
 		
+		SearchStatusWindow mReactomeStatusWindow;
+				
 		@Override
 		public void completeSearch(Table results, int status) {
+			
 			if(status == QueryThreadCallback.statusCodeFinishSuccess) {
 				
 				int res_len = results.getIdentifiers().size();
 				String[] res_id = results.getIdentifiers().toArray(new String[res_len]);
 				
-				int tox_len = toxicologyTable.getIdentifiers().size();
-				String[] tox_id = toxicologyTable.getIdentifiers().toArray(new String[tox_len]);
-				String fromWhere = "TargetMine";
-				ImportDataDialog importSelection = new ImportDataDialog(frmToxicologyGadget, fromWhere, tox_id, res_id) ;
+				int tox_len = mToxicologyTable.getIdentifiers().size();
+				String[] tox_id = mToxicologyTable.getIdentifiers().toArray(new String[tox_len]);
+				String fromWhere = "Reactome";
+				ImportDataDialog importSelection = new ImportDataDialog(mFrmToxicologyGadget, fromWhere, tox_id, res_id) ;
 				importSelection.setVisible(true);	
 				
 				String[] data = importSelection.getData();
@@ -208,20 +122,26 @@ public class MainWindow implements ActionListener {
 				if(data[0] != null) {
 					String keyTox = data[0];
 					String keyRes = data[1];
-					toxicologyTable.importTable(keyTox, keyRes, results);
+					mToxicologyTable.importTable(keyTox, keyRes, results);
 				}
 			
 			}
+			
+			mReactomeStatusWindow.setVisible(false);
+			mReactomeStatusWindow.dispose();
+			mReactomeStatusWindow = null;
 		}
 
 		@Override
 		public void statusUpdate(int complete, int total, int totalFound) {
-			System.out.println("Complete: " + complete + "\t Total: " + "\t Found: " + totalFound);
+			mReactomeStatusWindow.updateSearch(complete, total, totalFound);
+			System.out.println("Complete: " + complete + "\t Total: " + total + "\t Results: " + totalFound);
 		}
 
 		@Override
-		public void startSearch(int total) {
-			
+		public void startSearch(int number) {
+			mReactomeStatusWindow = new SearchStatusWindow("Reactome", number);
+			mReactomeStatusWindow.setVisible(true);
 		}
 		
 	}
@@ -230,20 +150,20 @@ public class MainWindow implements ActionListener {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		
-		frmToxicologyGadget = new JFrame();
-		frmToxicologyGadget.setTitle("Toxicology Gadget");
-		frmToxicologyGadget.setBounds(100, 100, 812, 555);
-		frmToxicologyGadget.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		mMainWindow = this;
+		mFrmToxicologyGadget = new JFrame();
+		mFrmToxicologyGadget.setTitle("Toxicology Gadget");
+		mFrmToxicologyGadget.setBounds(100, 100, 812, 555);
+		mFrmToxicologyGadget.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		JMenuBar menuBar = new JMenuBar();
-		frmToxicologyGadget.setJMenuBar(menuBar);
+		mFrmToxicologyGadget.setJMenuBar(menuBar);
 		
 		JMenu mnFile = new JMenu("File");
 		menuBar.add(mnFile);
 		
 		JMenuItem mntmOpen = new JMenuItem("Import");
-		mntmOpen.setAction(fileImportAction);
+		mntmOpen.setAction(mFileImportAction);
 		mnFile.add(mntmOpen);
 		
 		mntmOpen.addActionListener(this);
@@ -252,7 +172,7 @@ public class MainWindow implements ActionListener {
 		mnFile.add(mntmSave);
 		
 		JMenuItem menuItem = new JMenuItem("Clear Table");
-		menuItem.setAction(fileClearTableAction);
+		menuItem.setAction(mFileClearTableAction);
 		mnFile.add(menuItem);
 		
 		JMenu mnGaruda = new JMenu("Garuda");
@@ -264,11 +184,11 @@ public class MainWindow implements ActionListener {
 		mnGaruda.add(mnDiscover);
 		
 		JMenuItem mntmDiscoverGenelist = new JMenuItem("New menu item");
-		mntmDiscoverGenelist.setAction(garudaDiscoverActionGenelist);
+		mntmDiscoverGenelist.setAction(mGarudaDiscoverActionGenelist);
 		mnDiscover.add(mntmDiscoverGenelist);
 		
 		JMenuItem mntmDiscoverEnsemble = new JMenuItem("New menu item");
-		mntmDiscoverEnsemble.setAction(garudaDiscoverActionEnsemble);
+		mntmDiscoverEnsemble.setAction(mGarudaDiscoverActionEnsemble);
 		mnDiscover.add(mntmDiscoverEnsemble);
 		
 		JPopupMenu popupMenu = new JPopupMenu("Discover");
@@ -278,18 +198,16 @@ public class MainWindow implements ActionListener {
 		menuBar.add(mnOtherTools);
 		
 		JMenuItem mntmPercellomeMenuItem = new JMenuItem("Import Percellome");
-		mntmPercellomeMenuItem.setAction(reactomeImportAction);
+		mntmPercellomeMenuItem.setAction(mReactomeImportAction);
 		mnOtherTools.add(mntmPercellomeMenuItem);
 		
 		JMenuItem mntmTargetMineMenuItem = new JMenuItem("Import TargetMine");
-		mntmTargetMineMenuItem.setAction(targetMineImportAction);
+		mntmTargetMineMenuItem.setAction(mTargetMineImportAction);
 		mnOtherTools.add(mntmTargetMineMenuItem);
 		
-		this.targetMineCallback = new MainWindowTargetMineCallback();
-		this.targetMineQueryThread = new TargetMineQueryThread(targetMineCallback);
 		
-		this.reactomeCallback = new MainWindowReactomeCallback();
-		this.reactomeQueryThread = new ReactomeQueryThread(reactomeCallback);
+		this.mReactomeCallback = new MainWindowReactomeCallback();
+		this.mReactomeQueryThread = new ReactomeQueryThread(mReactomeCallback);
 		
 	}
 		
@@ -302,7 +220,7 @@ public class MainWindow implements ActionListener {
 
 				try {	
 					MainWindow window = new MainWindow();
-					window.frmToxicologyGadget.setVisible(true);
+					window.mFrmToxicologyGadget.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -319,18 +237,18 @@ public class MainWindow implements ActionListener {
 		initialize();
 		try {
 			
-				frmToxicologyGadget.getContentPane().setLayout(new BoxLayout(frmToxicologyGadget.getContentPane(), BoxLayout.X_AXIS));
+				mFrmToxicologyGadget.getContentPane().setLayout(new BoxLayout(mFrmToxicologyGadget.getContentPane(), BoxLayout.X_AXIS));
 		
-				this.toxicologyTable = new ToxicologyTable();
-				toxicologyTable.setCellSelectionEnabled(true);
-				toxicologyTable.setColumnSelectionAllowed(true);
-				this.garudaHandler = new GarudaHandler(this.frmToxicologyGadget, this.toxicologyTable);
+				this.mToxicologyTable = new ToxicologyTable();
+				mToxicologyTable.setCellSelectionEnabled(true);
+				mToxicologyTable.setColumnSelectionAllowed(true);
+				this.mGarudaHandler = new GarudaHandler(this.mFrmToxicologyGadget, this.mToxicologyTable);
 				
 				JScrollPane scrollPane = new JScrollPane();
-				frmToxicologyGadget.getContentPane().add(scrollPane);
+				mFrmToxicologyGadget.getContentPane().add(scrollPane);
 				
-				toxicologyTable.setFillsViewportHeight(true);
-				scrollPane.setViewportView(toxicologyTable);
+				mToxicologyTable.setFillsViewportHeight(true);
+				scrollPane.setViewportView(mToxicologyTable);
 			
 		} catch (GarudaConnectionNotInitializedException | NetworkConnectionException e) {
 			// TODO Auto-generated catch block
@@ -375,33 +293,26 @@ public class MainWindow implements ActionListener {
 
 	}
 	
-	private boolean isTxtExtention(File file) {
-		String path = file.getPath();
-		int len = path.length();
-		System.out.println(path.substring(len-4, len));
-		return path.substring(len-4, len).contentEquals(".txt");
-	}
-	
-	private void loadTable(Table incomingTable, String fromWhere) {
+	public void loadTable(Table incomingTable, String fromWhere) {
 		
-		if(toxicologyTable.isEmpty()) {
-			toxicologyTable.setTable(incomingTable);
+		if(mToxicologyTable.isEmpty()) {
+			mToxicologyTable.setTable(incomingTable);
 			
 		}else {
 			int inc_len = incomingTable.getIdentifiers().size();
 			String[] inc_id = incomingTable.getIdentifiers().toArray(new String[inc_len]);
 			
-			int tox_len = toxicologyTable.getIdentifiers().size();
-			String[] tox_id = toxicologyTable.getIdentifiers().toArray(new String[tox_len]);
+			int tox_len = mToxicologyTable.getIdentifiers().size();
+			String[] tox_id = mToxicologyTable.getIdentifiers().toArray(new String[tox_len]);
 			
-			ImportDataDialog importSelection = new ImportDataDialog(frmToxicologyGadget, fromWhere, tox_id, inc_id) ;
+			ImportDataDialog importSelection = new ImportDataDialog(mFrmToxicologyGadget, fromWhere, tox_id, inc_id) ;
 			importSelection.setVisible(true);	
 			
 			String[] data = importSelection.getData();
 			if(data[0] != null) {
 				String keyTox = data[0];
 				String keyInc = data[1];
-				toxicologyTable.importTable(keyTox, keyInc, incomingTable);
+				mToxicologyTable.importTable(keyTox, keyInc, incomingTable);
 			}
 		}
 		
@@ -411,7 +322,7 @@ public class MainWindow implements ActionListener {
 		Table listTable = null;
 		try {
 			listTable = FileManager.loadListFile(file, header);
-			toxicologyTable.setTable(listTable);
+			mToxicologyTable.setTable(listTable);
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(null, e.getMessage(), "Failure", JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
@@ -427,15 +338,17 @@ public class MainWindow implements ActionListener {
 			JOptionPane.showMessageDialog(null, e.getMessage(), "Failure", JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
 		}
-		
 	}
 	
-	private void loadCSV(File file) {
-		
-	}
-	
-	private void loadTxt(File file) {
-		
+	private void loadDataFile(File file, String seperator) {
+		Table data;
+		try {
+			data = FileManager.loadDataFile(file, seperator);
+			loadTable(data, "Import File Data");
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage(), "Failure", JOptionPane.ERROR_MESSAGE);
+			e.printStackTrace();
+		}
 	}
 	
 	private void loadFile(File file, String contents) {
@@ -458,10 +371,11 @@ public class MainWindow implements ActionListener {
 				break;
 				
 			case "CSV": 
-				loadCSV(file);
+				loadDataFile(file, ",");
 				break;
 				
 			case "Tab":
+				loadDataFile(file, "\t");
 				break;
 		}
 		
@@ -479,14 +393,14 @@ public class MainWindow implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			
 			//In response to a button click:
-			int returnVal = fc.showOpenDialog(frmToxicologyGadget);
+			int returnVal = fc.showOpenDialog(mFrmToxicologyGadget);
 			
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				File file = fc.getSelectedFile();
 				
 				Object[] possibilities = {"AGCT Scenario", "Genelist", "Ensemble", "CSV", "Tab Delimited Text"};
 				String content = (String)JOptionPane.showInputDialog(
-				                    frmToxicologyGadget,
+				                    mFrmToxicologyGadget,
 				                    "Complete the sentence:\n",
 				                    "File Type",
 				                    JOptionPane.PLAIN_MESSAGE,
@@ -501,7 +415,7 @@ public class MainWindow implements ActionListener {
 	}
 	
 	private void startDiscovery(String contence, String extension) {
-		String[] data = toxicologyTable.getUniqueSelected();
+		String[] data = mToxicologyTable.getUniqueSelected();
 		
 		String list = new String("");
 		for(int i = 0; i < data.length; i++) {
@@ -515,7 +429,7 @@ public class MainWindow implements ActionListener {
 		
 		try {
 			file = FileManager.writeOutString(list, fileName);
-			garudaHandler.garudaDiscover(file, contence);
+			mGarudaHandler.garudaDiscover(file, contence);
 		} catch (IOException e) {
 			e.printStackTrace();
 			
@@ -529,20 +443,19 @@ public class MainWindow implements ActionListener {
 	
 	boolean hasValidSelection() {
 		
-		if(toxicologyTable.isEmpty()) {
-			JOptionPane.showMessageDialog(frmToxicologyGadget, "There is no data in the table.");
+		if(mToxicologyTable.isEmpty()) {
+			JOptionPane.showMessageDialog(mFrmToxicologyGadget, "There is no data in the table.");
 			return false;
 		}
 		
-		if(!toxicologyTable.hasSelection()) {
-			JOptionPane.showMessageDialog(frmToxicologyGadget, "Select data from the table to use.");
+		if(!mToxicologyTable.hasSelection()) {
+			JOptionPane.showMessageDialog(mFrmToxicologyGadget, "Select data from the table to use.");
 			return false;
 		}
 		
 		return true;
 	}
-	
-	
+		
 	private class GarudaDiscoverActionGenelist extends AbstractAction {
 		public GarudaDiscoverActionGenelist() {
 			putValue(NAME, "Genelist");
@@ -561,7 +474,6 @@ public class MainWindow implements ActionListener {
 			
 		}
 	}
-	
 	
 	private class GarudaDiscoverActionEnsemble extends AbstractAction {
 		
@@ -582,7 +494,6 @@ public class MainWindow implements ActionListener {
 		}
 	}
 
-
 	private class TargetMineImportAction extends AbstractAction {
 		
 		public TargetMineImportAction() {
@@ -592,25 +503,13 @@ public class MainWindow implements ActionListener {
 		
 		public void actionPerformed(ActionEvent e) {
 			
-			String[] genelist = toxicologyTable.getUniqueSelected();
+			String[] genelist = mToxicologyTable.getUniqueSelected();
 			
 			if(!hasValidSelection()) {
 				return;
 			}
-			
-			if(targetMineQueryThread.isRunning())
-				targetMineQueryThread.stopRunning();
-			
-			try {
-				//TODO: add thread stop dialog
-				targetMineQueryThread.join();
-			} catch (InterruptedException ie) {
-				ie.printStackTrace();
-			}
-			
-			targetMineQueryThread = new TargetMineQueryThread(targetMineCallback);
-			targetMineQueryThread.setGenelist(genelist);
-			targetMineQueryThread.start();
+			TargetMineSearchDialog searchDialog = new TargetMineSearchDialog(mMainWindow, genelist); 
+			searchDialog.start();
 			
 		}
 	}
@@ -622,25 +521,25 @@ public class MainWindow implements ActionListener {
 		}
 		public void actionPerformed(ActionEvent e) {
 			
-			String[] genelist = toxicologyTable.getUniqueSelected();
+			String[] genelist = mToxicologyTable.getUniqueSelected();
 			
 			if(!hasValidSelection()) {
 				return;
 			}
 			
-			if(reactomeQueryThread.isRunning())
-				reactomeQueryThread.stopRunning();
+			if(mReactomeQueryThread.isRunning())
+				mReactomeQueryThread.stopRunning();
 			
 			try {
 				//TODO: add thread stop dialog
-				reactomeQueryThread.join();
+				mReactomeQueryThread.join();
 			} catch (InterruptedException ie) {
 				ie.printStackTrace();
 			}
 			
-			reactomeQueryThread = new ReactomeQueryThread(reactomeCallback);
-			reactomeQueryThread.setGenelist(genelist);
-			reactomeQueryThread.start();
+			mReactomeQueryThread = new ReactomeQueryThread(mReactomeCallback);
+			mReactomeQueryThread.setGenelist(genelist);
+			mReactomeQueryThread.start();
 			
 		}
 	}
@@ -654,7 +553,7 @@ public class MainWindow implements ActionListener {
 		
 		public void actionPerformed(ActionEvent e) {
 			
-			if(!toxicologyTable.isEmpty()) {
+			if(!mToxicologyTable.isEmpty()) {
 				int result = JOptionPane.showConfirmDialog(null,
 						"Are you sure you would like to discard the current table?", "Clear Confirm", JOptionPane.YES_NO_OPTION);
 				
@@ -663,9 +562,12 @@ public class MainWindow implements ActionListener {
 				
 			}
 			
-			toxicologyTable.clearTable();
+			mToxicologyTable.clearTable();
 			
 		}
 		
 	}
+
+
+	
 }

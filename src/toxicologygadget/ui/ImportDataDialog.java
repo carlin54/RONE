@@ -11,20 +11,18 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 
 
 public class ImportDataDialog extends JDialog implements ActionListener {
-   private String[] data;
-   private JComboBox<String> columnSelectA;
-   private JComboBox<String> columnSelectB;
+	
+   private String[] mData;
+   private JComboBox<String> mColumnSelectA;
+   private JComboBox<String> mColumnSelectB;
    
-   private JButton btnOk;
-   private JButton btnCancel;
+   private JButton mBtnOk;
+   private JButton mBtnCancel;
    
    public ImportDataDialog(Frame parent, String fromWhere, String[] columnA, String[] columnB) {
       super(parent, "Pick Constraint", true);
@@ -33,7 +31,7 @@ public class ImportDataDialog extends JDialog implements ActionListener {
       
       Point loc = parent.getLocation();
       setLocation(loc.x+80,loc.y+80);
-      data = new String[2]; // set to amount of data items
+      mData = new String[2]; // set to amount of data items
       JPanel panel = new JPanel();
       panel.setLayout(new GridBagLayout());
       GridBagConstraints gbc = new GridBagConstraints();
@@ -50,24 +48,24 @@ public class ImportDataDialog extends JDialog implements ActionListener {
       gbc.gridy = 1;
       panel.add(colorLabel,gbc);
       
-      columnSelectA = new JComboBox<String>(columnA);
+      mColumnSelectA = new JComboBox<String>(columnA);
+      gbc.gridwidth = 1;
+      gbc.gridx = 1;
+      gbc.gridy = 0;
+      panel.add(mColumnSelectA, gbc);
+      
+      mColumnSelectB = new JComboBox<String>(columnB);
       gbc.gridwidth = 1;
       gbc.gridx = 1;
       gbc.gridy = 1;
-      panel.add(columnSelectA, gbc);
-      
-      columnSelectB = new JComboBox<String>(columnB);
-      gbc.gridwidth = 2;
-      gbc.gridx = 1;
-      gbc.gridy = 0;
-      panel.add(columnSelectB, gbc);
+      panel.add(mColumnSelectB, gbc);
       
       // try to select columns with same identifier
       for(int i = 0; i < columnA.length; i++) {
           for(int j = i; j < columnB.length; j++) {
         	  if(columnA[i].equals(columnB[j])) {
-        		  columnSelectA.setSelectedItem(columnA[i]);
-        		  columnSelectB.setSelectedItem(columnB[j]);
+        		  mColumnSelectA.setSelectedItem(columnA[i]);
+        		  mColumnSelectB.setSelectedItem(columnB[j]);
         	  }
           }    	  
       }
@@ -76,42 +74,42 @@ public class ImportDataDialog extends JDialog implements ActionListener {
       gbc.gridx = 0;
       gbc.gridy = 2;
       panel.add(spacer,gbc);
-      btnOk = new JButton("Ok");
-      btnOk.addActionListener(this);
+      mBtnOk = new JButton("Ok");
+      mBtnOk.addActionListener(this);
       gbc.gridwidth = 1;
       gbc.gridx = 0;
       gbc.gridy = 3;
-      panel.add(btnOk,gbc);
-      btnCancel = new JButton("Cancel");
-      btnCancel.addActionListener(this);
+      panel.add(mBtnOk,gbc);
+      mBtnCancel = new JButton("Cancel");
+      mBtnCancel.addActionListener(this);
       gbc.gridx = 1;
       gbc.gridy = 3;
-      panel.add(btnCancel,gbc);
+      panel.add(mBtnCancel,gbc);
       getContentPane().add(panel);
       pack();
       
-      data = new String[2];
+      mData = new String[2];
    }
    
    public void actionPerformed(ActionEvent ae) {
       Object source = ae.getSource();
-      if (source == btnOk) {
-         data[0] = (String)columnSelectA.getSelectedItem();
-         data[1] = (String)columnSelectB.getSelectedItem();
+      if (source == mBtnOk) {
+         mData[0] = (String)mColumnSelectA.getSelectedItem();
+         mData[1] = (String)mColumnSelectB.getSelectedItem();
       }
       else {
-         data[0] = null;
-         data[1] = null;
+         mData[0] = null;
+         mData[1] = null;
       }
       dispose();
    }
    
    public String[] run() {
       this.setVisible(true);
-      return data;
+      return mData;
    }
    
    public String[] getData() {
-	   return this.data;
+	   return this.mData;
    }
 }

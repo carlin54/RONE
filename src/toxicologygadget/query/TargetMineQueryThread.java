@@ -1,5 +1,6 @@
 package toxicologygadget.query;
 
+import java.awt.EventQueue;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -9,6 +10,7 @@ import org.intermine.webservice.client.core.ServiceFactory;
 import org.intermine.webservice.client.services.QueryService;
 
 import toxicologygadget.filemanager.Table;
+import toxicologygadget.ui.TargetMineSearchDialog;
 
 import org.intermine.metadata.Model;
 import org.intermine.pathquery.Constraints;
@@ -33,7 +35,10 @@ public class TargetMineQueryThread extends Thread
     	this.mProcessRunning = false;
     	this.mStopProcess = false;
     	this.mStepSize = 5;
+ 
+    	
     }
+    
     
     public ArrayList<ArrayList<Object>> query(String genes) {
     	
@@ -63,6 +68,13 @@ public class TargetMineQueryThread extends Thread
         
         while (rows.hasNext()) {
         	Object[] row = rows.next().toArray();
+        	
+        	for(int i = 0; i < row.length; i++) {
+        		System.out.print(row[i] + " : ");
+        		
+        	}
+        	System.out.print("\n");
+        	
         	ArrayList<Object> rowList = new ArrayList<Object>();
         	
         	for(int i = 0; i < row.length; i++) 

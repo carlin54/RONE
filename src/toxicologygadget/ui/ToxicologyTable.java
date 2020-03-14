@@ -1,42 +1,28 @@
 package toxicologygadget.ui;
 
-import javax.swing.CellRendererPane;
-import javax.swing.JComponent;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
-import javax.swing.table.TableModel;
 
-import antlr.collections.impl.Vector;
-import javafx.scene.control.TableColumn;
 import toxicologygadget.filemanager.Table;
 
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.MenuItem;
-import java.awt.PopupMenu;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.TreeSet;
 
 public class ToxicologyTable extends JTable {
 	
-	private Table dataTable;
+	private Table mDataTable;
 	
 	public ArrayList<String> getIdentifiers() {
-		return dataTable.getIdentifiers();
+		return mDataTable.getIdentifiers();
+		
+		
+		
 	}
 	
 	public String[] getSelected() {
@@ -63,17 +49,19 @@ public class ToxicologyTable extends JTable {
 		int[] cols = this.getSelectedColumns();
 		
 		LinkedList<String> unique = new LinkedList<String>(); 
-	
-		String last_added = null;
+		
+		
+		Object last_added = null;
 		for(int i = 0; i < rows.length; i++) {
+			int r = rows[i];
 			for(int j = 0; j < cols.length; j++) {
-				int k = rows[i];
-				String cell = (String) getModel().getValueAt(k, cols[j]);
+				int c = cols[j];
+				String cell =  getModel().getValueAt(r, c).toString();
+				
 				if(!cell.equals(last_added) && !unique.contains(cell)) {
 					unique.add(cell);
 					last_added = cell;
 				}
-				
 					
 			}
 		}
@@ -82,7 +70,7 @@ public class ToxicologyTable extends JTable {
 	}
 	
 	public ToxicologyTable(){
-		dataTable = new Table();
+		mDataTable = new Table();
 		
         
 		this.tableHeader.addMouseListener(new MouseAdapter() {
@@ -91,20 +79,20 @@ public class ToxicologyTable extends JTable {
             public void mouseClicked(MouseEvent e) {
                 JTableHeader h = (JTableHeader) e.getSource();
                 int i = h.columnAtPoint(e.getPoint());
-                Object o = h.getColumnModel().getColumn(i).getHeaderValue();
-                Object selectedColumn;
                 if (i < 0) {
-                    selectedColumn = null;
                     return;
                 }
-                selectedColumn = o;
+                Object o = h.getColumnModel().getColumn(i).getHeaderValue();
+                Object selectedColumn = o;
+                
+                
                 
             }
         });
 	}
 	
 	public boolean isEmpty() {
-		return dataTable.isEmpty();
+		return mDataTable.isEmpty();
 	} 
 	
 	public boolean hasSelection() {
@@ -116,12 +104,12 @@ public class ToxicologyTable extends JTable {
     }
 	
 	public void setTable(Table set) {
-		this.dataTable = set;
+		this.mDataTable = set;
 		updateTable();
 	}
 	
 	public void clearTable() {
-		dataTable = new Table();
+		mDataTable = new Table();
 		
 		DefaultTableModel model = (DefaultTableModel) this.getModel();
 		model.setRowCount(0);
@@ -129,7 +117,7 @@ public class ToxicologyTable extends JTable {
 	}
 	
 	private boolean clearTableConfirmation() {
-		if(dataTable != null) {
+		if(mDataTable != null) {
 			int n = JOptionPane.showConfirmDialog(
 				    this,
 				    "Are you sure you would like to clear the current table?",
@@ -146,28 +134,31 @@ public class ToxicologyTable extends JTable {
 		
 		DefaultTableModel model = new DefaultTableModel();
 		
-		
-		ArrayList<String> identifiers = dataTable.getIdentifiers();
+		ArrayList<String> identifiers = mDataTable.getIdentifiers();
 				
 		for(int i = 0; i < identifiers.size(); i++) {
-			model.addColumn(identifiers.get(i));	
+			model.addColumn(identifiers.get(i));
+			System.out.println(identifiers.get(i));
 		}
-		int numRows = dataTable.rowCount();
-		int numCols = dataTable.columnCount();
+		int numRows = mDataTable.rowCount();
+		int numCols = mDataTable.columnCount();
+		
+		System.out.println("Cols: " + numCols);
 		
 		for(int iRow = 0; iRow < numRows; iRow++) {
 			Object[] row = new Object[numCols];
 			for(int iCol = 0; iCol < numCols; iCol++) {
-				row[iCol] = dataTable.get(iRow, iCol);				
+				row[iCol] = mDataTable.get(iRow, iCol);				
 			}
 			model.addRow(row);
 		}
+		
 		this.setModel(model);
-		this.setAutoCreateRowSorter(true);
+		
 	}
 	
 	public boolean hasColumn(String col) {
-		return dataTable.hasColumn(col);
+		return mDataTable.hasColumn(col);
 	}
 	
 	/*public void loadGenelist(String[] genelist) {
@@ -204,15 +195,14 @@ public class ToxicologyTable extends JTable {
 	public void importTable(String keyA, String keyB, Table importTable) {
 		
 		
-		if(this.dataTable.columnCount() == 0) { 
-			this.dataTable = importTable;
+		if(this.mDataTable.columnCount() == 0) { 
+			this.mDataTable = importTable;
 		}else {
-			Table tableA = this.dataTable;
+			Table tableA = this.mDataTable;
 			Table tableB = importTable;
 			
-			this.dataTable = Table.leftJoin(tableA, tableB, keyA, keyB);
+			this.mDataTable = Table.leftJoin(tableA, tableB, keyA, keyB);
 		}
-		
 		
 		updateTable();
 	}
@@ -220,19 +210,19 @@ public class ToxicologyTable extends JTable {
 	public String getGenelistStringTxt() {
 		String genelist = new String(); 
 		
-		int numRows = dataTable.rowCount();
-		int geneColIndex = dataTable.columnIndex("Gene");
+		int numRows = mDataTable.rowCount();
+		int geneColIndex = mDataTable.columnIndex("Gene");
 		
 		for(int iRow = 0; iRow < numRows-1; iRow++) {
-			genelist = genelist + dataTable.get(iRow, geneColIndex) + "\n";
+			genelist = genelist + mDataTable.get(iRow, geneColIndex) + "\n";
 		}
-		genelist = genelist + dataTable.get(numRows-1, geneColIndex);
+		genelist = genelist + mDataTable.get(numRows-1, geneColIndex);
 		
 		return genelist;
 	}
 	
 	public Object getCell(int row, int col) {
-		return dataTable.get(row, col);
+		return mDataTable.get(row, col);
 	}
 	
 }

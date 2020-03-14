@@ -1,11 +1,10 @@
 package toxicologygadget.backend.garudahandler;
 
-import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
@@ -34,69 +33,64 @@ import toxicologygadget.ui.ToxicologyTable;
 
 public class GarudaHandler {
 
-	private GarudaBackend garudaBackend;
-	private JFrame parentFrame;
-	private GarudaBackendPipelinePlugin pipelinePlugin;
-	private ToxicologyTable toxicologyTable;
+	private GarudaBackend mGarudaBackend;
+	private JFrame mParentFrame;
+	private GarudaBackendPipelinePlugin mPipelinePlugin;
+	private ToxicologyTable mToxicologyTable;
 	
 	
 	public GarudaHandler (JFrame parentFrame, ToxicologyTable geneTable) throws GarudaConnectionNotInitializedException, NetworkConnectionException
 	{
-		this.parentFrame = parentFrame;
-		this.toxicologyTable = geneTable;
+		this.mParentFrame = parentFrame;
+		this.mToxicologyTable = geneTable;
 		
-		garudaBackend = new GarudaBackend(GarudaConstants.GARUDA_ID, GarudaConstants.GARUDA_NAME, this.parentFrame);
+		mGarudaBackend = new GarudaBackend(GarudaConstants.GARUDA_ID, GarudaConstants.GARUDA_NAME, this.mParentFrame);
 
-		garudaBackend.addGarudaGlassPanel(this.parentFrame, null);
+		mGarudaBackend.addGarudaGlassPanel(this.mParentFrame, null);
 		
 		initGarudaListeners();
 		initPipeline();
 		
-		garudaBackend.activateGadget();
-		
-		// garudaBackend.getCompatibleGadgetList("txt", "genelist");
-		
-		
-		//File file = new File("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\data\\EnsembleGenelist2.txt");
-		//garudaDiscover(file, "ensemble");
+		mGarudaBackend.activateGadget();
+
 	
 	}
 
 	private void initPipeline () 
 	{
-		pipelinePlugin = new GarudaBackendPipelinePlugin() ;
+		mPipelinePlugin = new GarudaBackendPipelinePlugin() ;
 		
-		garudaBackend.registerProtocolHandlerPlugin(pipelinePlugin);
+		mGarudaBackend.registerProtocolHandlerPlugin(mPipelinePlugin);
 		
 	}
 	
 	public boolean isConnected() {
-		return garudaBackend.isConnectionLive();
+		return mGarudaBackend.isConnectionLive();
 	}
 	
 	public void activateConnection() 
 	{
-		garudaBackend.activateGadget();
+		mGarudaBackend.activateGadget();
 	}
 	
 	public GarudaGlassPanel getGarudaGlassPanel () 
 	{
-		return garudaBackend.getGarudaGlassPanel() ;
+		return mGarudaBackend.getGarudaGlassPanel() ;
 	}
 	
 	public IncomingRequestProtocolHandler accessIncomingRequestListenerHandler (  )
 	{
-		return garudaBackend.getIncomingRequestHandler() ;
+		return mGarudaBackend.getIncomingRequestHandler() ;
 	}
 	
 	public IncomingRequestProtocolHandler accessIncomingResponseListenerHandler (  )
 	{
-		return garudaBackend.getIncomingRequestHandler() ;
+		return mGarudaBackend.getIncomingRequestHandler() ;
 	}
 	
 	public GarudaBackendPipelinePlugin accessPipelinePlugin () 
 	{
-		return pipelinePlugin ;
+		return mPipelinePlugin ;
 	}
 	
 	public void garudaDiscover(File fileToDiscover, String fileFormat)
@@ -107,7 +101,7 @@ public class GarudaHandler {
 			throw new IllegalArgumentException( "Illegal file format.") ;
 		
 		
-		garudaBackend.getCompatibleGadgetList(fileToDiscover, fileFormat);
+		mGarudaBackend.getCompatibleGadgetList(fileToDiscover, fileFormat);
 	}
 	
 	public void garudaDiscover (DiscoveryTouple discoveryTouple)
@@ -115,48 +109,51 @@ public class GarudaHandler {
 		if ( discoveryTouple == null || discoveryTouple.getFileFormat() == null || discoveryTouple.getFileToDiscover()== null)
 			throw new IllegalArgumentException( "Incompatible discovery touple") ;
 		
-		garudaBackend.getCompatibleGadgetList(discoveryTouple.getFileToDiscover(), discoveryTouple.getFileFormat());
+		mGarudaBackend.getCompatibleGadgetList(discoveryTouple.getFileToDiscover(), discoveryTouple.getFileFormat());
 	}
 	
 	public void sendFileTo (CompatibleGadgetDetails targetGadget, boolean isStream) throws NoFileToSendException
 	{
 		if (!isStream)
-			garudaBackend.sendDataToGadgetAsFile(targetGadget);
+			mGarudaBackend.sendDataToGadgetAsFile(targetGadget);
 		else
-			garudaBackend.sendDataToGadgetAsStream(targetGadget);
+			mGarudaBackend.sendDataToGadgetAsStream(targetGadget);
 	}
 	
 	public void sendPipelineReply (File pipelineFile, String fileFormat) throws JsonGenerationException, JsonMappingException, IOException, PipelineNotInitializedException
 	{
-		pipelinePlugin.sendSendPipelineMessageToGadgetResponse(pipelineFile, fileFormat);
+		mPipelinePlugin.sendSendPipelineMessageToGadgetResponse(pipelineFile, fileFormat);
 	}
 	
 	public void sendPipelineOperationFailed (GarudaPipelineResponseCode pipelineResponseCode ) throws JsonGenerationException, JsonMappingException, IOException, PipelineNotInitializedException
 	{
-			pipelinePlugin.sendPipelineFailedToGadgetResponse(pipelineResponseCode);
+			mPipelinePlugin.sendPipelineFailedToGadgetResponse(pipelineResponseCode);
 	}
 	
 	private void loadTable(Table incomingTable, String fromWhere) {
 		
-		if(toxicologyTable.isEmpty()) {
-			toxicologyTable.setTable(incomingTable);
+		if(mToxicologyTable.isEmpty()) {
+			mToxicologyTable.setTable(incomingTable);
 			
 		}else {
+			
 			int inc_len = incomingTable.getIdentifiers().size();
 			String[] inc_id = incomingTable.getIdentifiers().toArray(new String[inc_len]);
 			
-			int tox_len = toxicologyTable.getIdentifiers().size();
-			String[] tox_id = toxicologyTable.getIdentifiers().toArray(new String[tox_len]);
+			int tox_len = mToxicologyTable.getIdentifiers().size();
+			String[] tox_id = mToxicologyTable.getIdentifiers().toArray(new String[tox_len]);
 			
-			ImportDataDialog importSelection = new ImportDataDialog(parentFrame, fromWhere, tox_id, inc_id) ;
+			ImportDataDialog importSelection = new ImportDataDialog(mParentFrame, fromWhere, tox_id, inc_id) ;
 			importSelection.setVisible(true);	
 			
 			String[] data = importSelection.getData();
+			
 			if(data[0] != null) {
 				String keyTox = data[0];
 				String keyInc = data[1];
-				toxicologyTable.importTable(keyTox, keyInc, incomingTable);
+				mToxicologyTable.importTable(keyTox, keyInc, incomingTable);
 			}
+			
 		}
 		
 		
@@ -164,7 +161,7 @@ public class GarudaHandler {
 	
 	private void initGarudaListeners () {
 				
-		garudaBackend.getIncomingRequestHandler().addLoadDataRequestActionListener(new LoadDataRequestActionListener() {
+		mGarudaBackend.getIncomingRequestHandler().addLoadDataRequestActionListener(new LoadDataRequestActionListener() {
 
 			@Override
 			public void loadDataRequestReceivedAsFile(File file, String senderId, String senderName,
@@ -177,7 +174,11 @@ public class GarudaHandler {
 					case "GeneMapper":
 						
 					try {
-						Table shoeTable = FileManager.loadCSV(file);
+						Table shoeTable = FileManager.loadDataFile(file, ",");
+						ArrayList<String> s = shoeTable.getIdentifiers();
+						for(int i = 0; i < s.size(); i++) {
+							s.set(i,  	"(S) " + s.get(i));
+						}
 						loadTable(shoeTable, "SHOE");
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
@@ -187,7 +188,7 @@ public class GarudaHandler {
 					case "Reactome gadget":
 					
 						try {
-							Table reactomeTable = FileManager.loadCSV(file);
+							Table reactomeTable = FileManager.loadDataFile(file, ",");
 							loadTable(reactomeTable, "Reactome");
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
@@ -209,11 +210,11 @@ public class GarudaHandler {
 			}
 		});
 		
-		garudaBackend.getIncomingResponseHandler().addActivateGadgetResponseActionListener(new ActivateGadgetResponseActionListener() {
+		mGarudaBackend.getIncomingResponseHandler().addActivateGadgetResponseActionListener(new ActivateGadgetResponseActionListener() {
 			
 			@Override
 			public void gadgetActivationFailed(GarudaResponseCode response) {
-				JOptionPane.showMessageDialog(parentFrame, "Activation Failed " + response.toString(), "Garuda Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(mParentFrame, "Activation Failed " + response.toString(), "Garuda Error", JOptionPane.ERROR_MESSAGE);
 				
 			}
 			
@@ -223,17 +224,17 @@ public class GarudaHandler {
 			}
 		}) ;
 		
-		garudaBackend.getIncomingResponseHandler().addGetCompatibleGadgetListResponseActionListener(new GetCompatibleGadgetListResponseActionListener() {
+		mGarudaBackend.getIncomingResponseHandler().addGetCompatibleGadgetListResponseActionListener(new GetCompatibleGadgetListResponseActionListener() {
 			
 			@Override
 			public void noCompatibleGadgetsFound(GarudaResponseCode responseCode) {
-				JOptionPane.showMessageDialog(parentFrame, "No compatible Gadgets " + responseCode.id, "Garuda Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(mParentFrame, "No compatible Gadgets " + responseCode.id, "Garuda Error", JOptionPane.ERROR_MESSAGE);
 				
 			}
 			
 			@Override
 			public void gotErrorOnCompatibleGadgetListRequest(GarudaResponseCode responseCode) {
-				JOptionPane.showMessageDialog(parentFrame, "Error while getting compatible gadgets " + responseCode.id, "Garuda Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(mParentFrame, "Error while getting compatible gadgets " + responseCode.id, "Garuda Error", JOptionPane.ERROR_MESSAGE);
 			}
 			
 			@Override
@@ -245,7 +246,7 @@ public class GarudaHandler {
 			
 			@Override
 			public void fileNotInOutBoundList(GarudaResponseCode responseCode) {
-				JOptionPane.showMessageDialog(parentFrame, "File not in output list " + responseCode.id, "Garuda Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(mParentFrame, "File not in output list " + responseCode.id, "Garuda Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}) ;
 	

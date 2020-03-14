@@ -144,7 +144,7 @@ public class ReactomeQueryThread extends Thread {
 				// "(R) FDR" - "fdr":0.10114749050397542
 				row.add(entities.getString("fdr"));
 				
-				System.out.println(pathway.getString("name")  + " : " + species.getString("name") + " : " + pathway.getString("stId") + " : " + entities.getString("ratio"));
+				// System.out.println(pathway.getString("name")  + " : " + species.getString("name") + " : " + pathway.getString("stId") + " : " + entities.getString("ratio"));
 				
 			} catch (JSONException e) {
 				e.printStackTrace();
