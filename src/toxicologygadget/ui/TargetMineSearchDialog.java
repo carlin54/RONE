@@ -274,9 +274,6 @@ public class TargetMineSearchDialog extends JDialog {
     	}
     	
     	public void processResults(String[] completeWork, ArrayList<ArrayList<Object>> results) {
-    		
-    		
-    		
     		if(completeWork != null && completeWork.length != 0) {
     			mSearched = mSearched + completeWork.length;
     		}
@@ -362,15 +359,10 @@ public class TargetMineSearchDialog extends JDialog {
     				if(!worker.hasGivenResults()) {
     					ArrayList<ArrayList<Object>> results = worker.getResults();
     					String[] completeWork = worker.getWork();
-	        			
     					processResults(completeWork, results);
-    					
-    					
-    					
     				}
     				
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
     		}

@@ -527,19 +527,8 @@ public class MainWindow implements ActionListener {
 				return;
 			}
 			
-			if(mReactomeQueryThread.isRunning())
-				mReactomeQueryThread.stopRunning();
-			
-			try {
-				//TODO: add thread stop dialog
-				mReactomeQueryThread.join();
-			} catch (InterruptedException ie) {
-				ie.printStackTrace();
-			}
-			
-			mReactomeQueryThread = new ReactomeQueryThread(mReactomeCallback);
-			mReactomeQueryThread.setGenelist(genelist);
-			mReactomeQueryThread.start();
+			ReactomeSearchDialog searchDialog = new ReactomeSearchDialog(mMainWindow, genelist); 
+			searchDialog.start();
 			
 		}
 	}

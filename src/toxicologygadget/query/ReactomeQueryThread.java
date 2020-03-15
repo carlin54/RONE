@@ -155,8 +155,6 @@ public class ReactomeQueryThread extends Thread {
 		}
 		
 		return rows;
-		
-		
 	}
 	
 	private int getNumberOfPathways(String jsonQuery) {
@@ -183,37 +181,6 @@ public class ReactomeQueryThread extends Thread {
 	}
 	
 	
-	/*private String[] parseQuery(String jsonQuery) {
-				
-		JSONObject jsonResults;
-		String arrayEntries[] = null;
-		try {
-			JSONObject jo = new JSONObject(jsonQuery);
-			
-			// Reactome Structure
-			// (...[], results [ entries [annotation 0,... annotation N] ])
-			// get the results 
-			String strResults = jo.getString("results");
-			String strClippedResults = (String) strResults.substring(1, strResults.length()-1);
-			jsonResults = new JSONObject(strClippedResults);
-	
-			// get the entries 
-			String strEntries = jsonResults.getString("entries");
-			String strClippedEntries = (String) strEntries.substring(1, strEntries.length()-1);
-			
-			// split into an array
-			arrayEntries = strClippedEntries.split("\\},\\{");
-		} catch (JSONException je) {
-			// System.out.println(je.getMessage());
-			return null; // <-- issue return null communicate it
-			// terminate parsing of this gene
-		}	
-		
-
-		arrayEntries = fixParsedQuery(arrayEntries);
-		
-		return arrayEntries;
-	}*/
 	
 	private ArrayList<Object> extractEntryData(String entry){
 
