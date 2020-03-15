@@ -36,7 +36,6 @@ public class ReactomeSearchDialog extends JDialog {
 	private final JPanel mContentPanel = new JPanel();
 	private JTable mTable;
 	private MainWindow mMainWindow; 
-	private JLabel mLblConnectionStatus;
 	private JLabel mLblSearchStatus;
 	
 	
@@ -77,27 +76,6 @@ public class ReactomeSearchDialog extends JDialog {
 			JPanel buttonPane = new JPanel();
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
-			{
-				mLblConnectionStatus = new JLabel("[Disconnected]");
-				buttonPane.add(mLblConnectionStatus);
-			}
-			{
-				JButton cancelButton = new JButton("Cancel");
-				cancelButton.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent arg0) {
-						try {
-							mMasterThread.stopProcess();
-							mMasterThread.join();
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						dispose();
-					}
-				});
-				cancelButton.setActionCommand("Cancel");
-				buttonPane.add(cancelButton);
-			}
 		}
 		this.mReactomeSearchDialog = this;
 		this.mMainWindow = mainWindow;
@@ -113,8 +91,6 @@ public class ReactomeSearchDialog extends JDialog {
 	}
 	
 	private void updateStatus(String status) {
-		
-		this.mLblConnectionStatus.setText("[" + status + "]");
 	}
 	
 	private void updateSearchStatus() {
@@ -242,7 +218,6 @@ public class ReactomeSearchDialog extends JDialog {
     	
     	private WorkerThread mThreadPool[];
     	
-    	private boolean mProcessRunning;
     	private boolean mStopProcess;
     	private int mWorkHeadIndex;
     	private Table mResultsTable;

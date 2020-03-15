@@ -55,20 +55,16 @@ public class TargetMineSearchDialog extends JDialog {
 	private Integer mSearched;
 	private Integer mResultsFound;
 	private Integer mStepSize;
-	private boolean mProcessRunning;
-	private boolean mStopProcess;
 	private MasterThread mMasterThread;
 
 
 	private JScrollPane scrollPane;
 
     private void stopMasterThread() {
-    	System.out.println("stopMasterThread()");
     	try {
     		
 			mMasterThread.stopProcess();
 			mMasterThread.join();
-			System.out.println("stopMasterThread() - join()");
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -100,20 +96,7 @@ public class TargetMineSearchDialog extends JDialog {
 			scrollPane = new JScrollPane(mTable);
 			mContentPanel.add(scrollPane, BorderLayout.CENTER);
 			
-			{
-				JButton cancelButton = new JButton("Cancel");
-				cancelButton.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent arg0) {
-						stopMasterThread();
-						dispose();
-					}
-				});
-				cancelButton.setActionCommand("Cancel");
-			}
 		}
-		
-
-		
 		
 		this.mTargetMineSearchDialog = this;
 		this.mMainWindow = mainWindow;
@@ -139,18 +122,12 @@ public class TargetMineSearchDialog extends JDialog {
     	  {
     	    System.out.println("jdialog window closing event received");
     	    stopMasterThread();
-    	    
     	  }
     	});
 		
 		
 	}
-	
-	private void updateStatus(String status) {
-		
-		this.mLblConnectionStatus.setText("[" + status + "]");
-	}
-	
+
 	private void updateSearchStatus() {
 		this.mLblSearchStatus.setText("Total: " + mGenelist.length +
 									  " | Searched: " + mSearched + 
@@ -193,10 +170,6 @@ public class TargetMineSearchDialog extends JDialog {
         while (rows.hasNext()) {
         	Object[] row = rows.next().toArray();
         	
-        	//for(int i = 0; i < row.length; i++) {
-        		//System.out.print(row[i] + " : ");
-        	//}
-        	
         	ArrayList<Object> rowList = new ArrayList<Object>();
         	
         	for(int i = 0; i < row.length; i++) 
@@ -204,9 +177,7 @@ public class TargetMineSearchDialog extends JDialog {
         	
         	results.add(rowList);
         	
-        	
         }
-        
 		return results;
     }
 	
@@ -232,7 +203,6 @@ public class TargetMineSearchDialog extends JDialog {
     	
     	WorkerThread(){
     		mResults = new ArrayList<ArrayList<Object>>();
-    		mProcessRunning = false;
     		this.setPriority(MAX_PRIORITY);
     	}
     	
@@ -248,12 +218,10 @@ public class TargetMineSearchDialog extends JDialog {
     	
 	    public void run() 
 	    { 
-	    	
 	    	for(int i = 0; i < mGenes.length; i++) {
 	    		System.out.println(this.getId() + "- Processing: " + mGenes[i]);
 	    	}
 	    	mResults = null;
-	    	mProcessRunning = true;
 	    	mHasGivenResults = false;
 	    	String search = "";
 	    	for(int i = 0; i < mGenes.length; i++) {
@@ -262,17 +230,21 @@ public class TargetMineSearchDialog extends JDialog {
 	    	System.out.println(this.getId() + "Quering");
 	    	mResults = query(search);
 	    	System.out.println(this.getId() + "Queried");
-	    	mProcessRunning = false;
 	    }
 
 		public boolean hasGivenResults() {
 			return mHasGivenResults;
+		}
+
+
+		public String[] getWork() {
+			return this.mGenes;
 		} 
 	} 
     
     class MasterThread extends Thread {
-    	final private int THREAD_POOL_SIZE = 5;
-    	final private int WORK_SIZE = 20;
+    	final private int THREAD_POOL_SIZE = 2;
+    	final private int WORK_SIZE = 2;
     	
     	private WorkerThread mThreadPool[];
     	
@@ -301,9 +273,19 @@ public class TargetMineSearchDialog extends JDialog {
     		}
     	}
     	
-    	public void processResults(ArrayList<ArrayList<Object>> results) {
+    	public void processResults(String[] completeWork, ArrayList<ArrayList<Object>> results) {
     		
-    		if(results.size() == 0) return;
+    		
+    		
+    		if(completeWork != null && completeWork.length != 0) {
+    			mSearched = mSearched + completeWork.length;
+    		}
+
+    		if(results == null || results.size() == 0) 
+    			return;
+    		
+    		
+    		mResultsFound = mResultsFound + results.size();
     		
     		Iterator<ArrayList<Object>> it = results.iterator();
     		while(it.hasNext()) {
@@ -314,6 +296,7 @@ public class TargetMineSearchDialog extends JDialog {
     			mResultsTable.addRow(row);
     		}
     		
+    		updateSearchStatus();
     	}
     	
     	public void initTableModel() {
@@ -324,15 +307,10 @@ public class TargetMineSearchDialog extends JDialog {
     	
     	public void run() {
     		
-    		
-    		DefaultTableModel dtm = new DefaultTableModel();
-    		dtm.setColumnIdentifiers(mTargetMineSearchDialog.queryIdentifiers().toArray());
-    		mTargetMineSearchDialog.mTable.setModel(dtm);
-    		
+    		initTableModel();
     		
     		mResultsTable = new Table(queryIdentifiers());
     		
-    		mProcessRunning = true;
     		mThreadPool = new WorkerThread[THREAD_POOL_SIZE];
     		for(int i = 0; i < THREAD_POOL_SIZE; i++) {
     			mThreadPool[i] = new WorkerThread();
@@ -358,13 +336,14 @@ public class TargetMineSearchDialog extends JDialog {
 							e.printStackTrace();
 						}
 						ArrayList<ArrayList<Object>> results = mThreadPool[i].getResults();
+						String completeWork[] = mThreadPool[i].getWork();
 						
 						mThreadPool[i] = new WorkerThread();
 	        			mThreadPool[i].setWork(work);
 	        			mThreadPool[i].start();
 	    				
-	    				if(results != null)
-	    					processResults(results);
+    					processResults(completeWork, results);
+    				 					
 	    				
 	    				givenWork = true;
 	    			}
@@ -382,9 +361,13 @@ public class TargetMineSearchDialog extends JDialog {
     				
     				if(!worker.hasGivenResults()) {
     					ArrayList<ArrayList<Object>> results = worker.getResults();
-    					processResults(results);
+    					String[] completeWork = worker.getWork();
+	        			
+    					processResults(completeWork, results);
+    					
+    					
+    					
     				}
-    				
     				
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
@@ -395,7 +378,6 @@ public class TargetMineSearchDialog extends JDialog {
     		if(!mStopProcess)
     			mMainWindow.loadTable(mResultsTable, "TargetMine");
     		
-    		mProcessRunning = false;
     	}
 
 		public boolean isRunning() {
@@ -404,59 +386,11 @@ public class TargetMineSearchDialog extends JDialog {
     }
      
     public void start() {
-    	if(!mMasterThread.isRunning()) {
+    	if(!mMasterThread.isAlive()) {
+    		mMasterThread = new MasterThread();
     		mMasterThread.start();
     	}
     }
-    
-	public void run() {
-		
-    	mProcessRunning = true;
-    	mStopProcess = false;
-    	String[] columnIdentifiers = 
-    		{"(TM) Gene", "(TM) Secondary Identifier", "(TM) Organism Name", 
-    		 "(TM) GO Identifier", "(TM) GO Name", "(TM) GO Code", "(TM) GO Namespace"};
-    	ArrayList<String> columnList = new ArrayList<String>();
-    	
-    	DefaultTableModel model = new DefaultTableModel();
-    	model.setColumnIdentifiers(columnIdentifiers);
-    	mTable.setModel(model);
-    	
-    	Collections.addAll(columnList, columnIdentifiers);
-    	
-    	Table targetMineTable = new Table(columnList);
-    	
-    	int totalFound = 0;
-    	ArrayList<ArrayList<Object>> stepResults = null;
-    	
-    	
-    	for(int i = 0; i < mGenelist.length; i = i + mStepSize) {
-    		String search = makeSearch(i, i+mStepSize);
-    		stepResults = query(search);
-    		
-    		Iterator<ArrayList<Object>> it = stepResults.iterator();
-    		while(it.hasNext()) {
-    			ArrayList<Object> row = it.next();
-    			
-    			model = (DefaultTableModel) mTable.getModel();
-    			model.addRow(row.toArray());
-    			mTable.setModel(model);
-    			
-    			if(!targetMineTable.addRow(row)) {
-    				System.out.println("Failed to add row to ");
-    			}
-    		}
-    		
-    		totalFound = totalFound + stepResults.size();
-    		
-    		
-    		updateSearchStatus();
-    		
-    	}
- 
-    	mMainWindow.loadTable(targetMineTable, "TargetMine");
-    	
-	}
 	
 
 }
