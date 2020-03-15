@@ -7,6 +7,7 @@ import java.awt.FlowLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
@@ -25,9 +26,13 @@ import toxicologygadget.query.QueryThreadCallback;
 
 import javax.swing.JLabel;
 import java.awt.GridLayout;
+import java.awt.ScrollPane;
+
 import javax.swing.JTable;
 import java.awt.Toolkit;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,7 +59,20 @@ public class TargetMineSearchDialog extends JDialog {
 	private boolean mStopProcess;
 	private MasterThread mMasterThread;
 
-    
+
+	private JScrollPane scrollPane;
+
+    private void stopMasterThread() {
+    	System.out.println("stopMasterThread()");
+    	try {
+    		
+			mMasterThread.stopProcess();
+			mMasterThread.join();
+			System.out.println("stopMasterThread() - join()");
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+    }
 
 	/**
 	 * Create the dialog.
@@ -67,6 +85,9 @@ public class TargetMineSearchDialog extends JDialog {
 		mContentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(mContentPanel, BorderLayout.CENTER);
 		mContentPanel.setLayout(new BorderLayout(0, 0));
+
+
+		mTable = new JTable();
 		{
 			JPanel panel = new JPanel();
 			mContentPanel.add(panel, BorderLayout.NORTH);
@@ -76,45 +97,52 @@ public class TargetMineSearchDialog extends JDialog {
 			}
 		}
 		{
-			mTable = new JTable();
-			mContentPanel.add(mTable, BorderLayout.CENTER);
-		}
-		{
-			JPanel buttonPane = new JPanel();
-			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
-			getContentPane().add(buttonPane, BorderLayout.SOUTH);
-			{
-				mLblConnectionStatus = new JLabel("[Disconnected]");
-				buttonPane.add(mLblConnectionStatus);
-			}
+			scrollPane = new JScrollPane(mTable);
+			mContentPanel.add(scrollPane, BorderLayout.CENTER);
+			
 			{
 				JButton cancelButton = new JButton("Cancel");
 				cancelButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent arg0) {
-						try {
-							mMasterThread.stopProcess();
-							mMasterThread.join();
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+						stopMasterThread();
 						dispose();
 					}
 				});
 				cancelButton.setActionCommand("Cancel");
-				buttonPane.add(cancelButton);
 			}
 		}
+		
+
+		
+		
 		this.mTargetMineSearchDialog = this;
 		this.mMainWindow = mainWindow;
 		this.mGenelist = genelist;
 		this.mSearched = 0;
 		this.mResultsFound = 0;
 		this.mStepSize = 1;
-		updateStatus("Disconnected");
+		//updateStatus("Disconnected");
 		this.updateSearchStatus();
 		this.setVisible(true);
 		this.mMasterThread = new MasterThread();
+		
+		
+		this.addWindowListener(new WindowAdapter() 
+    	{
+    	  public void windowClosed(WindowEvent e)
+    	  {
+    	    System.out.println("jdialog window closed event received");
+    	    
+    	  }
+
+    	  public void windowClosing(WindowEvent e)
+    	  {
+    	    System.out.println("jdialog window closing event received");
+    	    stopMasterThread();
+    	    
+    	  }
+    	});
+		
 		
 	}
 	
@@ -130,7 +158,7 @@ public class TargetMineSearchDialog extends JDialog {
 	}
 	
 	static private ArrayList<String> queryIdentifiers(){
-		return new ArrayList<String>( Arrays.asList( "(TM) Gene" , "1" , "2", "3", "4", "5", "6" ) );
+		return new ArrayList<String>( Arrays.asList( "(TM) Gene" , "(TM) Pathway Identifer" , "(TM) Pathway Name", "(TM) Pathway Organism Name", "(TM) Label 1", "(TM) Label 2") );
 	}
 	
     static private ArrayList<ArrayList<Object>> query(String genes) {
@@ -145,12 +173,11 @@ public class TargetMineSearchDialog extends JDialog {
 
         // Select the output columns:
         query.addViews(	"Gene.symbol",
-        				"Gene.secondaryIdentifier",
-        				"Gene.organism.name",
-        				"Gene.goAnnotation.ontologyTerm.identifier",
-        				"Gene.goAnnotation.ontologyTerm.name",
-        				"Gene.goAnnotation.evidence.code.code",
-        				"Gene.goAnnotation.ontologyTerm.namespace");
+                		"Gene.integratedPathwayClusters.pathways.identifier",
+                		"Gene.integratedPathwayClusters.pathways.name",
+                		"Gene.integratedPathwayClusters.pathways.organism.name",
+                		"Gene.integratedPathwayClusters.pathways.label1",
+                		"Gene.integratedPathwayClusters.pathways.label2");
 
         // Add orderby
         query.addOrderBy("Gene.symbol", OrderDirection.ASC);
@@ -204,6 +231,7 @@ public class TargetMineSearchDialog extends JDialog {
     	private boolean mHasGivenResults;
     	
     	WorkerThread(){
+    		mResults = new ArrayList<ArrayList<Object>>();
     		mProcessRunning = false;
     		this.setPriority(MAX_PRIORITY);
     	}
@@ -243,18 +271,18 @@ public class TargetMineSearchDialog extends JDialog {
 	} 
     
     class MasterThread extends Thread {
-    	final private int THREAD_POOL_SIZE = 24;
-    	final private int WORK_SIZE = 1;
+    	final private int THREAD_POOL_SIZE = 5;
+    	final private int WORK_SIZE = 20;
     	
     	private WorkerThread mThreadPool[];
     	
-    	private boolean mProcessRunning;
     	private boolean mStopProcess;
     	private int mWorkHeadIndex;
     	private Table mResultsTable;
     	
     	
     	public void stopProcess() {
+    		System.out.println("stopProcess()");
     		mStopProcess = true;
     	}
     	
@@ -288,7 +316,20 @@ public class TargetMineSearchDialog extends JDialog {
     		
     	}
     	
+    	public void initTableModel() {
+    		DefaultTableModel dtm = new DefaultTableModel();
+    		dtm.setColumnIdentifiers(mTargetMineSearchDialog.queryIdentifiers().toArray());
+    		mTargetMineSearchDialog.mTable.setModel(dtm);
+    	}
+    	
     	public void run() {
+    		
+    		
+    		DefaultTableModel dtm = new DefaultTableModel();
+    		dtm.setColumnIdentifiers(mTargetMineSearchDialog.queryIdentifiers().toArray());
+    		mTargetMineSearchDialog.mTable.setModel(dtm);
+    		
+    		
     		mResultsTable = new Table(queryIdentifiers());
     		
     		mProcessRunning = true;
@@ -301,7 +342,10 @@ public class TargetMineSearchDialog extends JDialog {
     		String[] work;
     		int i = 0;
     		while(((work = nextWork()).length != 0)) {
-    			if(mStopProcess) break;
+    			if(mStopProcess) {
+    				System.out.println("Ending Process!");
+    				break;
+    			}
     			
 				boolean givenWork = false;
 				System.out.println(work.length + "");
@@ -348,7 +392,8 @@ public class TargetMineSearchDialog extends JDialog {
 				}
     		}
     		
-    		mMainWindow.loadTable(mResultsTable, "TargetMine");
+    		if(!mStopProcess)
+    			mMainWindow.loadTable(mResultsTable, "TargetMine");
     		
     		mProcessRunning = false;
     	}
