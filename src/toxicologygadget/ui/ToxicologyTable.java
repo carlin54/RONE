@@ -34,7 +34,8 @@ public class ToxicologyTable extends JTable {
 		for(int i = 0; i < rows.length; i++) {
 			for(int j = 0; j < cols.length; j++) {
 				int k = rows[i];
-				String cell = (String) getModel().getValueAt(k, cols[j]);
+				String cell = (String)this.getValueAt(k, cols[j]);;
+				 
 				tree_set.add(cell);
 			}
 		}
@@ -56,7 +57,10 @@ public class ToxicologyTable extends JTable {
 			int r = rows[i];
 			for(int j = 0; j < cols.length; j++) {
 				int c = cols[j];
-				String cell =  getModel().getValueAt(r, c).toString();
+				int vr = this.convertRowIndexToModel(r);
+				int vc = this.convertColumnIndexToModel(c);
+				
+				String cell =  getModel().getValueAt(vr, vc).toString();
 				
 				if(!cell.equals(last_added) && !unique.contains(cell)) {
 					unique.add(cell);
@@ -67,12 +71,14 @@ public class ToxicologyTable extends JTable {
 		}
 		int len = unique.size();
 		return unique.toArray(new String[len]);
+		
 	}
 	
 	public ToxicologyTable(){
 		mDataTable = new Table();
 		
-        
+		setAutoCreateRowSorter(true);
+		
 		this.tableHeader.addMouseListener(new MouseAdapter() {
 
             @Override
@@ -84,8 +90,6 @@ public class ToxicologyTable extends JTable {
                 }
                 Object o = h.getColumnModel().getColumn(i).getHeaderValue();
                 Object selectedColumn = o;
-                
-                
                 
             }
         });
@@ -161,37 +165,6 @@ public class ToxicologyTable extends JTable {
 		return mDataTable.hasColumn(col);
 	}
 	
-	/*public void loadGenelist(String[] genelist) {
-		
-		if(!clearTableConfirmation())
-			return;
-		
-		
-		String[][] genelistData = new String[genelist.length][1];
-		genelistData[0][0] = "Gene";
-		for(int i = 1; i < genelist.length; i++) {
-			genelistData[i][0] = genelist[i-1];
-		}
-		
-		
-		dataTable = new Table(genelistData);
-		
-		updateTable();
-		
-	}*/
-	
-	/*public void importColumn(Object[] data, String columnIdentifier) {
-		updateTable();
-	}*/
-	
-	/*public void importTable(Object[][] data, String[] columnIdentifier) {
-		
-		for(int i = 0; i < data.length; i++) {
-			importColumn(data[i], columnIdentifier[i]);
-		}
-			
-	}*/
-	
 	public void importTable(String keyA, String keyB, Table importTable) {
 		
 		
@@ -203,7 +176,6 @@ public class ToxicologyTable extends JTable {
 			
 			this.mDataTable = Table.leftJoin(tableA, tableB, keyA, keyB);
 		}
-		
 		updateTable();
 	}
 	

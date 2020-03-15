@@ -5,8 +5,11 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 
 import javax.swing.JMenuBar;
@@ -19,9 +22,6 @@ import jp.sbi.garuda.backend.net.exception.NetworkConnectionException;
 import toxicologygadget.backend.garudahandler.GarudaHandler;
 import toxicologygadget.filemanager.Table;
 import toxicologygadget.filemanager.FileManager;
-import toxicologygadget.query.QueryThreadCallback;
-import toxicologygadget.query.ReactomeQueryThread;
-import toxicologygadget.query.TargetMineQueryThread;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -31,120 +31,22 @@ import javax.swing.JPopupMenu;
 
 
 public class MainWindow implements ActionListener {
+	
 	private MainWindow mMainWindow;
 	private JFrame mFrmToxicologyGadget;
 	private GarudaHandler mGarudaHandler;
 	private final Action mFileImportAction = new FileImportAction();
+	private final Action mFileExportTableAction = new FileExportTableAction();
 	private final Action mFileClearTableAction = new FileClearTableAction();
 	private final Action mReactomeImportAction =  new ReactomeImportAction();
 	private final Action mTargetMineImportAction = new TargetMineImportAction();
-	
 	
 	private final GarudaDiscoverActionGenelist mGarudaDiscoverActionGenelist = new GarudaDiscoverActionGenelist();
 	private final GarudaDiscoverActionEnsemble mGarudaDiscoverActionEnsemble = new GarudaDiscoverActionEnsemble();
 	
 	
 	private ToxicologyTable mToxicologyTable;
-	private TargetMineSearchDialog mTargetMineSearchDialog;
-	private MainWindowTargetMineCallback mTargetMineCallback;
-	private ReactomeQueryThread mReactomeQueryThread;
-	private MainWindowReactomeCallback mReactomeCallback;
 	
-	private class MainWindowTargetMineCallback implements QueryThreadCallback {
-		
-		SearchStatusWindow mTargetMineStatusWindow;
-		
-		@Override
-		public void startSearch(int number) {
-			mTargetMineStatusWindow = new SearchStatusWindow("TargetMine", number);
-			mTargetMineStatusWindow.setVisible(true);
-		}
-		
-		@Override
-		public void completeSearch(Table results, int status) {
-			
-			if(status == QueryThreadCallback.statusCodeFinishSuccess) {
-				
-				int res_len = results.getIdentifiers().size();
-				String[] res_id = results.getIdentifiers().toArray(new String[res_len]);
-				
-				int tox_len = mToxicologyTable.getIdentifiers().size();
-				String[] tox_id = mToxicologyTable.getIdentifiers().toArray(new String[tox_len]);
-				String fromWhere = "TargetMine";
-				ImportDataDialog importSelection = new ImportDataDialog(mFrmToxicologyGadget, fromWhere, tox_id, res_id) ;
-				importSelection.setVisible(true);	
-				
-				String[] data = importSelection.getData();
-				
-				if(data[0] != null) {
-					String keyTox = data[0];
-					String keyRes = data[1];
-					mToxicologyTable.importTable(keyTox, keyRes, results);
-				}
-			
-			}
-			
-			mTargetMineStatusWindow.setVisible(false);
-			mTargetMineStatusWindow.dispose();
-			mTargetMineStatusWindow = null;
-			
-		}
-
-		@Override
-		public void statusUpdate(int complete, int total, int totalFound) {
-			mTargetMineStatusWindow.updateSearch(complete, total, totalFound);
-			System.out.println("Complete: " + complete + "\t Total: " + total + "\t Results: " + totalFound);
-		}
-		
-		
-	}
-
-	private class MainWindowReactomeCallback implements QueryThreadCallback {
-		
-		SearchStatusWindow mReactomeStatusWindow;
-				
-		@Override
-		public void completeSearch(Table results, int status) {
-			
-			if(status == QueryThreadCallback.statusCodeFinishSuccess) {
-				
-				int res_len = results.getIdentifiers().size();
-				String[] res_id = results.getIdentifiers().toArray(new String[res_len]);
-				
-				int tox_len = mToxicologyTable.getIdentifiers().size();
-				String[] tox_id = mToxicologyTable.getIdentifiers().toArray(new String[tox_len]);
-				String fromWhere = "Reactome";
-				ImportDataDialog importSelection = new ImportDataDialog(mFrmToxicologyGadget, fromWhere, tox_id, res_id) ;
-				importSelection.setVisible(true);	
-				
-				String[] data = importSelection.getData();
-				
-				if(data[0] != null) {
-					String keyTox = data[0];
-					String keyRes = data[1];
-					mToxicologyTable.importTable(keyTox, keyRes, results);
-				}
-			
-			}
-			
-			mReactomeStatusWindow.setVisible(false);
-			mReactomeStatusWindow.dispose();
-			mReactomeStatusWindow = null;
-		}
-
-		@Override
-		public void statusUpdate(int complete, int total, int totalFound) {
-			mReactomeStatusWindow.updateSearch(complete, total, totalFound);
-			System.out.println("Complete: " + complete + "\t Total: " + total + "\t Results: " + totalFound);
-		}
-
-		@Override
-		public void startSearch(int number) {
-			mReactomeStatusWindow = new SearchStatusWindow("Reactome", number);
-			mReactomeStatusWindow.setVisible(true);
-		}
-		
-	}
 	
 	/**
 	 * Initialize the contents of the frame.
@@ -152,7 +54,7 @@ public class MainWindow implements ActionListener {
 	private void initialize() {
 		mMainWindow = this;
 		mFrmToxicologyGadget = new JFrame();
-		mFrmToxicologyGadget.setTitle("Toxicology Gadget");
+		mFrmToxicologyGadget.setTitle("DIVOC");
 		mFrmToxicologyGadget.setBounds(100, 100, 812, 555);
 		mFrmToxicologyGadget.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
@@ -169,6 +71,7 @@ public class MainWindow implements ActionListener {
 		mntmOpen.addActionListener(this);
 		
 		JMenuItem mntmSave = new JMenuItem("Export");
+		mntmSave.setAction(mFileExportTableAction);
 		mnFile.add(mntmSave);
 		
 		JMenuItem menuItem = new JMenuItem("Clear Table");
@@ -205,9 +108,6 @@ public class MainWindow implements ActionListener {
 		mntmTargetMineMenuItem.setAction(mTargetMineImportAction);
 		mnOtherTools.add(mntmTargetMineMenuItem);
 		
-		
-		this.mReactomeCallback = new MainWindowReactomeCallback();
-		this.mReactomeQueryThread = new ReactomeQueryThread(mReactomeCallback);
 		
 	}
 		
@@ -531,6 +431,108 @@ public class MainWindow implements ActionListener {
 			searchDialog.start();
 			
 		}
+	}
+	
+	private class FileExportTableAction extends AbstractAction {
+		
+		public FileExportTableAction() {
+			putValue(NAME, "Export");
+			putValue(SHORT_DESCRIPTION, "Some short description");
+		}
+		
+		public void actionPerformed(ActionEvent e) {
+			if(mToxicologyTable.isEmpty()) {
+				JOptionPane.showMessageDialog(mFrmToxicologyGadget, "There is no data in the table.");
+				return;
+			}
+			
+			JFrame parentFrame = new JFrame();
+			 
+			
+			 
+			
+			
+			File fileToSave;
+			boolean hasFile = false;
+			do {
+				JFileChooser fileChooser = new JFileChooser();
+				fileChooser.setDialogTitle("Specify a file to save");   
+				int userSelection = fileChooser.showSaveDialog(parentFrame);
+				if (userSelection != JFileChooser.APPROVE_OPTION)
+				    return;
+				
+				fileToSave = fileChooser.getSelectedFile();
+				
+				if(fileToSave.exists()) {
+					System.out.println("File exists!");
+					int dialogButton = JOptionPane.YES_NO_OPTION;
+					int dialogResult = JOptionPane.showConfirmDialog(null, "Would you like to over write this file?","Warning", dialogButton);
+					if(dialogResult == JOptionPane.YES_OPTION){
+						if(!fileToSave.delete()) {
+							continue;
+						}
+					}
+				}else {
+					System.out.println("File does not exists!");
+				}
+				
+				try {
+					fileToSave.createNewFile();
+					hasFile = true;
+				} catch (IOException e1) {
+					e1.printStackTrace();
+					continue;
+				}
+				
+			} while(!hasFile);
+			
+		    System.out.println("Save as file: " + fileToSave.getAbsolutePath());
+		    
+		    if(mToxicologyTable.hasSelection()) {
+				
+			    BufferedWriter writer;
+				try {
+					writer = new BufferedWriter(new FileWriter(fileToSave));
+					int cols[] = mToxicologyTable.getSelectedColumns();
+					
+					ArrayList<String> id = mToxicologyTable.getIdentifiers();
+					
+					String header = "";
+					for(int i = 0; i < cols.length-1; i++) {
+						int index = cols[i];
+						header = header + id.get(index) + ",";
+					}
+					int index = cols[cols.length-1];
+					header = header + id.get(index) + "\n"; 
+					writer.write(header);
+					
+					System.out.println(header);
+					
+				    int rows[] = mToxicologyTable.getSelectedRows();
+				    for(int r = 0; r < rows.length; r++) {
+				    	String line = "";
+				    	for(int c = 0; c < cols.length-1; c++) {
+				    		line = line + "\"" + mToxicologyTable.getCell(r, c) + "\"" + ",";
+				    	}
+				    	line = line + mToxicologyTable.getCell(r, cols.length-1) + "\n";
+				    	writer.write(line);
+				    	
+				    }
+				    
+					writer.close();
+					
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			    
+			    
+			} else {
+				
+			}
+			
+		}
+		
 	}
 	
 	private class FileClearTableAction extends AbstractAction {

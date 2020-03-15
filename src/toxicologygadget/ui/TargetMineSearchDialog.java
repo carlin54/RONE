@@ -1,18 +1,12 @@
 package toxicologygadget.ui;
 
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
-import java.awt.FlowLayout;
 
-import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableModel;
 
 import org.intermine.metadata.Model;
 import org.intermine.pathquery.Constraints;
@@ -22,24 +16,17 @@ import org.intermine.webservice.client.core.ServiceFactory;
 import org.intermine.webservice.client.services.QueryService;
 
 import toxicologygadget.filemanager.Table;
-import toxicologygadget.query.QueryThreadCallback;
 
 import javax.swing.JLabel;
-import java.awt.GridLayout;
-import java.awt.ScrollPane;
 
 import javax.swing.JTable;
 import java.awt.Toolkit;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.awt.event.ActionEvent;
 
 public class TargetMineSearchDialog extends JDialog {
 	
@@ -47,14 +34,12 @@ public class TargetMineSearchDialog extends JDialog {
 	private final JPanel mContentPanel = new JPanel();
 	private JTable mTable;
 	private MainWindow mMainWindow; 
-	private JLabel mLblConnectionStatus;
 	private JLabel mLblSearchStatus;
 	
 	
 	private String[] mGenelist;
 	private Integer mSearched;
 	private Integer mResultsFound;
-	private Integer mStepSize;
 	private MasterThread mMasterThread;
 
 
@@ -103,7 +88,6 @@ public class TargetMineSearchDialog extends JDialog {
 		this.mGenelist = genelist;
 		this.mSearched = 0;
 		this.mResultsFound = 0;
-		this.mStepSize = 1;
 		//updateStatus("Disconnected");
 		this.updateSearchStatus();
 		this.setVisible(true);
@@ -180,20 +164,6 @@ public class TargetMineSearchDialog extends JDialog {
         }
 		return results;
     }
-	
-    private String makeSearch(int i, int j) {
-    	String search = new String("");
-    	while(i < j && i < mGenelist.length) {
-    		search = search + mGenelist[i] + ", ";
-    		i++;
-    	}
-    	return search;
-    }
-    
-    private int numGenesToSearch(int i) {
-    	return ((i+mStepSize > mGenelist.length) ? mGenelist.length : i+mStepSize);
-    }
-    
     
     class WorkerThread extends Thread 
 	{ 
@@ -243,8 +213,8 @@ public class TargetMineSearchDialog extends JDialog {
 	} 
     
     class MasterThread extends Thread {
-    	final private int THREAD_POOL_SIZE = 2;
-    	final private int WORK_SIZE = 2;
+    	final private int THREAD_POOL_SIZE = 5;
+    	final private int WORK_SIZE = 20;
     	
     	private WorkerThread mThreadPool[];
     	

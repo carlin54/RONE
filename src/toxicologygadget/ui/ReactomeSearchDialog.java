@@ -1,10 +1,7 @@
 package toxicologygadget.ui;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
@@ -12,11 +9,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 
-import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -25,20 +19,11 @@ import javax.swing.JTable;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
-import org.intermine.metadata.Model;
-import org.intermine.pathquery.Constraints;
-import org.intermine.pathquery.OrderDirection;
-import org.intermine.pathquery.PathQuery;
-import org.intermine.webservice.client.core.ServiceFactory;
-import org.intermine.webservice.client.services.QueryService;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import toxicologygadget.filemanager.Table;
-import toxicologygadget.query.QueryThreadCallback;
-import toxicologygadget.ui.TargetMineSearchDialog.MasterThread;
-import toxicologygadget.ui.TargetMineSearchDialog.WorkerThread;
 
 public class ReactomeSearchDialog extends JDialog {
 	
@@ -46,7 +31,6 @@ public class ReactomeSearchDialog extends JDialog {
 	private final JPanel mContentPanel = new JPanel();
 	private JTable mTable;
 	private MainWindow mMainWindow; 
-	private JLabel mLblConnectionStatus;
 	private JLabel mLblSearchStatus;
 	
 	
@@ -268,19 +252,6 @@ public class ReactomeSearchDialog extends JDialog {
 		
 		return rows;
 	}
-    private String makeSearch(int i, int j) {
-    	String search = new String("");
-    	while(i < j && i < mGenelist.length) {
-    		search = search + mGenelist[i] + ", ";
-    		i++;
-    	}
-    	return search;
-    }
-    
-    private int numGenesToSearch(int i) {
-    	return ((i+mStepSize > mGenelist.length) ? mGenelist.length : i+mStepSize);
-    }
-    
     
     class WorkerThread extends Thread 
 	{ 
@@ -324,8 +295,8 @@ public class ReactomeSearchDialog extends JDialog {
 	} 
     
     class MasterThread extends Thread {
-    	final private int THREAD_POOL_SIZE = 10;
-    	final private int WORK_SIZE = 1;
+    	final private int THREAD_POOL_SIZE = 4;
+    	final private int WORK_SIZE = 20;
     	
     	private WorkerThread mThreadPool[];
     	
@@ -453,7 +424,7 @@ public class ReactomeSearchDialog extends JDialog {
     		}
     		
     		if(!mStopProcess)
-    			mMainWindow.loadTable(mResultsTable, "TargetMine");
+    			mMainWindow.loadTable(mResultsTable, "Reactome");
     		
     	}
 
