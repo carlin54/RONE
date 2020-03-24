@@ -45,7 +45,7 @@ public class GarudaHandler {
 		this.mToxicologyTable = geneTable;
 		
 		mGarudaBackend = new GarudaBackend(GarudaConstants.GARUDA_ID, GarudaConstants.GARUDA_NAME, this.mParentFrame);
-
+		
 		mGarudaBackend.addGarudaGlassPanel(this.mParentFrame, null);
 		
 		initGarudaListeners();

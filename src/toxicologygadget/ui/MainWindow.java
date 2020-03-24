@@ -5,10 +5,13 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -40,7 +43,6 @@ public class MainWindow implements ActionListener {
 	private final Action mFileClearTableAction = new FileClearTableAction();
 	private final Action mReactomeImportAction =  new ReactomeImportAction();
 	private final Action mTargetMineImportAction = new TargetMineImportAction();
-	
 	private final GarudaDiscoverActionGenelist mGarudaDiscoverActionGenelist = new GarudaDiscoverActionGenelist();
 	private final GarudaDiscoverActionEnsemble mGarudaDiscoverActionEnsemble = new GarudaDiscoverActionEnsemble();
 	
@@ -54,9 +56,10 @@ public class MainWindow implements ActionListener {
 	private void initialize() {
 		mMainWindow = this;
 		mFrmToxicologyGadget = new JFrame();
-		mFrmToxicologyGadget.setTitle("DIVOC");
+		mFrmToxicologyGadget.setTitle("RONE");
 		mFrmToxicologyGadget.setBounds(100, 100, 812, 555);
 		mFrmToxicologyGadget.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
 		
 		JMenuBar menuBar = new JMenuBar();
 		mFrmToxicologyGadget.setJMenuBar(menuBar);
@@ -133,27 +136,30 @@ public class MainWindow implements ActionListener {
 	 * Create the application.;
 	 * @throws IOException 
 	 */
-	public MainWindow() {
+	public MainWindow() throws SocketTimeoutException {
 		initialize();
-		try {
-			
-				mFrmToxicologyGadget.getContentPane().setLayout(new BoxLayout(mFrmToxicologyGadget.getContentPane(), BoxLayout.X_AXIS));
 		
-				this.mToxicologyTable = new ToxicologyTable();
-				mToxicologyTable.setCellSelectionEnabled(true);
-				mToxicologyTable.setColumnSelectionAllowed(true);
-				this.mGarudaHandler = new GarudaHandler(this.mFrmToxicologyGadget, this.mToxicologyTable);
-				
-				JScrollPane scrollPane = new JScrollPane();
-				mFrmToxicologyGadget.getContentPane().add(scrollPane);
-				
-				mToxicologyTable.setFillsViewportHeight(true);
-				scrollPane.setViewportView(mToxicologyTable);
+			mFrmToxicologyGadget.getContentPane().setLayout(new BoxLayout(mFrmToxicologyGadget.getContentPane(), BoxLayout.X_AXIS));
+	
+			this.mToxicologyTable = new ToxicologyTable();
+			mToxicologyTable.setCellSelectionEnabled(true);
+			mToxicologyTable.setColumnSelectionAllowed(true);
 			
-		} catch (GarudaConnectionNotInitializedException | NetworkConnectionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+			try {
+				this.mGarudaHandler = new GarudaHandler(this.mFrmToxicologyGadget, this.mToxicologyTable);
+			} catch (GarudaConnectionNotInitializedException | NetworkConnectionException e) {
+				JOptionPane.showMessageDialog(mFrmToxicologyGadget, "Was unable to connect to Garuda Platform. Please restart to connect.");
+				e.printStackTrace();
+			}
+			
+			
+			JScrollPane scrollPane = new JScrollPane();
+			mFrmToxicologyGadget.getContentPane().add(scrollPane);
+			
+			mToxicologyTable.setFillsViewportHeight(true);
+			scrollPane.setViewportView(mToxicologyTable);
+			
+		
 		
 		/* JSONObject res = new JSONObject(a);
 		
@@ -251,6 +257,17 @@ public class MainWindow implements ActionListener {
 		}
 	}
 	
+	private void loadBioCompendium(File file) {
+		Table data;
+		try {
+			data = FileManager.loadBioCompendiumFile(file);
+			loadTable(data, "Import File Data");
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage(), "Failure", JOptionPane.ERROR_MESSAGE);
+			e.printStackTrace();
+		}
+	}
+	
 	private void loadFile(File file, String contents) {
 		
 		if(!file.exists()) return;
@@ -277,10 +294,18 @@ public class MainWindow implements ActionListener {
 			case "Tab":
 				loadDataFile(file, "\t");
 				break;
+			
+			case "bioCompendium (HTML)":
+				loadBioCompendium(file);
+				break;
 		}
 		
 	}
 	
+	public void windowClosing(WindowEvent e) {
+		System.out.println("window closing");
+	}
+
 	private class FileImportAction extends AbstractAction {
 		
 		final JFileChooser fc = new JFileChooser();
@@ -298,7 +323,7 @@ public class MainWindow implements ActionListener {
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				File file = fc.getSelectedFile();
 				
-				Object[] possibilities = {"AGCT Scenario", "Genelist", "Ensemble", "CSV", "Tab Delimited Text"};
+				Object[] possibilities = {"AGCT Scenario", "Genelist", "Ensemble", "CSV", "Tab Delimited Text", "bioCompendium (HTML)"};
 				String content = (String)JOptionPane.showInputDialog(
 				                    mFrmToxicologyGadget,
 				                    "Complete the sentence:\n",
@@ -329,6 +354,7 @@ public class MainWindow implements ActionListener {
 		
 		try {
 			file = FileManager.writeOutString(list, fileName);
+			file.deleteOnExit();
 			mGarudaHandler.garudaDiscover(file, contence);
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -1,0 +1,360 @@
+/*
+#################################################################
+##                                                             ##       
+## Developed by Venkata P. Satagopam as part of his PhD thesis ##
+##                       July 2009                             ##
+##                 venkata.satagopam@embl.de                   ##
+##                                                             ##
+## Disclaimer: Copy rights reserved by EMBL, please contact    ## 
+##             Venkata Satagopam  prior to reuse any part      ##
+##             of this code                                    ##
+##                                                             ##
+#################################################################
+*/
+/*
+body {
+  padding-left: 11em;
+  font-family: Georgia, "Times New Roman",
+        Times, serif;
+  color: white;
+  background-color: #ffffff }
+*/
+td.banner_title {
+  font-family: verdana; 
+  color: white;
+  font-size: 180%; 
+}
+td.banner_subtitle  {
+  font-family: verdana;
+  font-size: 100%;
+  color: white;
+}
+
+p.title {
+  font-family: verdana;
+  color: white; 	
+  font-size: 160%
+}
+
+p.subtitle  {
+  font-family: verdana;
+  font-size: 100%;
+  color: white
+}
+
+a.deco {
+  text-decoration: none
+}
+
+h1 {font-size:144%;}
+h2 {font-size:129%;}
+h3 {font-size:114%;}
+h4 {font-size:100%;}
+body {margin:1em;font-family:verdana,arial,sans-serif;}
+ul {width:80%; font-size: 11px;}
+dl {padding:1em;}
+    
+    #hd {position:relative;}
+    #hd .logo {width:65px;height:38px;vertical-align:middle;padding-right:10px;}
+
+    #bd h1,h2,h3,p{padding:.5em;}
+    
+    #code {clear:both;}
+    #code .code {padding:1em;background:#DEDEDE;border:1px solid black;font-size:92%;}
+    
+    #logger {position:relative;float:right;clear:both;margin:1em;width:30em;padding:.5em;}
+    
+    #panel {width:40%;background:#DEDEDE;border:1px solid #000;margin:2em;padding:1em;}
+    #panel div {margin-top:1em;padding-bottom:.5em;border-bottom:1px solid #404040;}
+    
+    #coder {position:absolute;background:#DEDEDE;border:1px solid #000;margin:1em;padding:.5em;bottom:10px;right:10px;}
+    #output {position:relative;width:30em;height:15em;margin-top:1em;}
+
+    #searchmod {position:relative;padding:1em;} 
+
+    #genomeSearchAutocomplete, #domainSearchAutocomplete {position:absolute;margin-bottom:1.5em;width:40%;} /* set width of widget here */
+    #genomeSearchAutocomplete {z-index:9001;} /* for IE z-index of absolute divs inside relative divs issue - z-index for #genomeSearchAutocomplete must be higher than #domainSearchAutocomplete */
+    #domainSearchAutocomplete {z-index:9000;} /* for IE z-index of absolute divs inside relative divs issue */
+    #genomeTextInput, #domainTextInput {position:relative;width:100%;height:1.7em;} 
+    #genomeSuggestions, #domainSuggestions {position:absolute;top=1.0em;width:100%;} 
+    #genomeSuggestions .yui-ac-content, #domainSuggestions .yui-ac-content {position:absolute;width:100%;border:1px solid #404040;background:#fff;overflow:hidden;z-index:9050;} 
+    #genomeSuggestions ul, #domainSuggestions ul {list-style: none;margin: 0;padding: 0;width:100%;} 
+    #genomeSuggestions li, #domainSuggestions li {padding:0 5px;cursor:default;white-space:nowrap;} 
+    #genomeSuggestions li.yui-ac-highlight, #domainSuggestions li.yui-ac-highlight {background:#a0a0a0;}
+
+
+div.tabBox {margin: 0px 0px 2px 0px;}
+
+div.tabArea {
+  font-size: 80%;
+  font-weight: bold;
+  padding: 0px 2px 4px 2px;
+}
+
+a.tab {
+  color: white;
+  background-color: #5B5B5B; 
+  border: 1px solid #dcb;
+  border-bottom-width: 0px;
+  -moz-border-radius: .71em .71em 0em 0em;
+  border-radius-topleft: .71em;
+  border-radius-topright: .71em;
+  padding: 0 1em 0 1em;
+  position: relative;
+  text-decoration: none;
+  top: 3px;
+  z-index: 100;
+}
+
+a.activetab {
+  color: #5B5B5B;
+  background-color: #CAE1FF;
+  border: 1px solid #dcb;
+  border-bottom-width: 0px;
+  -moz-border-radius: .71em .71em 0em 0em;
+  border-radius-topleft: .71em;
+  border-radius-topright: .71em;
+  padding: 0 1em 0 1em;
+  position: relative;
+  text-decoration: none;
+  top: 3px;
+  z-index: 100;
+}
+
+a.activetab:visited {
+  color: #5B5B5B;
+  background-color: #CAE1FF;
+}
+
+a.activetab:hover {
+  color: #5B5B5B;
+  background-color: #CAE1FF;
+}
+
+a.tab:visited {
+  color: white;
+  background-color: #5B5B5B; 
+}
+
+a.tab:hover { color: #CAE1FF; }
+
+div.tabMain {
+  padding: 0px 4px 0px 2px;
+  position: relative;
+  z-index: 101;
+}
+
+div.tabIframeWrapper { width: 100%; }
+
+tooltipDiv {
+	position: absolute;
+	left: 0;
+	top: 0;
+	z-index: 1000;
+	display: none;
+	padding: 5px;
+	border-style: solid;
+	border-width: 5px;
+	border-color: #fff;
+	background-color: #cde9f2;
+	color: #3278a0;
+	font-family: verdana, sans-serif;
+	font-size: 11px;
+	white-space: nowrap;
+}
+
+body {
+	margin: 0px;
+	background-color: #fff;
+	border: 0;
+	padding: 2px;
+	color: #000;
+	font-family: Verdana, Arial, Helvetica, sans-serif; 
+	text-align: left; 
+}
+
+p.text_justify {
+	text-align: justify;
+	font-size: 11px;
+}
+ 
+p.text_justify2 {
+        text-align: right;
+        font-size: 9px;
+}
+
+small.text_justify {
+	text-align: justify;
+	font-size: 11px;
+}
+
+.frame { }
+.framedata { }
+.column { }
+.columndata { }
+.cell { padding: 2px; }
+
+.loginbanner {
+	background-color: #5B5B5B;
+	border:	1px solid #dcb;
+	padding: 0px 5px 2px 5px;
+	font-size: 80%; font-weight: bold;
+	color: #FFFFFF;
+}
+
+.cellbanner {
+	background-color: #CAE1FF;
+	border:	1px solid #dcb;
+	padding: 0px 5px 2px 5px;
+	font-size: 80%; font-weight: bold;
+	color: black;
+}
+
+.cellbody {
+	background-color: #fff;
+	border-right:  1px solid #dcb;
+	border-bottom: 1px solid #dcb;
+	border-left:   1px solid #dcb;
+	padding: 5px;
+}
+
+table.texttable {
+	border-collapse: collapse;
+	border:	1px solid #5B5B5B;
+	padding: 0px 5px 2px 5px;
+	color: black;
+}
+
+.keyrow { 
+	border-top: 3px solid #5B5B5B; 
+	border-bottom: 2px solid #5B5B5B;
+	padding: 0px 5px 2px 5px;
+	font-weight: bold;
+	color: black;
+}
+
+.bottomrow {
+	border-bottom: 3px solid #5B5B5B;
+	padding: 0px 5px 2px 5px;
+	color: black;
+}
+
+caption.texttable { 
+	caption-side: top; 
+	width: auto;
+	text-align: left 
+}
+
+
+a.non { text-decoration: none; }
+a.smallnon { font-size: 80%; text-decoration: none; }
+
+p.hang {
+	text-indent: -1em;
+	margin-left: 1em;
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+pre.darkgreen { color: darkgreen; }
+pre.darkblue { color: darkblue; }
+
+span.logname {
+	font-weight: bold;
+	font-size: 80%;
+	color: darkblue;
+}
+
+span.logtext { font-size: 80%; }
+
+span.sestext {
+	font-size: 80%;
+	color: darkblue;
+}
+
+button.logout {
+	padding: 0;
+	font-weight: bold;
+	font-size: 80%;
+	color: white;
+	float: right;
+}
+
+button.darkblue {
+	padding: 0;
+	font-weight: bold;
+	color: white;
+}
+
+.citation_title{
+        margin:         1em 0;
+        padding:        0.5em;
+        font-size:      15px;
+        background-color: #f0f8ff;
+        border:         solid 1px #ccc;
+}
+
+table.role { margin: 2px; font-size: 90%; font-weight: bold; background-color: #39628b; }
+td.role { text-align: right; font-size: 100%; font-weight: bold; color: #fff; }
+td img.decor { display: block; }
+
+a.external { text-decoration: none; }
+a.external:link { color: #fff }
+a.external:visited { color: #fff }
+a.external:hover { color: #ffc }
+a.external:active { color: #ffc }
+
+a.nav { text-decoration: none; }
+a.nav:link { color: #5B5B5B }
+a.nav:visited { color: #5B5B5B }
+a.nav:hover { color: #CAE1FF }
+a.nav:active { color: #CAE1FF }
+
+td.text {
+	font-family: verdana; 
+	font-size: 80%;
+	text-align: left;
+	font-weight: bold;
+	color: blue;	
+}
+td.navtext {
+	font-weight: bold;
+	text-align: left;
+	font-size: 75%;
+}
+
+td.titletext {
+	text-align: left; 
+	font-weight: bold;
+	width: 20%;
+}
+
+td.maintext {
+	text-align: left;
+	width: 20%;
+}
+
+td.maintext_grey {
+	text-align: left;
+	width: 20%;
+	background-color: #DDDDDD;
+        border: 1px solid #DDDDDD;
+}
+
+td.mainnumber {
+	text-align: left;
+}
+
+td.mainnumber_grey {
+	text-align: left;
+	background-color: #DDDDDD;
+}
+
+td.light_blue {
+	background-color: #CAE1FF;
+}
+
+/* FOOTER */
+
+.footer { font-size: 10px; }
+

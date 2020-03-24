@@ -1,28 +1,38 @@
 package toxicologygadget.ui;
 
+import javax.swing.DefaultRowSorter;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
 import javax.swing.JTable;
+import javax.swing.RowSorter;
+import javax.swing.RowSorter.SortKey;
+import javax.swing.SortOrder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 import toxicologygadget.filemanager.Table;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
 public class ToxicologyTable extends JTable {
-	
+	private JTable mJTable;
 	private Table mDataTable;
+	
+	private List<RowSorter.SortKey> sortKeys;
 	
 	public ArrayList<String> getIdentifiers() {
 		return mDataTable.getIdentifiers();
-		
-		
-		
 	}
 	
 	public String[] getSelected() {
@@ -75,8 +85,9 @@ public class ToxicologyTable extends JTable {
 	}
 	
 	public ToxicologyTable(){
+		mJTable = this;
 		mDataTable = new Table();
-		
+		sortKeys = new ArrayList<>();
 		setAutoCreateRowSorter(true);
 		
 		this.tableHeader.addMouseListener(new MouseAdapter() {
@@ -91,7 +102,69 @@ public class ToxicologyTable extends JTable {
                 Object o = h.getColumnModel().getColumn(i).getHeaderValue();
                 Object selectedColumn = o;
                 
+                final JPopupMenu popup = new JPopupMenu();
+                
+                JMenuItem menuItem = new JMenuItem("Sort by");
+                menuItem.addActionListener(new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						System.out.println("Sort By!");
+						TableRowSorter<TableModel> sorter = new TableRowSorter<>(mJTable.getModel());
+						mJTable.setRowSorter(sorter);
+						sortKeys = new ArrayList<>();
+						sortKeys.add(new RowSorter.SortKey(i, SortOrder.ASCENDING));
+						sorter.setSortKeys(sortKeys);
+						sorter.sort();
+						
+					}
+                	
+                });
+                menuItem.addMouseListener(new MouseAdapter() {
+                	 
+                    @Override
+                    public void mousePressed(MouseEvent e) {
+                        showPopup(e);
+                    }
+         
+                    @Override
+                    public void mouseReleased(MouseEvent e) {
+                        showPopup(e);
+                    }
+         
+                    private void showPopup(MouseEvent e) {
+                        if (e.isPopupTrigger()) {
+                        	if(e.getButton() == MouseEvent.BUTTON1)
+                        		popup.show(e.getComponent(),
+                        					e.getX(), e.getY());
+                        }
+                    }
+                }
+                );
+                popup.add(menuItem);
+                menuItem = new JMenuItem("Order by");
+                menuItem.addActionListener(new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						System.out.println("Order by!");
+						TableRowSorter<TableModel> sorter = new TableRowSorter<>(mJTable.getModel());
+						mJTable.setRowSorter(sorter);
+						sortKeys.add(new RowSorter.SortKey(i, SortOrder.ASCENDING));
+						sorter.setSortKeys(sortKeys);
+						sorter.sort();
+					}
+                	
+                });
+                popup.add(menuItem);
+                popup.show(h, e.getPoint().x, e.getPoint().y);
+                
+                System.out.println(selectedColumn);
+                
             }
+            
+            
+            
         });
 	}
 	

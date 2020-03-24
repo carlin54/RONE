@@ -1,0 +1,227 @@
+/*
+Document   : biocompendium_popup.css
+Created on : July 20th, 2009
+Author     : venkata.satagopam@embl.de
+Description:
+*/
+
+/* ---------------- popup entity styles ---------------- */
+/* ------------------------------------------------------ */
+a.biocompendium {
+      text-decoration: none;
+      color: blue;
+}
+td.biocompendium {
+      font-family: Arial;
+      font-size: 80%;
+}	
+td.biocompendium_header {
+      font-family: Arial;
+      font-size: 80%;
+      text-align: center;
+      background-color: #c7c7d0;
+}	
+td.biocompendium_header_left {
+      font-family: Arial;
+      font-size: 80%;
+      text-align: left;
+      background-color: #c7c7d0;
+}	
+td.biocompendium_header_right {
+      font-family: Arial;
+      font-size: 80%;
+      text-align: right;
+      background-color: #c7c7d0;
+}	
+a.urls {
+      text-decoration: none;
+      color: white;
+}
+a.url {
+      text-decoration: none;
+}
+
+
+
+a.gene_list1 {
+      background-color: #87ceeb;
+      text-decoration: none;
+      font-size: 60%;
+      color: black;
+}
+a.gene_list2 {
+      background-color: #ff6639;
+      text-decoration: none;
+      font-size: 60%;
+      color: black;
+}
+a.gene_list3 {
+      background-color: #57E964;
+      text-decoration: none;
+      font-size: 60%;
+      color: black;
+}
+a.gene_list4 {
+      background-color: #9966ff;
+      text-decoration: none;
+      font-size: 60%;
+      color: black;
+}
+
+a.gene_list5 {
+      background-color: #999900;
+      text-decoration: none;
+      font-size: 60%;
+      color: black;
+}
+a.gene_list6 {
+      background-color: #0000ff;
+      text-decoration: none;
+      font-size: 60%;
+      color: black;
+}
+a.gene_list7 {
+      background-color: #999999;
+      text-decoration: none;
+      font-size: 60%;
+      color: black;
+}
+a.gene_list8 {
+      background-color: #33ccff;
+      text-decoration: none;
+      font-size: 60%;
+      color: black;
+}
+a.gene_list9 {
+      background-color: #006699;
+      text-decoration: none;
+      font-size: 60%;
+      color: black;
+}
+a.gene_list10 {
+      background-color: #996633;
+      text-decoration: none;
+      font-size: 60%;
+      color: black;
+}
+a.gene_list11 {
+      background-color: #000033;
+      text-decoration: none;
+      font-size: 60%;
+      color: black;
+}
+a.gene_list12 {
+      background-color: #ff0000;
+      text-decoration: none;
+      font-size: 60%;
+      color: black;
+}
+a.gene_list13 {
+      background-color: #336600;
+      text-decoration: none;
+      font-size: 60%;
+      color: black;
+}
+a.gene_list14 {
+      background-color: #660033;
+      text-decoration: none;
+      font-size: 60%;
+      color: black;
+}
+a.gene_list15 {
+      background-color: #996600;
+      text-decoration: none;
+      font-size: 60%;
+      color: black;
+}
+a.gene_list16 {
+      background-color: #000000;
+      text-decoration: none;
+      font-size: 60%;
+      color: black;
+}
+a.gene_list17 {
+      background-color: #993300;
+      text-decoration: none;
+      font-size: 60%;
+      color: black;
+}
+a.gene_list18 {
+      background-color: #33cc00;
+      text-decoration: none;
+      font-size: 60%;
+      color: black;
+}
+a.gene_list19 {
+      background-color: #206090;
+      text-decoration: none;
+      font-size: 60%;
+      color: black;
+}
+a.gene_list20 {
+      background-color: #936200;
+      text-decoration: none;
+      font-size: 60%;
+      color: black;
+}
+
+a.intersect2 {
+#width: 200px;
+#        min-height: 250px;
+#        border: 1px solid #000;
+      height: 100%;
+      width: 100%;
+        display: -moz-inline-stack;
+        display: inline-block;
+        vertical-align: middle;
+      text-align: left;
+#        margin: 5px;
+        zoom: 1;
+        *display: inline;
+#        _height: 250px;
+	overflow: hidden;
+
+      background-color: red;
+      font-size: 140%;
+      color: black;
+}
+
+a.intersect {
+      text-align: left;
+      background-color: gray;
+      text-decoration: none;
+      font-size: 140%;
+      color: black;
+      height: 100%;
+      width: 100%;
+      display: inline-block;
+      zoom: 1;
+      *display: inline;
+      overflow: hidden;
+}
+a.intersect_old {
+      text-align: left;
+      background-color: gray;
+      text-decoration: none;
+      font-size: 140%;
+      color: black;
+}
+a.intersect_white {
+      background-color: white;
+      text-decoration: none;
+      font-size: 140%;
+      color: black;
+}
+td.biocompendium_intersect {
+      font-family: Arial;
+      font-size: 80%;
+      text-align: left;
+      vertical-align: middle;
+      background-color: gray;
+}	
+td.biocompendium_intersect_white {
+      font-family: Arial;
+      font-size: 80%;
+      text-align: left;
+      background-color: white;
+}	
