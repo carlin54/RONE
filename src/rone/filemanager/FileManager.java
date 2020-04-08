@@ -1,4 +1,4 @@
-package toxicologygadget.filemanager;
+package rone.filemanager;
 
 import java.awt.event.WindowEvent;
 import java.io.*;
@@ -30,6 +30,7 @@ public class FileManager {
 		int endIndex = pathwayIdLine.length() - 12;
 		return pathwayIdLine.substring(beginIndex, endIndex);
 	}
+	
 	private static String parsePathwayName(String pathwayNameLine) {
 		int beginIndex = 0;
 		int endIndex = pathwayNameLine.length() - 12;
@@ -37,6 +38,7 @@ public class FileManager {
 		String[] split = clipped.split(">");
 		return split[split.length-1];
 	}
+	
 	private static String parseAdjustedPvalue(String adjustedPvalueLine) {
 		int beginIndex = 0;
 		int endIndex = adjustedPvalueLine.length() - 39;
@@ -44,6 +46,7 @@ public class FileManager {
 		String[] split = clipped.split(">");
 		return split[split.length-1];
 	}
+	
 	private static String parseGeneName(String geneNameLine) {
 		int beginIndex = 0;
 		int endIndex = geneNameLine.length() - 12;
@@ -51,6 +54,7 @@ public class FileManager {
 		String[] split = clipped.split(">");
 		return split[split.length-1];
 	}
+	
 	private static String parseKEGGGene(String KEGGGeneLine) {
 		int beginIndex = 0;
 		int endIndex = KEGGGeneLine.length() - 16;
@@ -58,6 +62,7 @@ public class FileManager {
 		String[] split = clipped.split(">");
 		return split[split.length-1];
 	}
+	
 	private static String parseEnsemble(String ensembleLine) {
 		int beginIndex = 0;
 		int endIndex = ensembleLine.length() - 16;
@@ -161,8 +166,6 @@ public class FileManager {
 			}
 			
 		}
-		
-		
 		return bioCompendiumResults;
 		
 	}
@@ -322,7 +325,6 @@ public class FileManager {
 			ArrayList<String> identifiers = new ArrayList<String>();
 			identifiers.add("Probe ID");
 			identifiers.add("Cluster");
-			
 			
 			return new Table(table, identifiers);
 			

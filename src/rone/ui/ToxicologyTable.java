@@ -1,4 +1,4 @@
-package toxicologygadget.ui;
+package rone.ui;
 
 import javax.swing.DefaultRowSorter;
 import javax.swing.JMenuItem;
@@ -13,7 +13,7 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
-import toxicologygadget.filemanager.Table;
+import rone.filemanager.Table;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 public class ToxicologyTable extends JTable {
+	
 	private JTable mJTable;
 	private Table mDataTable;
 	

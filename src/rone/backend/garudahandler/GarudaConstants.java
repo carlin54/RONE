@@ -1,4 +1,4 @@
-package toxicologygadget.backend.garudahandler;
+package rone.backend.garudahandler;
 
 public class GarudaConstants {
 	

@@ -1,4 +1,4 @@
-package toxicologygadget.ui;
+package rone.ui;
 
 import java.awt.EventQueue;
 
@@ -22,15 +22,16 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import jp.sbi.garuda.backend.net.exception.GarudaConnectionNotInitializedException;
 import jp.sbi.garuda.backend.net.exception.NetworkConnectionException;
-import toxicologygadget.backend.garudahandler.GarudaHandler;
-import toxicologygadget.filemanager.Table;
-import toxicologygadget.filemanager.FileManager;
+import rone.backend.garudahandler.GarudaHandler;
+import rone.filemanager.FileManager;
+import rone.filemanager.Table;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JFileChooser;
 import javax.swing.BoxLayout;
 import javax.swing.JPopupMenu;
+import java.awt.Toolkit;
 
 
 public class MainWindow implements ActionListener {
@@ -46,21 +47,19 @@ public class MainWindow implements ActionListener {
 	private final GarudaDiscoverActionGenelist mGarudaDiscoverActionGenelist = new GarudaDiscoverActionGenelist();
 	private final GarudaDiscoverActionEnsemble mGarudaDiscoverActionEnsemble = new GarudaDiscoverActionEnsemble();
 	
-	
 	private ToxicologyTable mToxicologyTable;
-	
-	
+		
 	/**
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
 		mMainWindow = this;
 		mFrmToxicologyGadget = new JFrame();
+		mFrmToxicologyGadget.setIconImage(Toolkit.getDefaultToolkit().getImage("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\icons\\roneicon.png"));
 		mFrmToxicologyGadget.setTitle("RONE");
 		mFrmToxicologyGadget.setBounds(100, 100, 812, 555);
 		mFrmToxicologyGadget.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		
+				
 		JMenuBar menuBar = new JMenuBar();
 		mFrmToxicologyGadget.setJMenuBar(menuBar);
 		

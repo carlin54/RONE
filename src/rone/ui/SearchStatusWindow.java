@@ -1,4 +1,4 @@
-package toxicologygadget.ui;
+package rone.ui;
 
 
 import javax.swing.JFrame;

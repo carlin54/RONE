@@ -1,36 +1,33 @@
-package toxicologygadget.ui;
+package rone.ui;
 
 import java.awt.BorderLayout;
-
-import javax.swing.JDialog;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.border.EmptyBorder;
-import javax.swing.table.DefaultTableModel;
-
-import org.intermine.metadata.Model;
-import org.intermine.pathquery.Constraints;
-import org.intermine.pathquery.OrderDirection;
-import org.intermine.pathquery.PathQuery;
-import org.intermine.webservice.client.core.ServiceFactory;
-import org.intermine.webservice.client.services.QueryService;
-
-import toxicologygadget.filemanager.Table;
-
-import javax.swing.JLabel;
-
-import javax.swing.JTable;
 import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 
-public class TargetMineSearchDialog extends JDialog {
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import rone.filemanager.Table;
+
+public class ReactomeSearchDialog extends JDialog {
 	
-	private TargetMineSearchDialog mTargetMineSearchDialog;
+	private ReactomeSearchDialog mTargetMineSearchDialog;
 	private final JPanel mContentPanel = new JPanel();
 	private JTable mTable;
 	private MainWindow mMainWindow; 
@@ -40,6 +37,7 @@ public class TargetMineSearchDialog extends JDialog {
 	private String[] mGenelist;
 	private Integer mSearched;
 	private Integer mResultsFound;
+	private Integer mStepSize;
 	private MasterThread mMasterThread;
 
 
@@ -58,9 +56,9 @@ public class TargetMineSearchDialog extends JDialog {
 	/**
 	 * Create the dialog.
 	 */
-	public TargetMineSearchDialog(MainWindow mainWindow, String[] genelist) {
-		setIconImage(Toolkit.getDefaultToolkit().getImage("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\icons\\targetminelogo.png"));
-		setTitle("TargetMine Search");
+	public ReactomeSearchDialog(MainWindow mainWindow, String[] genelist) {
+		setIconImage(Toolkit.getDefaultToolkit().getImage("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\icons\\reactomelogo.png"));
+		setTitle("Reactome Search");
 		setBounds(100, 100, 450, 300);
 		getContentPane().setLayout(new BorderLayout());
 		mContentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -88,11 +86,11 @@ public class TargetMineSearchDialog extends JDialog {
 		this.mGenelist = genelist;
 		this.mSearched = 0;
 		this.mResultsFound = 0;
-		//updateStatus("Disconnected");
+		this.mStepSize = 1;
+		
 		this.updateSearchStatus();
 		this.setVisible(true);
 		this.mMasterThread = new MasterThread();
-		
 		
 		this.addWindowListener(new WindowAdapter() 
     	{
@@ -119,51 +117,141 @@ public class TargetMineSearchDialog extends JDialog {
 	}
 	
 	static private ArrayList<String> queryIdentifiers(){
-		return new ArrayList<String>( Arrays.asList( "(TM) Gene" , "(TM) Pathway Identifer" , "(TM) Pathway Name", "(TM) Pathway Organism Name", "(TM) Label 1", "(TM) Label 2") );
+		return new ArrayList<String>(
+				Arrays.asList("Gene", "(R) Pathway", "(R) Species", "(R) stId", "(R) Coverage", "(R) P-Value", "(R) FDR"));
+		}
+	
+	public static String[] getCommand(String gene, int resultsPerPage, int pageNumber) {
+		String url= "\"https://reactome.org/AnalysisService/identifier/" 
+					+ gene 
+					+ "?interactors=false&pageSize=" 
+					+ resultsPerPage 
+					+ "&page=" 
+					+ pageNumber 
+					+ "&sortBy=ENTITIES_PVALUE&order=ASC&resource=TOTAL&pValue=1&includeDisease=true\"";
+		
+		return new String[] {"curl", "-X", "GET", url, "-H", "\"accept: application/json\""}; 
 	}
 	
-    static private ArrayList<ArrayList<Object>> query(String genes) {
-    	
-    	final String ROOT = "https://targetmine.mizuguchilab.org/targetmine/service";
-    	
-    	ServiceFactory factory = new ServiceFactory(ROOT);
-    	Model model = factory.getModel();
-   
-        
-        PathQuery query = new PathQuery(model);
+	private static int getNumberOfPathways(String jsonQuery) {
+		try {
+			JSONObject jo = new JSONObject(jsonQuery);
+			return jo.getInt("pathwaysFound");
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return -1;
+		}
+	}
+	
+	private static ArrayList<ArrayList<Object>> query(String[] genes) {
+		
+		String jsonQuery = null;
+		ArrayList<ArrayList<Object>> pathways = new ArrayList<ArrayList<Object>>();
+		for(int i = 0; i < genes.length; i++) {
+			String gene = genes[i];
+			
+			try
+			{
+				int resultsPerPage = 1000; 
+				int pathwaysSearched = 0;
+				int numberOfPathways = 0;
+				int pageNumber = 1;
+				do {
+					String[] command = getCommand(gene, resultsPerPage, pageNumber);
+					ProcessBuilder process = new ProcessBuilder(command); 
+					Process p;
+					
+					p = process.start();
+					BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+					StringBuilder builder = new StringBuilder();
+					String line = null;
+					while ( (line = reader.readLine()) != null) {
+						builder.append(line);
+						builder.append(System.getProperty("line.separator"));
+					}
+					jsonQuery = builder.toString();
+					System.out.print(jsonQuery);
+					
+					numberOfPathways = getNumberOfPathways(jsonQuery);
+					ArrayList<ArrayList<Object>> searchResults = parseQuery(jsonQuery);
+					for(ArrayList<Object> o : searchResults) 
+						o.add(0, gene);
+					pathways.addAll(searchResults);
+					
+					pathwaysSearched = pathwaysSearched + resultsPerPage;
+					pageNumber++;
+				} while(pathwaysSearched < numberOfPathways);
+				
+			} catch (IOException e) {
+				return null;
+			}
+		
+		}
+		return pathways;
+	}
+	
+	private static ArrayList<ArrayList<Object>> parseQuery(String jsonQuery) {
+		JSONObject jo;
+		JSONArray pathways;
+		
+		try {
+			jo = new JSONObject(jsonQuery);		
+			pathways= jo.getJSONArray("pathways");
+		} catch (JSONException e) {
+			e.printStackTrace();
+			return null;
+		}
+		
+		ArrayList<ArrayList<Object>> rows = new ArrayList<ArrayList<Object>>();
+		
+		for(int i = 0; i < pathways.length(); i++) {
+			
+			JSONObject pathway;
+			JSONObject species;
+			JSONObject entities;
+			try {
+				pathway = pathways.getJSONObject(i);
+				species = pathway.getJSONObject("species");
+				entities = pathway.getJSONObject("entities");
+			} catch (JSONException e) {
+				e.printStackTrace();
+				continue;
+			}
 
-        // Select the output columns:
-        query.addViews(	"Gene.symbol",
-                		"Gene.integratedPathwayClusters.pathways.identifier",
-                		"Gene.integratedPathwayClusters.pathways.name",
-                		"Gene.integratedPathwayClusters.pathways.organism.name",
-                		"Gene.integratedPathwayClusters.pathways.label1",
-                		"Gene.integratedPathwayClusters.pathways.label2");
-
-        // Add orderby
-        query.addOrderBy("Gene.symbol", OrderDirection.ASC);
-
-        // Filter the results with the following constraints:
-        query.addConstraint(Constraints.lookup("Gene", genes, null));
-        
-        QueryService service = factory.getQueryService();
-        
-        Iterator<List<Object>> rows = service.getRowListIterator(query);
-        ArrayList<ArrayList<Object>> results = new ArrayList<ArrayList<Object>>();
-        
-        while (rows.hasNext()) {
-        	Object[] row = rows.next().toArray();
-        	
-        	ArrayList<Object> rowList = new ArrayList<Object>();
-        	
-        	for(int i = 0; i < row.length; i++) 
-        		rowList.add(row[i]);
-        	
-        	results.add(rowList);
-        	
-        }
-		return results;
-    }
+			
+			ArrayList<Object> row = new ArrayList<Object>();
+			try {
+				// "(R) Pathway" - "name":"Citric acid cycle (TCA cycle)"
+				row.add(pathway.getString("name"));
+				
+				// "(R) Species" - "name":"Homo sapiens"
+				row.add(species.getString("name"));
+							
+				// "(R) stId" - "stId":"R-HSA-71403"
+				row.add(pathway.getString("stId"));
+				
+				// "(R) Coverage" - "ratio":0.0013613068545803972
+				row.add(entities.getString("ratio"));
+				
+				// "(R) P-Value"- "pValue":0.030749978135627742
+				row.add(entities.getString("pValue"));
+				
+				// "(R) FDR" - "fdr":0.10114749050397542
+				row.add(entities.getString("fdr"));
+				
+				// System.out.println(pathway.getString("name")  + " : " + species.getString("name") + " : " + pathway.getString("stId") + " : " + entities.getString("ratio"));
+				
+			} catch (JSONException e) {
+				e.printStackTrace();
+				continue;
+			}
+			
+			rows.add(row);	
+		}
+		
+		return rows;
+	}
     
     class WorkerThread extends Thread 
 	{ 
@@ -193,13 +281,7 @@ public class TargetMineSearchDialog extends JDialog {
 	    	}
 	    	mResults = null;
 	    	mHasGivenResults = false;
-	    	String search = "";
-	    	for(int i = 0; i < mGenes.length; i++) {
-	    		search = search + mGenes[i] + ", ";
-	    	}
-	    	System.out.println(this.getId() + "Quering");
-	    	mResults = query(search);
-	    	System.out.println(this.getId() + "Queried");
+	    	mResults = query(mGenes);
 	    }
 
 		public boolean hasGivenResults() {
@@ -213,7 +295,7 @@ public class TargetMineSearchDialog extends JDialog {
 	} 
     
     class MasterThread extends Thread {
-    	final private int THREAD_POOL_SIZE = 5;
+    	final private int THREAD_POOL_SIZE = 4;
     	final private int WORK_SIZE = 20;
     	
     	private WorkerThread mThreadPool[];
@@ -270,6 +352,10 @@ public class TargetMineSearchDialog extends JDialog {
     		DefaultTableModel dtm = new DefaultTableModel();
     		dtm.setColumnIdentifiers(mTargetMineSearchDialog.queryIdentifiers().toArray());
     		mTargetMineSearchDialog.mTable.setModel(dtm);
+    	}
+    	
+    	public boolean unsuccessful(ArrayList<ArrayList<Object>> ptr) {
+    		return ptr == null || ptr.size() == 0;
     	}
     	
     	public void run() {
@@ -338,7 +424,7 @@ public class TargetMineSearchDialog extends JDialog {
     		}
     		
     		if(!mStopProcess)
-    			mMainWindow.loadTable(mResultsTable, "TargetMine");
+    			mMainWindow.loadTable(mResultsTable, "Reactome");
     		
     	}
 
@@ -353,6 +439,7 @@ public class TargetMineSearchDialog extends JDialog {
     		mMasterThread.start();
     	}
     }
+    
 	
-
+	
 }

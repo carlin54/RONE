@@ -1,4 +1,4 @@
-package toxicologygadget.ui;
+package rone.ui;
 
 import java.awt.Frame;
 import java.awt.GridBagConstraints;

@@ -1,4 +1,4 @@
-package toxicologygadget.backend.garudahandler;
+package rone.backend.garudahandler;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,11 +25,11 @@ import jp.sbi.garuda.backend.plugin.pipeline.GarudaBackendPipelinePlugin;
 import jp.sbi.garuda.backend.plugin.pipeline.exceptions.PipelineNotInitializedException;
 import jp.sbi.garuda.backend.plugin.pipeline.responseCodes.GarudaPipelineResponseCode;
 import jp.sbi.garuda.backend.ui.GarudaGlassPanel;
-import toxicologygadget.backend.garudahandler.DiscoveryTouple;
-import toxicologygadget.filemanager.Table;
-import toxicologygadget.filemanager.FileManager;
-import toxicologygadget.ui.ImportDataDialog;
-import toxicologygadget.ui.ToxicologyTable;
+import rone.backend.garudahandler.DiscoveryTouple;
+import rone.filemanager.FileManager;
+import rone.filemanager.Table;
+import rone.ui.ImportDataDialog;
+import rone.ui.ToxicologyTable;
 
 public class GarudaHandler {
 
