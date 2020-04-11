@@ -20,6 +20,8 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
+import javax.swing.filechooser.FileFilter;
+
 import jp.sbi.garuda.backend.net.exception.GarudaConnectionNotInitializedException;
 import jp.sbi.garuda.backend.net.exception.NetworkConnectionException;
 import rone.backend.garudahandler.GarudaHandler;
@@ -55,7 +57,7 @@ public class MainWindow implements ActionListener {
 	private void initialize() {
 		mMainWindow = this;
 		mFrmToxicologyGadget = new JFrame();
-		mFrmToxicologyGadget.setIconImage(Toolkit.getDefaultToolkit().getImage("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\icons\\roneicon.png"));
+		mFrmToxicologyGadget.setIconImage(Toolkit.getDefaultToolkit().getImage("C:\\Users\\Richard\\eclipse-workspace\\RONE\\icons\\roneicon.png"));
 		mFrmToxicologyGadget.setTitle("RONE");
 		mFrmToxicologyGadget.setBounds(100, 100, 812, 555);
 		mFrmToxicologyGadget.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -109,8 +111,6 @@ public class MainWindow implements ActionListener {
 		JMenuItem mntmTargetMineMenuItem = new JMenuItem("Import TargetMine");
 		mntmTargetMineMenuItem.setAction(mTargetMineImportAction);
 		mnOtherTools.add(mntmTargetMineMenuItem);
-		
-		
 	}
 		
 	/**
@@ -311,7 +311,7 @@ public class MainWindow implements ActionListener {
 		
 		public FileImportAction() {
 			putValue(NAME, "Open");
-			putValue(SHORT_DESCRIPTION, "Some short description");
+			putValue(SHORT_DESCRIPTION, "Import a file");
 		}
 		
 		public void actionPerformed(ActionEvent e) {
@@ -384,7 +384,7 @@ public class MainWindow implements ActionListener {
 	private class GarudaDiscoverActionGenelist extends AbstractAction {
 		public GarudaDiscoverActionGenelist() {
 			putValue(NAME, "Genelist");
-			putValue(SHORT_DESCRIPTION, "Some short description");
+			putValue(SHORT_DESCRIPTION, "Discover Garuda Genelist");
 			
 			
 			
@@ -404,7 +404,7 @@ public class MainWindow implements ActionListener {
 		
 		public GarudaDiscoverActionEnsemble() {
 			putValue(NAME, "Ensemble");
-			putValue(SHORT_DESCRIPTION, "Some short description");
+			putValue(SHORT_DESCRIPTION, "Discover Garuda Ensemble");
 			
 	
 		}
@@ -423,7 +423,7 @@ public class MainWindow implements ActionListener {
 		
 		public TargetMineImportAction() {
 			putValue(NAME, "Import TargetMine");
-			putValue(SHORT_DESCRIPTION, "Some short description");
+			putValue(SHORT_DESCRIPTION, "Import selected from TargetMine");
 		}
 		
 		public void actionPerformed(ActionEvent e) {
@@ -442,7 +442,7 @@ public class MainWindow implements ActionListener {
 	private class ReactomeImportAction extends AbstractAction {
 		public ReactomeImportAction() {
 			putValue(NAME, "Import Reactome");
-			putValue(SHORT_DESCRIPTION, "Some short description");
+			putValue(SHORT_DESCRIPTION, "Import selected from Reactome");
 		}
 		public void actionPerformed(ActionEvent e) {
 			
@@ -462,7 +462,7 @@ public class MainWindow implements ActionListener {
 		
 		public FileExportTableAction() {
 			putValue(NAME, "Export");
-			putValue(SHORT_DESCRIPTION, "Some short description");
+			putValue(SHORT_DESCRIPTION, "Export selected to CSV");
 		}
 		
 		public void actionPerformed(ActionEvent e) {
@@ -473,14 +473,26 @@ public class MainWindow implements ActionListener {
 			
 			JFrame parentFrame = new JFrame();
 			 
-			
-			 
-			
-			
 			File fileToSave;
 			boolean hasFile = false;
 			do {
 				JFileChooser fileChooser = new JFileChooser();
+				fileChooser.setFileFilter(new FileFilter() {
+
+					   public String getDescription() {
+					       return "CSV (*.csv)";
+					   }
+
+					   public boolean accept(File f) {
+					       if (f.isDirectory()) {
+					           return true;
+					       } else {
+					           String filename = f.getName().toLowerCase();
+					           return filename.endsWith(".csv");
+					       }
+					   }
+					});
+				
 				fileChooser.setDialogTitle("Specify a file to save");   
 				int userSelection = fileChooser.showSaveDialog(parentFrame);
 				if (userSelection != JFileChooser.APPROVE_OPTION)
@@ -491,8 +503,8 @@ public class MainWindow implements ActionListener {
 				if(fileToSave.exists()) {
 					System.out.println("File exists!");
 					int dialogButton = JOptionPane.YES_NO_OPTION;
-					int dialogResult = JOptionPane.showConfirmDialog(null, "Would you like to over write this file?","Warning", dialogButton);
-					if(dialogResult == JOptionPane.YES_OPTION){
+					int dialogResult = JOptionPane.showConfirmDialog(null, "Would you like to overwrite this file?","Warning", dialogButton);
+					if(dialogResult == JOptionPane.YES_OPTION) {
 						if(!fileToSave.delete()) {
 							continue;
 						}
@@ -541,13 +553,10 @@ public class MainWindow implements ActionListener {
 				    	}
 				    	line = line + mToxicologyTable.getCell(r, cols.length-1) + "\n";
 				    	writer.write(line);
-				    	
 				    }
-				    
 					writer.close();
 					
 				} catch (IOException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 			    
@@ -564,7 +573,7 @@ public class MainWindow implements ActionListener {
 		
 		public FileClearTableAction() {
 			putValue(NAME, "Clear");
-			putValue(SHORT_DESCRIPTION, "Some short description");
+			putValue(SHORT_DESCRIPTION, "Clear the contence of the table");
 		}
 		
 		public void actionPerformed(ActionEvent e) {

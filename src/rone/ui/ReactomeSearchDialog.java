@@ -57,7 +57,7 @@ public class ReactomeSearchDialog extends JDialog {
 	 * Create the dialog.
 	 */
 	public ReactomeSearchDialog(MainWindow mainWindow, String[] genelist) {
-		setIconImage(Toolkit.getDefaultToolkit().getImage("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\icons\\reactomelogo.png"));
+		setIconImage(Toolkit.getDefaultToolkit().getImage("C:\\Users\\Richard\\eclipse-workspace\\RONE\\icons\\reactomelogo.png"));
 		setTitle("Reactome Search");
 		setBounds(100, 100, 450, 300);
 		getContentPane().setLayout(new BorderLayout());

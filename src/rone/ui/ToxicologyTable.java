@@ -45,8 +45,7 @@ public class ToxicologyTable extends JTable {
 		for(int i = 0; i < rows.length; i++) {
 			for(int j = 0; j < cols.length; j++) {
 				int k = rows[i];
-				String cell = (String)this.getValueAt(k, cols[j]);;
-				 
+				String cell = (String)this.getValueAt(k, cols[j]);
 				tree_set.add(cell);
 			}
 		}

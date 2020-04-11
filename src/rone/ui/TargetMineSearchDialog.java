@@ -59,7 +59,7 @@ public class TargetMineSearchDialog extends JDialog {
 	 * Create the dialog.
 	 */
 	public TargetMineSearchDialog(MainWindow mainWindow, String[] genelist) {
-		setIconImage(Toolkit.getDefaultToolkit().getImage("C:\\Users\\Richard\\eclipse-workspace\\ToxicologyGadget\\icons\\targetminelogo.png"));
+		setIconImage(Toolkit.getDefaultToolkit().getImage("C:\\Users\\Richard\\eclipse-workspace\\RONE\\icons\\targetminelogo.png"));
 		setTitle("TargetMine Search");
 		setBounds(100, 100, 450, 300);
 		getContentPane().setLayout(new BorderLayout());
