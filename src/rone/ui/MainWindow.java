@@ -11,9 +11,10 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
@@ -25,6 +26,7 @@ import javax.swing.filechooser.FileFilter;
 import jp.sbi.garuda.backend.net.exception.GarudaConnectionNotInitializedException;
 import jp.sbi.garuda.backend.net.exception.NetworkConnectionException;
 import rone.backend.garudahandler.GarudaHandler;
+import rone.filemanager.Database;
 import rone.filemanager.FileManager;
 import rone.filemanager.Table;
 
@@ -34,7 +36,25 @@ import javax.swing.JFileChooser;
 import javax.swing.BoxLayout;
 import javax.swing.JPopupMenu;
 import java.awt.Toolkit;
+import java.net.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.io.*;
+import java.net.*;
+import java.io.*;
 
+import org.json.*;
+import java.sql.*; 
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import org.apache.derby.drda.NetworkServerControl;
+import org.apache.derby.jdbc.EmbeddedDriver;
 
 public class MainWindow implements ActionListener {
 	
@@ -45,6 +65,7 @@ public class MainWindow implements ActionListener {
 	private final Action mFileExportTableAction = new FileExportTableAction();
 	private final Action mFileClearTableAction = new FileClearTableAction();
 	private final Action mReactomeImportAction =  new ReactomeImportAction();
+	private final Action mPercellomeImportAction =  new PercellomeImportAction();
 	private final Action mTargetMineImportAction = new TargetMineImportAction();
 	private final GarudaDiscoverActionGenelist mGarudaDiscoverActionGenelist = new GarudaDiscoverActionGenelist();
 	private final GarudaDiscoverActionEnsemble mGarudaDiscoverActionEnsemble = new GarudaDiscoverActionEnsemble();
@@ -104,19 +125,145 @@ public class MainWindow implements ActionListener {
 		JMenu mnOtherTools = new JMenu("Tools");
 		menuBar.add(mnOtherTools);
 		
-		JMenuItem mntmPercellomeMenuItem = new JMenuItem("Import Percellome");
-		mntmPercellomeMenuItem.setAction(mReactomeImportAction);
-		mnOtherTools.add(mntmPercellomeMenuItem);
+		JMenuItem mntmReactomeMenuItem = new JMenuItem("Import Reactome");
+		mntmReactomeMenuItem.setAction(mReactomeImportAction);
+		mnOtherTools.add(mntmReactomeMenuItem);
 		
 		JMenuItem mntmTargetMineMenuItem = new JMenuItem("Import TargetMine");
 		mntmTargetMineMenuItem.setAction(mTargetMineImportAction);
 		mnOtherTools.add(mntmTargetMineMenuItem);
-	}
 		
+		JMenuItem mntmPercellomeMenuItem = new JMenuItem("Import Percellome");
+		mntmTargetMineMenuItem.setAction(mPercellomeImportAction);
+		mnOtherTools.add(mntmPercellomeMenuItem);
+	}
+	
+    public static String getText(String url) throws Exception {
+        URL website = new URL(url);
+        URLConnection connection = website.openConnection();
+        BufferedReader in = new BufferedReader(
+                                new InputStreamReader(
+                                    connection.getInputStream()));
+
+        StringBuilder response = new StringBuilder();
+        String inputLine;
+
+        while ((inputLine = in.readLine()) != null) 
+            response.append(inputLine);
+
+        in.close();
+
+        return response.toString();
+    }
+	
+
+    
+    public static String[] parseDescription(String description) {
+		String[] find = {"<<<BiologicalProcess>>>.*<<<CellularComponent>>>", 
+                		 "<<<CellularComponent>>>.*<<<MolecularFunction>>>", 
+                		 "<<<MolecularFunction>>>.*"};
+
+		String[] found = {"", "", ""};
+
+		for (int i = 0; i < find.length; i++) { 
+			Pattern pattern = Pattern.compile(find[i], Pattern.DOTALL | Pattern.MULTILINE);
+			Matcher m = pattern.matcher(description);
+			System.out.println("----------");
+			if (m.find()) {
+				System.out.println(m.group(0));
+				found[i] = m.group(0);
+			} else {
+				System.out.println("None");
+				found[i] = null;
+			}
+		}
+		
+		if(found[0] != null) found[0] = found[0].replace("\n", "").substring(23, found[0].length()-23);
+		else found[0] = "";
+		
+		if(found[1] != null) found[1] = found[1].replace("\n", "").substring(23, found[1].length()-23);
+		else found[1] = "";
+		
+		if(found[2] != null) found[2] = found[2].replace("\n", "").substring(23);
+		else found[2] = "";
+		
+		return found;
+    }
+    
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+        
+		try {
+			Database db = Database.getInstance();
+			
+			String tableName = "Percellome";
+			String[] columnIdentifiers = {
+					"AffyID",
+					"GeneSymbol",
+					"Biology_Process",
+					"Cellular_Component",
+					"Molecular_Function"
+			};
+			
+			int[] primaryKeys = {
+					1
+			};
+			
+			//
+			Database.Table percellomeTable = db.createTable("Percellome", columnIdentifiers, primaryKeys);
+			ArrayList<Object[]> percellomeData = new ArrayList<Object[]>();
+			percellomeData.add(new Object[]{"1451544_at","Tapbpl","A","B"});
+			percellomeData.add(new Object[]{"1452676_a_at","Pnpt1","C","D"});
+			percellomeData.add(new Object[]{"1415713_a_at","Ddx24","E","F"});
+			percellomeData.add(new Object[]{"1427076_at","Mpeg1","G","H"});
+			percellomeTable.insertRows(percellomeData);
+			percellomeTable.getTabel();
+			
+			//
+			tableName = new String("SHOE");
+			primaryKeys = new int[]{
+					1
+			};
+			columnIdentifiers = new String[]{"Gene","NM","TF","Region","Strand","MA_Score","PSSM_Score","ID","MOTIF","CONSENSUS","Similarity","Pareto"};
+			Database.Table shoeTable = db.createTable(tableName, columnIdentifiers, primaryKeys);
+			ArrayList<Object[]> shoeData = new ArrayList<Object[]>();
+			shoeData.add(new Object[]{"Tapbpl","NM_001777","Nrf-1","922-931","+","5.782955","7.831982","1","CGCGTGCGCG","CGCATGCGCR","0.85","0"});
+			shoeData.add(new Object[]{"Pnpt1","NM_001565","IRF-2","47-59","+","5.625442","7.353745","1","GGAAAGTGAAACC","GAAAAGYGAAASY","0.807692308","1"});
+			shoeData.add(new Object[]{"Ddx24","NM_001350","AML-1a","317-322","+","1.397158","9.581742","1","TGTGGT","TGTGGT","1","0"});
+			shoeTable.insertRows(shoeData);
+			shoeTable.getTabel();
+			
+			//
+			java.sql.ResultSet rs = db.join(percellomeTable, 1, shoeTable, 0, Database.JOIN.LEFT);
+			int size = rs.getFetchSize();
+			System.out.println("Result size: " + size);
+			ResultSetMetaData rsmd = rs.getMetaData();
+			int columnCount = rsmd.getColumnCount();
+			
+			System.out.println("Num Columns: " + rsmd.getColumnCount());
+			columnIdentifiers = new String[columnCount];
+			for (int i = 1; i <= columnCount; i++ ) {
+			  columnIdentifiers[i-1] = rsmd.getColumnName(i);
+			}
+			System.out.println(java.util.Arrays.toString(columnIdentifiers));
+			
+			while (rs.next()) {
+			    for (int i = 1; i <= columnCount; i++) {
+			        if (i > 1) System.out.print(",  ");
+			        String columnValue = rs.getString(i);
+			        System.out.print(columnValue);
+			    }
+			    System.out.println("");
+			}
+			
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 
@@ -158,7 +305,7 @@ public class MainWindow implements ActionListener {
 			mToxicologyTable.setFillsViewportHeight(true);
 			scrollPane.setViewportView(mToxicologyTable);
 			
-		
+			
 		
 		/* JSONObject res = new JSONObject(a);
 		
@@ -274,17 +421,6 @@ public class MainWindow implements ActionListener {
 		System.out.println(contents);
 		
 		switch (contents) {
-			case "Genelist":
-				loadList(file, "Gene");
-				break;
-				
-			case "Ensemble":
-				loadList(file, "Ensemble");
-				break;
-				
-			case "AGCT Scenario":
-				loadAGCTScenario(file);
-				break;
 				
 			case "CSV": 
 				loadDataFile(file, ",");
@@ -292,10 +428,6 @@ public class MainWindow implements ActionListener {
 				
 			case "Tab":
 				loadDataFile(file, "\t");
-				break;
-			
-			case "bioCompendium (HTML)":
-				loadBioCompendium(file);
 				break;
 		}
 		
@@ -322,7 +454,7 @@ public class MainWindow implements ActionListener {
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				File file = fc.getSelectedFile();
 				
-				Object[] possibilities = {"AGCT Scenario", "Genelist", "Ensemble", "CSV", "Tab Delimited Text", "bioCompendium (HTML)"};
+				Object[] possibilities = {"CSV", "Tab Delimited Text"};
 				String content = (String)JOptionPane.showInputDialog(
 				                    mFrmToxicologyGadget,
 				                    "Complete the sentence:\n",
@@ -385,10 +517,6 @@ public class MainWindow implements ActionListener {
 		public GarudaDiscoverActionGenelist() {
 			putValue(NAME, "Genelist");
 			putValue(SHORT_DESCRIPTION, "Discover Garuda Genelist");
-			
-			
-			
-			
 		}
 		public void actionPerformed(ActionEvent ae) {
 			
@@ -453,6 +581,25 @@ public class MainWindow implements ActionListener {
 			}
 			
 			ReactomeSearchDialog searchDialog = new ReactomeSearchDialog(mMainWindow, genelist); 
+			searchDialog.start();
+			
+		}
+	}
+	
+	private class PercellomeImportAction extends AbstractAction {
+		public PercellomeImportAction() {
+			putValue(NAME, "Import Percellome");
+			putValue(SHORT_DESCRIPTION, "Import selected from Percellome");
+		}
+		public void actionPerformed(ActionEvent e) {
+			
+			String[] genelist = mToxicologyTable.getUniqueSelected();
+			
+			if(!hasValidSelection()) {
+				return;
+			}
+			
+			PercellomeSearchDialog searchDialog = new PercellomeSearchDialog(mMainWindow, genelist); 
 			searchDialog.start();
 			
 		}

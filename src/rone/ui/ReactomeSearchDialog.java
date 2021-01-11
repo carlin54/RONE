@@ -7,6 +7,8 @@ import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -57,7 +59,9 @@ public class ReactomeSearchDialog extends JDialog {
 	 * Create the dialog.
 	 */
 	public ReactomeSearchDialog(MainWindow mainWindow, String[] genelist) {
-		setIconImage(Toolkit.getDefaultToolkit().getImage("C:\\Users\\Richard\\eclipse-workspace\\RONE\\icons\\reactomelogo.png"));
+		Path currentRelativePath = Paths.get("");
+		String reactomeIconPath = currentRelativePath.toAbsolutePath().toString() + "\\reactome_logo.png";
+		setIconImage(Toolkit.getDefaultToolkit().getImage(reactomeIconPath));
 		setTitle("Reactome Search");
 		setBounds(100, 100, 450, 300);
 		getContentPane().setLayout(new BorderLayout());
@@ -136,6 +140,7 @@ public class ReactomeSearchDialog extends JDialog {
 	private static int getNumberOfPathways(String jsonQuery) {
 		try {
 			JSONObject jo = new JSONObject(jsonQuery);
+			
 			return jo.getInt("pathwaysFound");
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
@@ -295,7 +300,7 @@ public class ReactomeSearchDialog extends JDialog {
 	} 
     
     class MasterThread extends Thread {
-    	final private int THREAD_POOL_SIZE = 4;
+    	final private int THREAD_POOL_SIZE = 5;
     	final private int WORK_SIZE = 20;
     	
     	private WorkerThread mThreadPool[];

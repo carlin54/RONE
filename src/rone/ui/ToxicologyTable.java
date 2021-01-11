@@ -70,7 +70,14 @@ public class ToxicologyTable extends JTable {
 				int vr = this.convertRowIndexToModel(r);
 				int vc = this.convertColumnIndexToModel(c);
 				
-				String cell =  getModel().getValueAt(vr, vc).toString();
+				String cell;
+				if(getModel().getValueAt(vr, vc) != null) {
+					cell = getModel().getValueAt(vr, vc).toString();
+				}else {
+					break;
+				}
+				
+				
 				
 				if(!cell.equals(last_added) && !unique.contains(cell)) {
 					unique.add(cell);

@@ -248,8 +248,42 @@ public class FileManager {
 		return referenceString;
 	}
 	
-	public static File writeOutTable(Table writeOut, String location) {
-		return null;
+	public static File writeOutTable(Table writeOut, String location) throws IOException {
+		
+		File file = new File(location);
+		
+		if(file.exists())
+			file.delete();
+		
+		
+		FileWriter fr = new FileWriter(file, true);
+		
+		ArrayList<String> identifiers = writeOut.getIdentifiers();
+		
+		// write header
+		for(int c = 0; c < identifiers.size(); c++) {
+			String cell = "\"" + identifiers.get(c) + "\"";
+			if(c < identifiers.size()-1)
+				cell += ",";
+			fr.write(cell);
+		}
+		fr.write("\n");
+		
+		// write data
+		for(int r = 0; r < writeOut.rowCount(); r++) {
+			ArrayList<Object> row = writeOut.getRow(r);
+			for(int c = 0; c < writeOut.columnCount(); c++) {
+				String cell = "\"" + writeOut.getRow(r).get(c) + "\"";
+				if(c < identifiers.size()-1)
+					cell += ",";
+				fr.write(cell);
+			}
+			fr.write("\n");
+		}
+		fr.close();
+
+		
+		return file;
 	}
 	
 	private static String getJarPath() {

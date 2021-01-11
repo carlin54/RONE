@@ -23,6 +23,8 @@ import javax.swing.JTable;
 import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -59,7 +61,9 @@ public class TargetMineSearchDialog extends JDialog {
 	 * Create the dialog.
 	 */
 	public TargetMineSearchDialog(MainWindow mainWindow, String[] genelist) {
-		setIconImage(Toolkit.getDefaultToolkit().getImage("C:\\Users\\Richard\\eclipse-workspace\\RONE\\icons\\targetminelogo.png"));
+		Path currentRelativePath = Paths.get("");
+		String targetMineIconPath = currentRelativePath.toAbsolutePath().toString() + "\\targetmine_logo.png";
+		setIconImage(Toolkit.getDefaultToolkit().getImage(targetMineIconPath));
 		setTitle("TargetMine Search");
 		setBounds(100, 100, 450, 300);
 		getContentPane().setLayout(new BorderLayout());
@@ -119,7 +123,46 @@ public class TargetMineSearchDialog extends JDialog {
 	}
 	
 	static private ArrayList<String> queryIdentifiers(){
-		return new ArrayList<String>( Arrays.asList( "(TM) Gene" , "(TM) Pathway Identifer" , "(TM) Pathway Name", "(TM) Pathway Organism Name", "(TM) Label 1", "(TM) Label 2") );
+		/*return new ArrayList<String>( Arrays.asList(
+				"(TM) ncbiGeneId" , 
+				"(TM) symbol" , 
+				"(TM) probeSetId", 
+				"(TM) organism.name", 
+				"(TM) pathways primaryIdentifier", 
+				"(TM) pathways name", 
+				"(TM) pathways label1", 
+				"(TM) pathways label2") );*/
+		
+		/*return new ArrayList<String>( Arrays.asList(
+				"(TM) Pathway.genes.symbol",
+                "(TM) Pathway.name",
+                "(TM) Pathway.identifier",
+                "(TM) Pathway.label1",
+                "(TM) Pathway.label2",
+                "(TM) Pathway.genes.primaryIdentifier",
+                "(TM) Pathway.genes.name",
+                "(TM) Pathway.genes.organism.name",
+                "(TM) Pathway.genes.ncbiGeneId",
+                "(TM) Pathway.genes.secondaryIdentifier",
+                "(TM) Pathway.organism.name",
+                "(TM) Pathway.organism.species") );*/
+		
+		return new ArrayList<String>( Arrays.asList(
+				"Gene.ncbiGeneId",
+                "Gene.symbol",
+                "Gene.probeSets.probeSetId",
+                "Gene.organism.name",
+                "Gene.name",
+                "Gene.probeSets.primaryIdentifier",
+                "Gene.pathways.name",
+                "Gene.pathways.identifier",
+                "Gene.pathways.label1",
+                "Gene.pathways.label2",
+                "Gene.transcripts.symbol",
+                "Gene.transcripts.secondaryIdentifier",
+                "Gene.transcripts.primaryIdentifier",
+                "Gene.transcripts.name",
+                "Gene.transcripts.length") );
 	}
 	
     static private ArrayList<ArrayList<Object>> query(String genes) {
@@ -133,18 +176,58 @@ public class TargetMineSearchDialog extends JDialog {
         PathQuery query = new PathQuery(model);
 
         // Select the output columns:
-        query.addViews(	"Gene.symbol",
-                		"Gene.integratedPathwayClusters.pathways.identifier",
-                		"Gene.integratedPathwayClusters.pathways.name",
-                		"Gene.integratedPathwayClusters.pathways.organism.name",
-                		"Gene.integratedPathwayClusters.pathways.label1",
-                		"Gene.integratedPathwayClusters.pathways.label2");
-
+        /*query.addViews("Gene.ncbiGeneId",
+                "Gene.symbol",
+                "Gene.probeSets.probeSetId",
+                "Gene.organism.name",
+                "Gene.name",
+                "Gene.probeSets.primaryIdentifier",
+                "Gene.pathways.name",
+                "Gene.pathways.identifier",
+                "Gene.pathways.label1",
+                "Gene.pathways.label2");
+        
         // Add orderby
-        query.addOrderBy("Gene.symbol", OrderDirection.ASC);
-
+        query.addOrderBy("Gene.symbol", OrderDirection.ASC);*/
+        
         // Filter the results with the following constraints:
-        query.addConstraint(Constraints.lookup("Gene", genes, null));
+        // query.addConstraint(Constraints.lookup("Gene", genes, null));
+        
+        /*query.addViews("Pathway.genes.symbol",
+                "Pathway.name",
+                "Pathway.identifier",
+                "Pathway.label1",
+                "Pathway.label2",
+                "Pathway.genes.primaryIdentifier",
+                "Pathway.genes.name",
+                "Pathway.genes.organism.name",
+                "Pathway.genes.ncbiGeneId",
+                "Pathway.genes.secondaryIdentifier",
+                "Pathway.organism.name",
+                "Pathway.organism.species");
+        
+        query.addOrderBy("Pathway.genes.symbol", OrderDirection.ASC);
+        
+        // Filter the results with the following constraints:
+        query.addConstraint(Constraints.lookup("Pathway", genes, null));*/
+        
+        query.addViews("Gene.ncbiGeneId",
+                "Gene.symbol",
+                "Gene.probeSets.probeSetId",
+                "Gene.organism.name",
+                "Gene.name",
+                "Gene.probeSets.primaryIdentifier",
+                "Gene.pathways.name",
+                "Gene.pathways.identifier",
+                "Gene.pathways.label1",
+                "Gene.pathways.label2",
+                "Gene.transcripts.symbol",
+                "Gene.transcripts.secondaryIdentifier",
+                "Gene.transcripts.primaryIdentifier",
+                "Gene.transcripts.name",
+                "Gene.transcripts.length");
+
+        //query.addConstraint(Constraints.lookup("Gene", genes, null));
         
         QueryService service = factory.getQueryService();
         
@@ -156,9 +239,10 @@ public class TargetMineSearchDialog extends JDialog {
         	
         	ArrayList<Object> rowList = new ArrayList<Object>();
         	
-        	for(int i = 0; i < row.length; i++) 
+        	for(int i = 0; i < row.length; i++) {
         		rowList.add(row[i]);
-        	
+        		System.out.println(row[i].toString());
+        	}
         	results.add(rowList);
         	
         }
@@ -199,6 +283,9 @@ public class TargetMineSearchDialog extends JDialog {
 	    	}
 	    	System.out.println(this.getId() + "Quering");
 	    	mResults = query(search);
+	    	if(mResults.size() > 0) {
+	    		System.out.println(mResults.toString());
+	    	}
 	    	System.out.println(this.getId() + "Queried");
 	    }
 
