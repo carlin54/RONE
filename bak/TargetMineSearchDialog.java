@@ -123,15 +123,7 @@ public class TargetMineSearchDialog extends JDialog {
 	}
 	
 	static private ArrayList<String> queryIdentifiers(){
-		/*return new ArrayList<String>( Arrays.asList(
-				"(TM) ncbiGeneId" , 
-				"(TM) symbol" , 
-				"(TM) probeSetId", 
-				"(TM) organism.name", 
-				"(TM) pathways primaryIdentifier", 
-				"(TM) pathways name", 
-				"(TM) pathways label1", 
-				"(TM) pathways label2") );*/
+
 		
 		/*return new ArrayList<String>( Arrays.asList(
 				"(TM) Pathway.genes.symbol",

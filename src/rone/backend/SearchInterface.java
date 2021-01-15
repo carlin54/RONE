@@ -6,10 +6,11 @@ import java.util.ArrayList;
 
 public interface SearchInterface {
 	
-	public String title();
-	public String iconLocation();
-	public int workSize();
-	public int numberOfWorkers();
-	public ArrayList<ArrayList<Object>> query(String[] searchData);
-	
+	public String getTitle();
+	public String getIconLocation();
+	public String[] getColumnIdentifers();
+	public int getWorkSize();
+	public int getThreadPoolSize();
+
+	public ArrayList<Object[]> query(String[] searchData);
 }

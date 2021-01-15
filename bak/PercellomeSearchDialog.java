@@ -142,7 +142,7 @@ public class PercellomeSearchDialog extends JDialog {
 	}
 	
 	
-	private static ArrayList<ArrayList<Object>> query(String[] affyProbeIDs) {
+	private static ArrayList<Object[]> query(String[] affyProbeIDs) {
 		
 		String urlString = null; 
 		String jsonString = null;
@@ -197,18 +197,18 @@ public class PercellomeSearchDialog extends JDialog {
 		}
 	}
 	
-	private static ArrayList<ArrayList<Object>> parseQuery(String jsonQuery) {
+	private static ArrayList<Object[]> parseQuery(String jsonQuery) {
 		return null; 
 	}
     
     class WorkerThread extends Thread 
 	{ 
-    	private ArrayList<ArrayList<Object>> mResults;
+    	private ArrayList<Object[]> mResults;
     	private String[] mAffyProbeIDs;
     	private boolean mHasGivenResults;
     	
     	WorkerThread(){
-    		mResults = new ArrayList<ArrayList<Object>>();
+    		mResults = new ArrayList<Object[]>();
     		this.setPriority(MAX_PRIORITY);
     	}
     	
@@ -216,7 +216,7 @@ public class PercellomeSearchDialog extends JDialog {
     		this.mAffyProbeIDs = affyProbeIDs;
     	}
     	
-    	public ArrayList<ArrayList<Object>> getResults(){
+    	public ArrayList<Object[]> getResults(){
     		mHasGivenResults = true;
     		return mResults;
     	}

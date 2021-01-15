@@ -29,20 +29,21 @@ import rone.backend.garudahandler.DiscoveryTouple;
 import rone.filemanager.FileManager;
 import rone.filemanager.Table;
 import rone.ui.ImportDataDialog;
-import rone.ui.ToxicologyTable;
+import rone.ui.MainWindow;
+import rone.ui.DataTable;
 
 public class GarudaHandler {
 
 	private GarudaBackend mGarudaBackend;
 	private JFrame mParentFrame;
 	private GarudaBackendPipelinePlugin mPipelinePlugin;
-	private ToxicologyTable mToxicologyTable;
+	private DataTable mToxicologyTable;
 	
 	
-	public GarudaHandler (JFrame parentFrame, ToxicologyTable geneTable) throws GarudaConnectionNotInitializedException, NetworkConnectionException
+	public GarudaHandler(MainWindow mainWindow) throws GarudaConnectionNotInitializedException, NetworkConnectionException
 	{
-		this.mParentFrame = parentFrame;
-		this.mToxicologyTable = geneTable;
+		//this.mParentFrame = mainWindow;
+		//this.mToxicologyTable = geneTable;
 		
 		mGarudaBackend = new GarudaBackend(GarudaConstants.GARUDA_ID, GarudaConstants.GARUDA_NAME, this.mParentFrame);
 		
@@ -134,8 +135,7 @@ public class GarudaHandler {
 		
 		if(mToxicologyTable.isEmpty()) {
 			mToxicologyTable.setTable(incomingTable);
-			
-		}else {
+		} else {
 			
 			int inc_len = incomingTable.getIdentifiers().size();
 			String[] inc_id = incomingTable.getIdentifiers().toArray(new String[inc_len]);

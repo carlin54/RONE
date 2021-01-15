@@ -6,11 +6,10 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.SQLNonTransientConnectionException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Iterator;
 
 import org.apache.derby.drda.NetworkServerControl;
 
@@ -33,6 +32,7 @@ public class Database {
 		this.mConnection = DriverManager.getConnection(connectionString);
 		System.out.println("Server started");
 		
+		this.mTableNames = new ArrayList<String>();
 	}
 	
 	public static Database getInstance() {
@@ -52,17 +52,40 @@ public class Database {
 	private String mDatabaseName;
 	private Connection mConnection; 
 	
+	//TODO: make safe table names
+	ArrayList<String> mTableNames;
+	
+	private void removeTable(String tableName) {
+        Iterator itr = mTableNames.iterator(); 
+        while (itr.hasNext()) 
+        { 
+            if(itr.equals(tableName)) {
+                itr.remove(); 
+                break;
+            }
+        } 
+  
+	}
 	
 	public class Table {
+		
 		String mTabelName;
 		String[] mColumnIdentifiers;
 		Database mDatabase;
+		
+		public int mRowCount;
+		boolean mHasData;
+		
+		private void setHasData(boolean set) {
+			mHasData = set;
+		}
 		
 		
 		private Table(Database database, String tableName, String[] columnIdentifiers) {
 			this.mDatabase = database;
 			this.mTabelName = tableName;
-			this.mColumnIdentifiers = makeColumnIdentifersSafe(columnIdentifiers);
+			this.mColumnIdentifiers = columnIdentifiers;
+			this.mRowCount = 0;
 		}
 		
 		
@@ -77,7 +100,7 @@ public class Database {
 		}
 		
 		
-		public ArrayList<String[]> getTabel() throws SQLException {
+		public ArrayList<Object[]> getTable() throws SQLException {
 			String query = generateGetTableQuery();
 			System.out.println("----generated sql query----");
 			System.out.println(query);
@@ -89,12 +112,13 @@ public class Database {
 			int columnCount = rsmd.getColumnCount();
 			
 			System.out.println("----query results----");
-			ArrayList<String[]> queryResults = new ArrayList<String[]>();
+			ArrayList<Object[]> queryResults = new ArrayList<Object[]>();
 			while (rs.next()) {
-				String[] row = new String[columnCount]; 
+				Object[] row = new Object[columnCount]; 
 			    for (int i = 0; i < columnCount; i++) {
 			        if (i > 0) System.out.print(",  ");
-			        String columnValue = rs.getString(i+1);
+			        //TODO: fix get object
+			        Object columnValue = rs.getString(i+1);
 			        row[i] = columnValue;
 			        System.out.print(columnValue);
 			    }
@@ -112,12 +136,30 @@ public class Database {
 		}
 		
 		
+		public String[] getColumnIdentifiers() {
+			return this.mColumnIdentifiers;
+		}
+		
+		
 		private int finalIdx(String[] array) { return array.length-1; }; 
 		
 		
 		private String generateDeleteTableQuery() {
 			String query = "DROP TABLE " + this.mTabelName;
 			return query;
+		}
+		
+		
+		public void clearTable() throws SQLException {
+			String query = generateDeleteTableQuery();
+			System.out.println("----generated sql----");
+			System.out.println(query);
+			System.out.println("----generated sql----");
+			
+			Statement statement = mConnection.createStatement();
+			statement.executeUpdate(query);
+			
+			setHasData(false);
 		}
 		
 		
@@ -148,6 +190,16 @@ public class Database {
 		}
 		
 		
+		public int getRowCount() {
+			return mRowCount;
+		}
+		
+		
+		public int getColumnCount() {
+			return this.getColumnIdentifiers().length;
+		}
+		
+		
 		public int[] insertRows(ArrayList<Object[]> rows) throws SQLException {
 			String code = generateInsertRowQuery();
 			System.out.println("----generated sql----");
@@ -160,9 +212,10 @@ public class Database {
 	        	
 	        	for(Object[] row : rows) {
 	        		System.out.println(Arrays.toString(row));
-		            for(int i = 1; i < row.length; i++) {
+		            for(int i = 1; i <= row.length; i++) {
 		                ps.setObject(i, row[i-1]);
 		            }
+		            mRowCount += 1;
 		            ps.addBatch();
 	        	}
 	            success = ps.executeBatch();
@@ -171,12 +224,19 @@ public class Database {
 			
 			System.out.println("----successful insertion----");
 			System.out.println(Arrays.toString(success));
+			setHasData(true);
 			System.out.println("----successful insertion----");
-			
 	        return success;
 		}
+
+
+		public boolean isEmpty() {
+			return this.mHasData == false;
+		}
+		
 		
 	}
+	
 	
 	private boolean hasPrimaryKeys(int[] primaryKeys) {
 		return primaryKeys != null && primaryKeys.length > 0;
@@ -188,11 +248,47 @@ public class Database {
 	}
 	
 	
+	public String makeNameSafe(String str) {
+		String newstr = str.replaceAll("[^A-Za-z]+", "_");
+		
+		while(newstr.startsWith("_")) {
+			newstr = newstr.substring(1);
+		}
+		
+		return newstr;
+	}
+	
+	public String makeUniqueTableName(String tableName) {
+		String checkTableName = new String(tableName);
+		Integer i = 0;
+		while(!isUniqueTableName(checkTableName)) {
+			checkTableName = tableName + "_" + i.toString();
+			if(isUniqueTableName(checkTableName)) {
+				return checkTableName;
+			}
+		}
+		return checkTableName;
+	}
+	
+	public boolean isUniqueTableName(String tableName) {
+		for(String checkTableName : this.mTableNames) {
+			if(checkTableName.equals(tableName)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public String makeSafeTableName(String str) {
+		String safeTableName = makeNameSafe(str);
+		return makeUniqueTableName(safeTableName);
+	}
+	
 	public String[] makeColumnIdentifersSafe(String[] columnIdentifiers) {
 		//TODO: FIX THIS WEIRD ISSUE
 		String[] columnIdentifiersSQL = new String[columnIdentifiers.length];
 		for(int i = 0; i < columnIdentifiers.length; i++) {
-			columnIdentifiersSQL[i] = columnIdentifiers[i].replace(" ", "");
+			columnIdentifiersSQL[i] = makeNameSafe(columnIdentifiers[i]);
 			System.out.println(columnIdentifiers[i] + ":" + columnIdentifiersSQL[i]);
 		}
 		return columnIdentifiersSQL;
@@ -236,25 +332,31 @@ public class Database {
 		// generate query
 		//assert(hasColumnIdentifiers(columnIdentifiers));
 		
+		//TODO: implement this
+		String safeTableName = makeSafeTableName(tableName);
 		String[] safeColumnIdentifiers = makeColumnIdentifersSafe(columnIdentifiers);
 		//System.out.println(safeColumnIdentifiers.toString());
 		
-		String code = buildCreateTableCode(tableName, safeColumnIdentifiers, primaryKeys);
+		String code = buildCreateTableCode(safeTableName, safeColumnIdentifiers, primaryKeys);
 		
 		System.out.println("----generated sql----");
 		System.out.println(code);
 		System.out.println("----generated sql----");
 		
-		Database.Table create = new Database.Table(this, tableName, safeColumnIdentifiers);
+		Database.Table create = new Database.Table(this, safeTableName, safeColumnIdentifiers);
 		
 		java.sql.Statement statement = this.mConnection.createStatement();
 		boolean success = statement.execute(code);
 		System.out.println("Query success: " + Boolean.toString(success));
 		statement.close();
 		
+		this.mTableNames.add(safeTableName);
 		return create;
 	}
 	
+	public Table createTable(java.sql.ResultSet results) {
+		return null;
+	}
 	
 	public java.sql.ResultSet join(Table a, int a_key, Table b, int b_key, JOIN j) throws SQLException {
 		assert(a.mDatabase == b.mDatabase);

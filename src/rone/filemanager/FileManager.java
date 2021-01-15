@@ -11,8 +11,6 @@ import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
 
 public class FileManager {
-
-
 	
 	public static String[] loadCSVIdentifiers(File file) throws IOException {
 		ArrayList<String> identifiers = new ArrayList<String>();
@@ -24,7 +22,7 @@ public class FileManager {
 		int len = identifiers.size();
 		return identifiers.toArray(new String[len]);	
 	}
-	
+
 	private static String parsePathwayID(String pathwayIdLine) {
 		int beginIndex = pathwayIdLine.length() - 20;
 		int endIndex = pathwayIdLine.length() - 12;
@@ -170,40 +168,50 @@ public class FileManager {
 		
 	}
 	
-	public static Table loadDataFile(File file, String seperator) throws IOException {
+	public static ArrayList<Object[]> loadDataFile(File file, String seperator) throws IOException {
 		
-		if (!file.exists()) return null;
+		if (!file.exists()) 
+			return null;
 		
-		ArrayList<ArrayList<Object>> data = new ArrayList<ArrayList<Object>>();
-		ArrayList<String> identifiers = new ArrayList<String>();
+		ArrayList<Object[]> data = new ArrayList<Object[]>();
 		
-		BufferedReader bufferReader = null;
-	
-		bufferReader = new BufferedReader(new FileReader(file));
-	  
-		String line; 
-	
-		line = bufferReader.readLine();
-		String[] parsedLine = line.split(seperator);
-		identifiers.addAll(Arrays.asList(parsedLine));
+		BufferedReader bufferReader = new BufferedReader(new FileReader(file));
+		String line = null;
 		while((line = bufferReader.readLine()) != null) {
-			parsedLine = line.split(seperator);
-			ArrayList<Object> row = new ArrayList<Object>();
-			row.addAll(Arrays.asList(parsedLine));
-			data.add(row);
+			String[] parsedLine = line.split(seperator);
+			data.add(parsedLine);
 		}
 		bufferReader.close();
 		
-		return new Table(data, identifiers);
+		return data;
 			
 	}
 	
-	public static Table loadListFile(File listFile, String header) throws IOException {
+	public static ArrayList<Object[]> loadCSV(File file, String seperator) throws IOException {
 		
-		if (!listFile.exists()) return null;
+		if (!file.exists()) 
+			return null;
+		
+		ArrayList<Object[]> data = new ArrayList<Object[]>();
+		
+		BufferedReader bufferReader = new BufferedReader(new FileReader(file));
+		String line = bufferReader.readLine();
+		while((line = bufferReader.readLine()) != null) {
+			String[] parsedLine = line.split(seperator);
+			data.add(parsedLine);
+		}
+		bufferReader.close();
+		
+		return data;
+			
+	}
+	
+	public static ArrayList<Object[]> loadListFile(File listFile, String header) throws IOException {
+		
+		/*if (!listFile.exists()) return null;
 				
 		BufferedReader bufferReader = new BufferedReader(new FileReader(listFile));
-		ArrayList<ArrayList<Object>> table = new ArrayList<ArrayList<Object>>();
+		ArrayList<Object[]> table = new ArrayList<Object[]>();
 		String line; 
 		
 		if(header == null) {
@@ -221,7 +229,9 @@ public class FileManager {
 		Table dt = new Table(table, identifier);
 		
 		bufferReader.close();
-		return dt;
+		return dt;*/
+		
+		return new ArrayList<Object[]>();
 	}
 	
 	public static String loadAGCTReferenceString(File clusterResultsFile) throws IOException {
@@ -369,8 +379,6 @@ public class FileManager {
 		return null;
 	}
 	
-	
-
 	
 }
 

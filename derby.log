@@ -1,0 +1,30 @@
+Fri Jan 15 15:56:10 AEST 2021 : Could not listen on port 1528 on host 127.0.0.1:
+ java.net.BindException: Address already in use: bind
+An exception was thrown during network server startup. DRDA_ListenPort.S:Could not listen on port 1528 on host 127.0.0.1:
+ java.net.BindException: Address already in use: bind
+java.lang.reflect.InvocationTargetException
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:564)
+	at org.apache.derby.iapi.jdbc.DRDAServerStarter.run(DRDAServerStarter.java:236)
+	at java.base/java.lang.Thread.run(Thread.java:832)
+Caused by: java.lang.Exception: DRDA_ListenPort.S:Could not listen on port 1528 on host 127.0.0.1:
+ java.net.BindException: Address already in use: bind
+	at org.apache.derby.impl.drda.NetworkServerControlImpl.consolePropertyMessageWork(NetworkServerControlImpl.java:3516)
+	at org.apache.derby.impl.drda.NetworkServerControlImpl.consolePropertyMessage(NetworkServerControlImpl.java:2107)
+	at org.apache.derby.impl.drda.NetworkServerControlImpl.blockingStart(NetworkServerControlImpl.java:850)
+	... 6 more
+----------------------------------------------------------------
+Fri Jan 15 15:56:10 AEST 2021:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.15.2.0 - (1873585): instance a816c00e-0177-049d-8d2f-00000099b9d0 
+on database directory memory:C:\Users\Richard\Documents\GitHub\RONE\Singleton with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@4cc77c2e 
+Loaded from file:/C:/Users/Richard/Documents/GitHub/RONE/lib/derby/derby.jar
+java.vendor=Oracle Corporation
+java.runtime.version=14.0.2+12-46
+user.dir=C:\Users\Richard\Documents\GitHub\RONE
+os.name=Windows 10
+os.arch=amd64
+os.version=10.0
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
