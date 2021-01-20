@@ -15,18 +15,22 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JViewport;
+import javax.swing.event.ChangeEvent;
 import javax.swing.plaf.basic.BasicButtonUI;
+import javax.swing.plaf.basic.BasicTabbedPaneUI;
 
 import rone.filemanager.Database;
 
@@ -49,7 +53,7 @@ public class DatabaseTabbedPane extends JTabbedPane {
 		return uniqueName;
 	}
 	
-	void importDatabaseTable(String tableName, String[] columnIdentifiers, Database.Table table, ActionListener actionListenerTabClose) throws SQLException {
+	DataTable importDatabaseTable(String tableName, String[] columnIdentifiers, Database.Table table, ActionListener actionListenerTabClose) throws SQLException {
 		tableName = getUniqueTabName(tableName);
 		DataTable dataTable = new DataTable(columnIdentifiers);
 		dataTable.setTable(table);
@@ -59,9 +63,9 @@ public class DatabaseTabbedPane extends JTabbedPane {
 		
 		int index = indexOfTab(tableName);
 		
-		ButtonTabComponent tabHeader = new ButtonTabComponent(this, actionListenerTabClose);
+		ButtonTabComponent tabHeader = new ButtonTabComponent(this, tabBody, actionListenerTabClose);
 		this.setTabComponentAt(index, tabHeader);
-		
+		return dataTable;
 		
 	}
 	
@@ -81,15 +85,18 @@ public class DatabaseTabbedPane extends JTabbedPane {
 	
 	//https://docs.oracle.com/javase/tutorial/uiswing/examples/components/TabComponentsDemoProject/src/components/ButtonTabComponent.java
 	public class ButtonTabComponent extends JPanel {
-	    private final DatabaseTabbedPane pane;
+	    private final DatabaseTabbedPane mPane;
 	    private final ActionListener actionListenerTabClose;
-	    public ButtonTabComponent(final DatabaseTabbedPane pane, ActionListener actionListenerTabClose) {
+	    private final JScrollPane mTabBody;
+	    public ButtonTabComponent(final DatabaseTabbedPane pane, final JScrollPane tabBody, ActionListener actionListenerTabClose) {
 	        //unset default FlowLayout' gaps
 	        super(new FlowLayout(FlowLayout.LEFT, 0, 0));
 	        if (pane == null) {
 	            throw new NullPointerException("TabbedPane is null");
 	        }
-	        this.pane = pane;
+	        this.mPane = pane;
+	        this.mTabBody = tabBody;
+	        
 	        setOpaque(false);
 	        
 	        this.actionListenerTabClose = actionListenerTabClose;
@@ -109,15 +116,18 @@ public class DatabaseTabbedPane extends JTabbedPane {
 	        //add more space between the label and the button
 	        label.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
 	        //tab button
-	        JButton button = new TabButton();
+	        JButton button = new TabButton(this.mTabBody);
 	        add(button);
 	        //add more space to the top of the component
 	        setBorder(BorderFactory.createEmptyBorder(2, 0, 0, 0));
 	    }
 
 	    private class TabButton extends JButton implements ActionListener {
-	        public TabButton() {
-	        	
+	    	
+	    	final JScrollPane mTabBody;
+	    	
+	        public TabButton(JScrollPane tabBody) {
+	        	this.mTabBody = tabBody;
 	            int size = 17;
 	            setPreferredSize(new Dimension(size, size));
 	            setToolTipText("close this tab");
@@ -136,14 +146,62 @@ public class DatabaseTabbedPane extends JTabbedPane {
 	            //Close the proper tab by clicking the button
 	            addActionListener(this);
 	        }
-
-	        public void actionPerformed(ActionEvent e) {
-	        	
-	            int i = pane.indexOfTabComponent(ButtonTabComponent.this);
-
+	        
+	        public DataTable getDataTable() {
+	        	Component[] components = mPane.getComponents();
+	            Component component = null;
+	            System.out.println("Selected tab:" + mPane.getSelectedIndex());
+	            
+	            
+	            
+	            for(Component c : components) {
+	            	if(c.getClass().equals(JScrollPane.class)) {
+	            		component = c;
+	            		break;
+	            	}
+	            }
+	            if(component == null) {
+	            	System.out.println("Close button found no JScrollPane!");
+	            	return null;
+	            }
+	            
+	            JScrollPane scrollPane = (JScrollPane) component;
+	            JViewport viewport = scrollPane.getViewport();
+	            DataTable dataTable = (DataTable) viewport.getComponent(0);
+	            return dataTable;
+	        }
+	        
+	        public JScrollPane[] getTabs() {
+	        	Component[] components = mPane.getComponents();
+	        	ArrayList<JScrollPane> tabs = new ArrayList<JScrollPane>();
+	        	for(Component c : components) {
+	        		if(c.getClass().equals(JScrollPane.class)) 
+	        			tabs.add((JScrollPane)c);
+	        	}
+	        	JScrollPane[] arr = new JScrollPane[tabs.size()];
+	        	return (JScrollPane[]) tabs.toArray(arr);
+	        }
+	        
+	        public DataTable getActiveDataTable() {
+	        	int i = mPane.indexOfTabComponent(ButtonTabComponent.this);
+	            System.out.println("Close tab, index of tab component: " + i);
 	            if (i != -1) {
-		            Component component = pane.getComponent(i);
-		            JScrollPane scrollPane = (JScrollPane) component;
+		            JScrollPane scrollPane = getTabs()[i];
+		            JViewport viewport = scrollPane.getViewport();
+		            DataTable dataTable = (DataTable) viewport.getComponent(0);
+		            return dataTable;
+	            } else {
+	            	return null;
+	            }
+	        }
+	        
+	        public void actionPerformed(ActionEvent e) {
+	            int i = mPane.indexOfTabComponent(ButtonTabComponent.this);
+	            System.out.println("Close tab, index of tab component: " + i);
+	      
+	            
+	            if (i != -1) {
+		            JScrollPane scrollPane = getTabs()[i];
 		            JViewport viewport = scrollPane.getViewport();
 		            DataTable dataTable = (DataTable) viewport.getComponent(0);
 		            
@@ -153,7 +211,7 @@ public class DatabaseTabbedPane extends JTabbedPane {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-	                pane.remove(i);
+	                mPane.remove(i);
 	            }
 	        }
 
@@ -199,4 +257,56 @@ public class DatabaseTabbedPane extends JTabbedPane {
 	        }
 	    };
 	}
+	
+    public JScrollPane[] getTabs() {
+    	Component[] components = getComponents();
+    	ArrayList<JScrollPane> tabs = new ArrayList<JScrollPane>();
+    	for(Component c : components) {
+    		if(c.getClass().equals(JScrollPane.class)) 
+    			tabs.add((JScrollPane)c);
+    	}
+    	JScrollPane[] arr = new JScrollPane[tabs.size()];
+    	return (JScrollPane[]) tabs.toArray(arr);
+    }
+	
+    public DataTable getActiveDataTable() {
+    	int i = getSelectedIndex();
+        System.out.println("Close tab, index of tab component: " + i);
+        if (i != -1) {
+            JScrollPane scrollPane = getTabs()[i];
+            JViewport viewport = scrollPane.getViewport();
+            DataTable dataTable = (DataTable) viewport.getComponent(0);
+            return dataTable;
+        } else {
+        	return null;
+        }
+    }
+	
+	public String[] getSelection() {
+		
+		
+		DataTable a = this.getActiveDataTable();
+		
+		if(a != null) {
+			return a.getUniqueSelected();
+		}
+		
+		
+		
+		return null;
+	}
+
+    public void stateChanged(ChangeEvent e) {
+        JTabbedPane tabbedPane = (JTabbedPane) e.getSource();
+        int selectedIndex = tabbedPane.getSelectedIndex();
+        DataTable dataTable = getActiveDataTable();
+        try {
+			dataTable.updateTable();
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+        JOptionPane.showMessageDialog(null, "Selected Index: " + selectedIndex);
+    }
+	
 }

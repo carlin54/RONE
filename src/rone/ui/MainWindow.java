@@ -14,7 +14,13 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Stack;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,6 +30,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
 import jp.sbi.garuda.backend.net.exception.GarudaConnectionNotInitializedException;
@@ -65,6 +72,9 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 
 import java.awt.ScrollPane;
+import javax.swing.JLabel;
+import javax.swing.JSplitPane;
+import java.awt.Label;
 
 public class MainWindow implements ActionListener {
 	
@@ -131,7 +141,7 @@ public class MainWindow implements ActionListener {
 		}
 		return null;
 	}
-	
+	private Database mDatabaseInstance; 
 	
 	private void initialize() {
 		mMainWindow = this;
@@ -196,6 +206,7 @@ public class MainWindow implements ActionListener {
 				mnSearch.add(mnPercellome);
 				{
 					mntmPercellomeProbeIDs = new JMenuItem("with Probe IDs (Affy IDs)");
+					mntmPercellomeProbeIDs.setAction(actionPercellomeProbeID);
 					mnPercellome.add(mntmPercellomeProbeIDs);
 				}
 			}
@@ -239,7 +250,12 @@ public class MainWindow implements ActionListener {
 		JMenuItem mntmNewMenuItem = new JMenuItem("Discover");
 		JPopupMenu popupMenu = new JPopupMenu("Discover");
 		popupMenu.add(mntmNewMenuItem);
-	
+		
+		mDatabaseInstance = Database.getInstance();
+		
+		mSearchQueue = new ConcurrentLinkedQueue<Search>();
+		mSearchThreadManager = new SearchThreadManager();
+		mSearchThreadManager.start();
 	}
 	
 
@@ -321,7 +337,7 @@ public class MainWindow implements ActionListener {
 			//mDatabaseTabbedPane.setFillsViewportHeight(true);
 			this.mGarudaHandler = new GarudaHandler(this);
 		} catch (GarudaConnectionNotInitializedException | NetworkConnectionException e) {
-			JOptionPane.showMessageDialog(mMainWindowJFrame, "Was unable to connect to Garuda Platform. Please restart to connect.");
+			//JOptionPane.showMessageDialog(mMainWindowJFrame, "Was unable to connect to Garuda Platform. Please restart to connect.");
 			e.printStackTrace();
 		}
 		
@@ -345,7 +361,7 @@ public class MainWindow implements ActionListener {
 		mMainWindowJFrame.getContentPane().add(mDatabaseTabbedPane);
 		Database.Table importTable;
 		try {
-			importTable = Database.getInstance().createTable(tableName, columnIdentifiers, new int[]{});
+			importTable = mDatabaseInstance.createTable(tableName, columnIdentifiers, new int[]{});
 			importTable.insertRows(tableToLoad);
 			mDatabaseTabbedPane.importDatabaseTable(tableName, columnIdentifiers, importTable, null);
 		} catch (SQLException e) {
@@ -353,7 +369,7 @@ public class MainWindow implements ActionListener {
 		}
 		
 		if(mDatabaseTabbedPane.isEmpty()) {
-			/*Database.Table importTable = Database.getInstance().createTable(tableName, columnIdentifiers, new int[]{});
+			/*Database.Table importTable = mDatabaseInstance.createTable(tableName, columnIdentifiers, new int[]{});
 			importTable.insertRows(tableToLoad);
 			mDatabaseTabbedPane.importDatabaseTable(importTable);*/
 		} else {
@@ -409,6 +425,7 @@ public class MainWindow implements ActionListener {
 		loadTable(file.getName(), columnIdentifiers, data);
 	}
 	
+	
 	private void loadBioCompendium(File file) {
 		Table data;
 		try {
@@ -420,9 +437,14 @@ public class MainWindow implements ActionListener {
 		}
 	}
 	
+	private boolean hasFile(File file) {
+		return file != null && file.exists();
+	}
+	
 	private void loadFile(File file, String contents) {
 		
-		if(!file.exists()) return;
+		if(!hasFile(file)) 
+			return;
 		
 		System.out.println(contents);
 		
@@ -438,6 +460,7 @@ public class MainWindow implements ActionListener {
 		}
 		
 	}
+	
 	
 	public void windowClosing(WindowEvent e) {
 		System.out.println("window closing");
@@ -477,6 +500,7 @@ public class MainWindow implements ActionListener {
 		}
 	}
 	
+	
 	private void startDiscovery(String contence, String extension) {
 		String[] data = mDatabaseTabbedPane.getUniqueSelected();
 		
@@ -505,6 +529,7 @@ public class MainWindow implements ActionListener {
 		
 	}
 	
+	
 	boolean hasValidSelection() {
 		
 		if(mDatabaseTabbedPane.isEmpty()) {
@@ -519,7 +544,8 @@ public class MainWindow implements ActionListener {
 		
 		return true;
 	}
-		
+	
+	
 	private class GarudaDiscoverActionGenelist extends AbstractAction {
 		public GarudaDiscoverActionGenelist() {
 			putValue(NAME, "Genelist");
@@ -534,6 +560,7 @@ public class MainWindow implements ActionListener {
 			
 		}
 	}
+	
 	
 	private class GarudaDiscoverActionEnsemble extends AbstractAction {
 		
@@ -554,6 +581,7 @@ public class MainWindow implements ActionListener {
 		}
 	}
 
+	
 	private class TargetMineImportAction extends AbstractAction {
 		
 		public TargetMineImportAction() {
@@ -573,6 +601,7 @@ public class MainWindow implements ActionListener {
 		}
 	}
 	
+	
 	private class ReactomeImportAction extends AbstractAction {
 		public ReactomeImportAction() {
 			putValue(NAME, "Import Reactome");
@@ -591,6 +620,7 @@ public class MainWindow implements ActionListener {
 		}
 	}
 	
+	
 	private class PercellomeImportAction extends AbstractAction {
 		public PercellomeImportAction() {
 			putValue(NAME, "Import Percellome");
@@ -608,6 +638,7 @@ public class MainWindow implements ActionListener {
 			
 		}
 	}
+	
 	
 	private class FileExportTableAction extends AbstractAction {
 		
@@ -720,6 +751,7 @@ public class MainWindow implements ActionListener {
 		
 	}
 	
+	
 	private class FileClearTableAction extends AbstractAction {
 		
 		public FileClearTableAction() {
@@ -749,6 +781,7 @@ public class MainWindow implements ActionListener {
 	
 	}
 	
+	
 	private class ActionFileImportFromFile extends AbstractAction {
 		public ActionFileImportFromFile() {
 			putValue(NAME, "from File");
@@ -777,6 +810,7 @@ public class MainWindow implements ActionListener {
 		}
 	}
 	
+	
 	private class ActionFileExportToFile extends AbstractAction {
 		public ActionFileExportToFile() {
 			putValue(NAME, "to File");
@@ -784,6 +818,7 @@ public class MainWindow implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 		}
 	}
+	
 	
 	private class ActionFileExportToGarudaAsGenelist extends AbstractAction {
 		public ActionFileExportToGarudaAsGenelist() {
@@ -817,13 +852,7 @@ public class MainWindow implements ActionListener {
 		}
 	}
 	
-	private class ActionSearchPercellomeWithProbeID extends AbstractAction {
-		public ActionSearchPercellomeWithProbeID() {
-			putValue(NAME, "with Probe IDs (Affy ID)");
-		}
-		public void actionPerformed(ActionEvent e) {
-		}
-	}
+
 	
 	private class ActionSearchReactomeWithGeneSymbols extends AbstractAction {
 		public ActionSearchReactomeWithGeneSymbols() {
@@ -856,6 +885,457 @@ public class MainWindow implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 		}
 	}
+	
+	
+	private class ActionSearchPercellomeWithProbeID extends AbstractAction {
+		public ActionSearchPercellomeWithProbeID() {
+			putValue(NAME, "with Probe IDs (Affy ID)");
+		}
+		public void actionPerformed(ActionEvent e) {
+			String[] selection = mDatabaseTabbedPane.getSelection();
+			TargetMineSearchInterface targetMineSearchInterface = new TargetMineSearchInterface();
+			
+			Search search = new Search(targetMineSearchInterface, selection, mDatabaseTabbedPane);
+			
+			mSearchThreadManager.addSearch(search);
+			
+		}
+	}
+	
+	ConcurrentLinkedQueue<Search> mSearchQueue;
+
+	class Search {
+		private SearchInterface mSearchInterface;
+		private String[] mSearchInterfaceRequests;
+		private DatabaseTabbedPane mDatabaseTabbedPane;
+		
+		public SearchInterface getSearchInterface() 		{	return mSearchInterface;		}
+		public String[] getSearchInterfaceRequests() 		{	return mSearchInterfaceRequests;}
+		public DatabaseTabbedPane getDatabaseTabbedPane() 	{	return mDatabaseTabbedPane;		}
+		
+		Search(	SearchInterface searchInterface, 
+				String[] searchInterfaceRequests, 
+				DatabaseTabbedPane databaseTabbedPane)
+		{
+			this.mSearchInterface = searchInterface;
+			this.mSearchInterfaceRequests = searchInterfaceRequests;
+			this.mDatabaseTabbedPane = databaseTabbedPane;
+		}
+	}
+	
+
+	SearchThreadManager mSearchThreadManager; 
+	class SearchThreadManager extends Thread {
+		
+		private ConcurrentLinkedQueue<Search> mSearchQueue; 
+		private ConcurrentLinkedQueue<MasterThread> mActiveQueue; 
+		private boolean mStopAllThreads;
+		
+		SearchThreadManager(){
+			mStopAllThreads = false;
+			mSearchQueue = new ConcurrentLinkedQueue<Search>();
+			mActiveQueue = new ConcurrentLinkedQueue<MasterThread>();
+		}
+		
+		public void stopAllThreads() {
+			
+			for(MasterThread ms : mActiveQueue) {
+				ms.interrupt();
+			}
+			
+		}
+		
+		public boolean finishing() {
+			return mStopAllThreads;
+		}
+		
+		private boolean hasInActiveSearches() 	{ return mSearchQueue.size() > 0;}
+		private boolean hasActiveSearches() 	{ return mActiveQueue.size() > 0;}
+		
+		private boolean hasSearches() {
+			return hasInActiveSearches() || hasActiveSearches();
+		}
+		
+		public void startInActiveSearches() {
+			while(hasInActiveSearches()) {
+				Search search = mSearchQueue.poll();
+				MasterThread startThread = new MasterThread(search);
+				startThread.start();
+				mActiveQueue.add(startThread);
+			}
+		}
+		
+		public void run() 
+	    { 
+			this.mStopAllThreads = false;
+			while(!finishing()) {
+				try {
+					synchronized (mSearchQueue) {
+						while(mSearchQueue.isEmpty()) {
+							System.out.println("SearchThreadManager:" + this.getName() + ": Thread will wait.");
+							mSearchQueue.wait();	
+						}
+						System.out.println("SearchThreadManager:" + this.getName() + ": Thread done waiting, notifyAll().");
+						mSearchQueue.notifyAll();
+					}
+					
+					while(hasSearches()) {
+						System.out.println("SearchThreadManager:" + this.getName() + ": Starting searches!");
+						startInActiveSearches();
+						joinActiveSearches();
+					}
+					
+					
+				} catch(InterruptedException e) {  
+					System.out.println("SearchThreadManager:"  + this.getName() + ": Interupted, Finishing = " + Boolean.toString(finishing()) + ".");
+				}
+			}
+			
+			try {
+				joinActiveSearches();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+	    }
+		
+		private boolean threadEnded(MasterThread mt) {
+			return mt.processSuccess() || mt.hasToStopWorking();
+		}
+		
+		private void joinActiveSearches() throws InterruptedException {
+			while(hasActiveSearches()) {
+				for(int i = 0; i < mActiveQueue.size(); ) {
+					MasterThread mt = mActiveQueue.peek();
+					if(threadEnded(mt)) {
+						mt.join();
+						mActiveQueue.remove(i);
+					} else {
+						i = i + 1;
+					}
+				}
+			}
+		}
+		
+		private Search getSearch() {
+			synchronized(mSearchQueue) {
+				System.out.println("SearchThreadManager:getSearch():" + this.getName() + ": removing from queue.");
+				return mSearchQueue.poll();
+			}
+		}
+		
+		public void addSearch(Search search) {
+			synchronized(mSearchQueue) {
+				System.out.println("SearchThreadManager:addSearch():" + this.getName() + ": adding to queue.");
+				mSearchQueue.add(search);
+				mSearchQueue.notifyAll();
+			}
+		}
+		
+		
+	};
+	
+    class WorkerThread extends Thread 
+	{ 
+    	private ArrayList<Object[]> mResults;
+    	private String[] mSearchInterfaceRequests;
+    	private boolean mHasGivenResults;
+    	private SearchInterface mSearchInterface;
+    	
+    	WorkerThread(SearchInterface searchInterface){
+    		System.out.println("WorkerThread():" + this.getName());
+    		mSearchInterface = searchInterface;
+    		mResults = new ArrayList<Object[]>();
+    	}
+    	
+    	public void setWork(String[] work) {
+    		this.mSearchInterfaceRequests = work;
+    	}
+    	
+    	public ArrayList<Object[]> getResults(){
+    		setHasGivenResults(true);
+    		return mResults;
+    	}
+
+    	public void setHasGivenResults(boolean set) {
+    		mHasGivenResults = set;
+    	}
+    	
+    	public void setResults(ArrayList<Object[]> results) {
+    		mResults = results;
+    	}
+    	
+	    public void run() 
+	    { 
+	    	System.out.println("WorkerThread:run()" + this.getName());
+    		ArrayList<Object[]> results = mSearchInterface.query(mSearchInterfaceRequests);
+    		System.out.println("WorkerThread:run()" + this.getName() +": query complete!");
+    		setResults(results);
+    		setHasGivenResults(false);
+	    }
+
+		public boolean hasGivenResults() {
+			return mHasGivenResults;
+		}
 
 
+		public String[] getWork() {
+			return this.mSearchInterfaceRequests;
+		} 
+	
+	} 
+    
+    
+    class MasterThread extends Thread {
+    	private int mThreadPoolSize = 5;
+    	private int mWorkSize = 20;
+    	
+    	private WorkerThread mThreadPool[];
+    	
+    	private Boolean mProcessSuccess;
+    	private boolean mStopWorking;
+    	private int mWorkHeadIndex;
+    	private Database.Table mResultsTable;
+    	private Search mSearch;
+    	
+    	private SearchInterface mSearchInterface;
+    	private String[] mSearchInterfaceRequests;
+    	
+    	private int mRequestsSearched;
+    	
+    	private DataTable mDataTable;
+    	
+    	
+    	public MasterThread(Search search) {
+    		mSearch = search;
+    		mSearchInterface = search.getSearchInterface();
+    		mSearchInterfaceRequests = search.getSearchInterfaceRequests();
+    		mDatabaseTabbedPane = search.getDatabaseTabbedPane();
+    		
+    		mThreadPoolSize = mSearchInterface.getThreadPoolSize();
+    		mWorkSize = mSearchInterface.getWorkSize();
+    		
+    		mRequestsSearched = 0;
+    		
+    		System.out.println("MasterThread():" + this.getName());
+    		
+    		setProcessSuccess(false);
+    	}
+    	
+    	public void stopProcess() {
+    		System.out.println("stopProcess()");
+    		mStopWorking = true;
+    	}
+    	
+    	private int nextIndex(int i) {
+        	return ((i+mWorkSize > mSearchInterfaceRequests.length) ? mSearchInterfaceRequests.length : i+mWorkSize);
+        }
+    	
+    	public String[] getNextWork() {
+    		if(mWorkHeadIndex < mSearchInterfaceRequests.length) {
+    			int mNewWorkHead = nextIndex(mWorkHeadIndex);
+    			String[] slice = Arrays.copyOfRange(mSearchInterfaceRequests, mWorkHeadIndex, mNewWorkHead);
+    			mWorkHeadIndex = mNewWorkHead;
+    			return slice;
+    		}else{
+    			return new String[] {};
+    		}
+    	}
+    	
+    	private boolean hasResults(ArrayList<Object[]> results) {
+    		return (results != null) && results.size() > 0;
+    	}
+    	
+    	private int totalCompletedWork(String[] work) {
+    		return work == null ? 0 : work.length; 
+    	}
+    	
+    	private void updateTableModel(ArrayList<Object[]> results) {
+    		
+    		Iterator<Object[]> it = results.iterator();
+    		
+    		while(it.hasNext()) {
+    			Object[] row = it.next();
+    			DefaultTableModel model = (DefaultTableModel) mTable.getModel();
+    			model.addRow(row);
+    			mTable.setModel(model);
+    		}
+    		
+    	}
+    	
+    	public void processResults(String[] completeWork, ArrayList<Object[]> results) {
+    		
+    		
+    		if(!hasResults(results)) 
+    			return;
+    		
+    		try {
+				mResultsTable.insertRows(results);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    		
+    		if(mDataTable.isVisible()) {
+    			try {
+					mDataTable.updateTable();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+    		}
+    		
+    		mRequestsSearched = mRequestsSearched + totalCompletedWork(completeWork); 
+    		
+    	}
+    	
+    	private DefaultTableModel makeDefaultTableModel() {
+    		DefaultTableModel dtm = new DefaultTableModel();
+    		dtm.setColumnIdentifiers(mSearchInterface.getColumnIdentifers());
+    		return dtm; 
+    	}
+    	
+    	public boolean unsuccessful(ArrayList<Object[]> ptr) {
+    		return ptr == null || ptr.size() == 0;
+    	}
+    	
+    	public boolean hasWork(String[] work) {
+    		return work.length > 0;
+    	}
+    	
+    	private WorkerThread[] makeThreadPool(int size, int priority) {
+    		WorkerThread[] threadPool = new WorkerThread[size];
+    		for(int i = 0; i < mThreadPoolSize; i++) {
+    			threadPool[i] = new WorkerThread(mSearchInterface);
+    			threadPool[i].setPriority(priority);
+    		}
+    		return threadPool;
+    	}
+    	
+    	public void giveWork(String[] work) {
+			int i = 0;
+			boolean givenWork = false;
+			while(!givenWork) {
+				
+				if(!mThreadPool[i].isAlive()) {
+					try {
+						mThreadPool[i].join();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					ArrayList<Object[]> results = mThreadPool[i].getResults();
+					String completeWork[] = mThreadPool[i].getWork();
+					
+					//TODO: check if i don't need a new worker thread
+					mThreadPool[i] = new WorkerThread(mSearchInterface);
+        			mThreadPool[i].setWork(work);
+        			mThreadPool[i].start();
+        			
+					processResults(completeWork, results);
+    				
+    				givenWork = true;
+    			}
+				i = (i + 1) % mThreadPoolSize;
+			}
+    	}
+    	
+    	private void cleanUp() {
+    		System.out.println("MasterThread:cleanUp()");
+    		boolean doneCleanUp = false;
+    		while(!doneCleanUp) {
+    			doneCleanUp = true;
+	    		for(int i = 0; i < mThreadPool.length; i++) {
+	    			WorkerThread worker = mThreadPool[i];
+	    			try {
+	    				if(worker.isAlive()) {
+	    					doneCleanUp = false;
+	    					System.out.println("MasterThread: joining worker - " + worker.getId());
+	    					worker.join();
+	    				}
+	    				
+	    				if(!worker.hasGivenResults()) {
+	    					ArrayList<Object[]> results = worker.getResults();
+	    					String[] completeWork = worker.getWork();
+	    					processResults(completeWork, results);
+	    				}
+	    				
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+	    		}
+    		}
+    		mThreadPool = null;
+    		mWorkHeadIndex = 0;
+    	}
+    	
+    	private boolean hasToStopWorking() {
+    		return mStopWorking;
+    	}
+    	
+    	public Boolean processSuccess() {
+    		return mProcessSuccess;
+    	}
+    	
+    	private void setProcessSuccess(Boolean set) {
+    		mProcessSuccess = set;
+    	}
+    	
+    	public void run() {
+    		System.out.println("MasterThread:Run():" + this.getName());
+    		String tableName = mSearchInterface.getTitle();
+    		String[] columnIdentifiers = mSearchInterface.getColumnIdentifers();
+    		int[] primaryKeys = mSearchInterface.getPrimaryKeys();
+    		
+    		mResultsTable = null;
+			try {
+				mResultsTable = mDatabaseInstance.createTable(tableName, columnIdentifiers, primaryKeys);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			System.out.println("MasterThread:Run():" + this.getName() + ":Database created!");
+    		ActionListener actionListener = new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					stopProcess();
+				}
+    			
+    		};
+    		try {
+				mDataTable = mDatabaseTabbedPane.importDatabaseTable(tableName, columnIdentifiers, mResultsTable, actionListener);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    		
+    		System.out.println("MasterThread:Run():" + this.getName() + ":Imported Database Table!");
+    		mThreadPool = makeThreadPool(mThreadPoolSize, MAX_PRIORITY);
+    		
+    		System.out.println("MasterThread:Run():" + this.getName() + ":Made thread pool!");
+    		String[] work = null;
+    		
+    		setProcessSuccess(false);
+    		
+    		System.out.println("MasterThread:Run():" + this.getName() + ":Allocating work.");
+    		while(hasWork(work = getNextWork())) {
+    			if(hasToStopWorking()) {
+    				System.out.println("Ending Process!");
+    				break;
+    			}
+    			giveWork(work);
+			}
+	    		
+    		cleanUp();
+    		
+    		if(!hasToStopWorking()) {
+    			setProcessSuccess(true);
+    		}
+    	}
+
+		public boolean isRunning() {
+			return false;
+		}
+    
+    }
 }

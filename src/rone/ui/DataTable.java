@@ -8,6 +8,7 @@ import javax.swing.JTable;
 import javax.swing.RowSorter;
 import javax.swing.RowSorter.SortKey;
 import javax.swing.SortOrder;
+import javax.swing.event.ChangeEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableModel;
@@ -63,7 +64,7 @@ public class DataTable extends JTable {
 		int[] rows = this.getSelectedRows();
 		int[] cols = this.getSelectedColumns();
 		
-		LinkedList<String> unique = new LinkedList<String>(); 
+		ArrayList<String> unique = new ArrayList<String>(); 
 		
 		Object last_added = null;
 		for(int i = 0; i < rows.length; i++) {
@@ -188,7 +189,6 @@ public class DataTable extends JTable {
 		this.mColumnIdentifiers = columnIdentifiers;
 	}
 	
-	
 	public DataTable(Database.Table databaseTable) throws SQLException{
 		this.setDatabaseTable(databaseTable);
 		init();
@@ -212,10 +212,7 @@ public class DataTable extends JTable {
 	}
 	
 	public void clearTable() throws SQLException {
-		this.mDatabaseTable.clearTable();
-		this.mDatabaseTable = null;
-		this.mColumnIdentifiers = null;
-		this.mJTable = null;
+		Database.getInstance().removeTable(this.mDatabaseTable);
 		DefaultTableModel model = new DefaultTableModel();
 		setModel(model);
 		
@@ -254,24 +251,34 @@ public class DataTable extends JTable {
 	}
 	
 	private DefaultTableModel loadDataIntoTableModel(DefaultTableModel model) {
-		int numRows = mTableContence.size();
-		int numCols =  mTableContence.get(0).length;
 		
-		System.out.println("Rows: " + numRows);
-		System.out.println("Cols: " + numCols);
+		try {
+			mTableContence = mDatabaseTable.getTable();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
-		for(int iRow = 0; iRow < numRows; iRow++) {
-			Object[] row = mTableContence.get(iRow);	
-			model.addRow(row);
+		if(!mTableContence.isEmpty()) {
+			int numRows = mTableContence.size();
+			int numCols =  mTableContence.get(0).length;
+			
+			System.out.println("Rows: " + numRows);
+			System.out.println("Cols: " + numCols);
+			
+			for(int iRow = 0; iRow < numRows; iRow++) {
+				Object[] row = mTableContence.get(iRow);	
+				model.addRow(row);
+			}
 		}
 		return model;
 	}
 	
-	private void updateTable() throws SQLException {
+	public void updateTable() throws SQLException {
 		assert(mDatabaseTable != null);
 		setUpdatingTable(true);
 	
-		mTableContence = mDatabaseTable.getTable();
+		
 	
 		DefaultTableModel model = makeDefaultTableModel();
 		model = loadDataIntoTableModel(model);
@@ -288,5 +295,7 @@ public class DataTable extends JTable {
 	public Object getCell(int row, int col) {
 		return this.mTableContence.get(col)[row];
 	}
+	
+
 	
 }
