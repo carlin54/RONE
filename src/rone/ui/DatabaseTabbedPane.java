@@ -49,6 +49,7 @@ public class DatabaseTabbedPane extends JTabbedPane {
 		Integer i = 1;
 		while(!isUniqueTabName(uniqueName)) {
 			uniqueName = name + " (" + i.toString() + ")";
+			i = i + 1;
 		}
 		return uniqueName;
 	}
@@ -112,11 +113,14 @@ public class DatabaseTabbedPane extends JTabbedPane {
 	            }
 	        };
 	        
+	        
+	        
 	        add(label);
 	        //add more space between the label and the button
 	        label.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
 	        //tab button
 	        JButton button = new TabButton(this.mTabBody);
+	        button.addActionListener(actionListenerTabClose);
 	        add(button);
 	        //add more space to the top of the component
 	        setBorder(BorderFactory.createEmptyBorder(2, 0, 0, 0));
@@ -184,7 +188,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
 	        
 	        public DataTable getActiveDataTable() {
 	        	int i = mPane.indexOfTabComponent(ButtonTabComponent.this);
-	            System.out.println("Close tab, index of tab component: " + i);
 	            if (i != -1) {
 		            JScrollPane scrollPane = getTabs()[i];
 		            JViewport viewport = scrollPane.getViewport();
@@ -198,7 +201,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
 	        public void actionPerformed(ActionEvent e) {
 	            int i = mPane.indexOfTabComponent(ButtonTabComponent.this);
 	            System.out.println("Close tab, index of tab component: " + i);
-	      
 	            
 	            if (i != -1) {
 		            JScrollPane scrollPane = getTabs()[i];
@@ -206,7 +208,9 @@ public class DatabaseTabbedPane extends JTabbedPane {
 		            DataTable dataTable = (DataTable) viewport.getComponent(0);
 		            
 		            try {
+		            	System.out.println("TabButton:actionPerformed:Clearing table");
 						dataTable.clearTable();
+						System.out.println("TabButton:actionPerformed:Table cleared.");
 					} catch (SQLException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -306,6 +310,7 @@ public class DatabaseTabbedPane extends JTabbedPane {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+       
         JOptionPane.showMessageDialog(null, "Selected Index: " + selectedIndex);
     }
 	

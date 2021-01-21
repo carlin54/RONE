@@ -40,7 +40,7 @@ public class Database {
 		this.mTableNames = new ArrayList<String>();
 	}
 	
-	public static synchronized Database getInstance() {
+	public synchronized static Database getInstance() {
 		
 		
 		if(single_instance == null) {
@@ -50,9 +50,6 @@ public class Database {
 				e.printStackTrace();
 			}
 		}
-		
-		while(instanceLocked);
-		instanceLocked = true; 
 		
 		return single_instance;
 	}
@@ -267,6 +264,7 @@ public class Database {
 			if(isUniqueTableName(checkTableName)) {
 				return checkTableName;
 			}
+			i = i + 1;
 		}
 		return checkTableName;
 	}
@@ -379,27 +377,34 @@ public class Database {
 	public Table createTable(String tableName, String[] columnIdentifiers, int[] primaryKeys) throws SQLException {
 		// generate query
 		//assert(hasColumnIdentifiers(columnIdentifiers));
-		
+		System.out.println("CreatingTable!");
 		//TODO: implement this
 		String safeTableName = makeSafeTableName(tableName);
+		System.out.println("makeSafeTableName!");
 		String[] safeColumnIdentifiers = makeColumnIdentifersSafe(columnIdentifiers);
+		System.out.println("makeColumnIdentifersSafe!");
 		//System.out.println(safeColumnIdentifiers.toString());
 		
+		System.out.println("Building Code!");
 		String code = buildCreateTableCode(safeTableName, safeColumnIdentifiers, primaryKeys);
 		
 		//System.out.println("----generated sql----");
 		//System.out.println(code);
 		//System.out.println("----generated sql----");
 		
+		System.out.println("Creating database!");
 		Database.Table create = new Database.Table(this, safeTableName, safeColumnIdentifiers);
 		
+		
 		java.sql.Statement statement = this.mConnection.createStatement();
+		System.out.println("create command database!");
 		boolean success = statement.execute(code);
 		//System.out.println("Query success: " + Boolean.toString(success));
 		statement.close();
 		
 		this.mTableNames.add(safeTableName);
 		create.setExistsInDatabase(true);
+		System.out.println("create success!");
 		return create;
 	}
 	

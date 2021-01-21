@@ -1,7 +1,23 @@
-Wed Jan 20 15:11:11 AEST 2021 : Apache Derby Network Server - 10.15.2.0 - (1873585) started and ready to accept connections on port 1528
+Thu Jan 21 23:35:57 AEST 2021 : Could not listen on port 1528 on host 127.0.0.1:
+ java.net.BindException: Address already in use: bind
+An exception was thrown during network server startup. DRDA_ListenPort.S:Could not listen on port 1528 on host 127.0.0.1:
+ java.net.BindException: Address already in use: bind
+java.lang.reflect.InvocationTargetException
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:564)
+	at org.apache.derby.iapi.jdbc.DRDAServerStarter.run(DRDAServerStarter.java:236)
+	at java.base/java.lang.Thread.run(Thread.java:832)
+Caused by: java.lang.Exception: DRDA_ListenPort.S:Could not listen on port 1528 on host 127.0.0.1:
+ java.net.BindException: Address already in use: bind
+	at org.apache.derby.impl.drda.NetworkServerControlImpl.consolePropertyMessageWork(NetworkServerControlImpl.java:3516)
+	at org.apache.derby.impl.drda.NetworkServerControlImpl.consolePropertyMessage(NetworkServerControlImpl.java:2107)
+	at org.apache.derby.impl.drda.NetworkServerControlImpl.blockingStart(NetworkServerControlImpl.java:850)
+	... 6 more
 ----------------------------------------------------------------
-Wed Jan 20 15:11:11 AEST 2021:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.15.2.0 - (1873585): instance a816c00e-0177-1e34-29ff-000000a09550 
+Thu Jan 21 23:35:58 AEST 2021:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.15.2.0 - (1873585): instance a816c00e-0177-2528-a99f-000000a09f20 
 on database directory memory:C:\Users\Richard\Documents\GitHub\RONE\Singleton with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@4cc77c2e 
 Loaded from file:/C:/Users/Richard/Documents/GitHub/RONE/lib/derby/derby.jar
 java.vendor=Oracle Corporation

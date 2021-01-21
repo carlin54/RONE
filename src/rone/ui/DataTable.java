@@ -250,14 +250,9 @@ public class DataTable extends JTable {
 		return model;
 	}
 	
-	private DefaultTableModel loadDataIntoTableModel(DefaultTableModel model) {
+	private DefaultTableModel loadDataIntoTableModel(DefaultTableModel model) throws SQLException {
 		
-		try {
-			mTableContence = mDatabaseTable.getTable();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		mTableContence = mDatabaseTable.getTable();
 		
 		if(!mTableContence.isEmpty()) {
 			int numRows = mTableContence.size();
@@ -278,7 +273,7 @@ public class DataTable extends JTable {
 		assert(mDatabaseTable != null);
 		setUpdatingTable(true);
 	
-		
+		mTableContence = mDatabaseTable.getTable();
 	
 		DefaultTableModel model = makeDefaultTableModel();
 		model = loadDataIntoTableModel(model);

@@ -89,7 +89,6 @@ public class TargetMineSearchInterface implements SearchInterface {
         Iterator<List<Object>> rows = service.getRowListIterator(query);
         ArrayList<Object[]> results = new ArrayList<Object[]>();
         
-        System.out.println("TargetMineSearchInterface: Query complete! " + service.getCount(query));
         while (rows.hasNext()) {
         	Object[] row = rows.next().toArray();
         	for(int i = 0; i < row.length; i++) {
@@ -98,16 +97,13 @@ public class TargetMineSearchInterface implements SearchInterface {
         		}
         	}
         	results.add(row);
-        	
-        	System.out.println("Result - " + Arrays.toString(row));
         }
-        System.out.println("TargetMineSearchInterface: Returning results.");
-		return results;
+        return results;
 	}
 
 	@Override
 	public int getWorkSize() {
-		return 20; //20
+		return 1; //20
 	}
 
 	@Override

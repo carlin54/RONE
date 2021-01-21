@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.Stack;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -75,6 +76,7 @@ import java.awt.ScrollPane;
 import javax.swing.JLabel;
 import javax.swing.JSplitPane;
 import java.awt.Label;
+import java.awt.List;
 
 public class MainWindow implements ActionListener {
 	
@@ -852,8 +854,6 @@ public class MainWindow implements ActionListener {
 		}
 	}
 	
-
-	
 	private class ActionSearchReactomeWithGeneSymbols extends AbstractAction {
 		public ActionSearchReactomeWithGeneSymbols() {
 			putValue(NAME, "with Gene Symbols");
@@ -885,7 +885,6 @@ public class MainWindow implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 		}
 	}
-	
 	
 	private class ActionSearchPercellomeWithProbeID extends AbstractAction {
 		public ActionSearchPercellomeWithProbeID() {
@@ -927,100 +926,21 @@ public class MainWindow implements ActionListener {
 	SearchThreadManager mSearchThreadManager; 
 	class SearchThreadManager extends Thread {
 		
-		private ConcurrentLinkedQueue<Search> mSearchQueue; 
-		private ConcurrentLinkedQueue<MasterThread> mActiveQueue; 
+		private CopyOnWriteArrayList<Search> mSearchQueue; 
+		private CopyOnWriteArrayList<MasterThread> mActiveQueue; 
+		
 		private boolean mStopAllThreads;
+		
 		
 		SearchThreadManager(){
 			mStopAllThreads = false;
-			mSearchQueue = new ConcurrentLinkedQueue<Search>();
-			mActiveQueue = new ConcurrentLinkedQueue<MasterThread>();
+			mSearchQueue = new CopyOnWriteArrayList<Search>();
+			mActiveQueue = new CopyOnWriteArrayList<MasterThread>();
 		}
 		
 		public void stopAllThreads() {
-			
-			for(MasterThread ms : mActiveQueue) {
-				ms.interrupt();
-			}
-			
-		}
-		
-		public boolean finishing() {
-			return mStopAllThreads;
-		}
-		
-		private boolean hasInActiveSearches() 	{ return mSearchQueue.size() > 0;}
-		private boolean hasActiveSearches() 	{ return mActiveQueue.size() > 0;}
-		
-		private boolean hasSearches() {
-			return hasInActiveSearches() || hasActiveSearches();
-		}
-		
-		public void startInActiveSearches() {
-			while(hasInActiveSearches()) {
-				Search search = mSearchQueue.poll();
-				MasterThread startThread = new MasterThread(search);
-				startThread.start();
-				mActiveQueue.add(startThread);
-			}
-		}
-		
-		public void run() 
-	    { 
-			this.mStopAllThreads = false;
-			while(!finishing()) {
-				try {
-					synchronized (mSearchQueue) {
-						while(mSearchQueue.isEmpty()) {
-							System.out.println("SearchThreadManager:" + this.getName() + ": Thread will wait.");
-							mSearchQueue.wait();	
-						}
-						System.out.println("SearchThreadManager:" + this.getName() + ": Thread done waiting, notifyAll().");
-						mSearchQueue.notifyAll();
-					}
-					
-					while(hasSearches()) {
-						System.out.println("SearchThreadManager:" + this.getName() + ": Starting searches!");
-						startInActiveSearches();
-						joinActiveSearches();
-					}
-					
-					
-				} catch(InterruptedException e) {  
-					System.out.println("SearchThreadManager:"  + this.getName() + ": Interupted, Finishing = " + Boolean.toString(finishing()) + ".");
-				}
-			}
-			
-			try {
-				joinActiveSearches();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-	    }
-		
-		private boolean threadEnded(MasterThread mt) {
-			return mt.processSuccess() || mt.hasToStopWorking();
-		}
-		
-		private void joinActiveSearches() throws InterruptedException {
-			while(hasActiveSearches()) {
-				for(int i = 0; i < mActiveQueue.size(); ) {
-					MasterThread mt = mActiveQueue.peek();
-					if(threadEnded(mt)) {
-						mt.join();
-						mActiveQueue.remove(i);
-					} else {
-						i = i + 1;
-					}
-				}
-			}
-		}
-		
-		private Search getSearch() {
-			synchronized(mSearchQueue) {
-				System.out.println("SearchThreadManager:getSearch():" + this.getName() + ": removing from queue.");
-				return mSearchQueue.poll();
-			}
+			mSearchQueue.clear();
+			mStopAllThreads = true;
 		}
 		
 		public void addSearch(Search search) {
@@ -1031,6 +951,112 @@ public class MainWindow implements ActionListener {
 			}
 		}
 		
+		public boolean finishing() {
+			return mStopAllThreads;
+		}
+		
+		private  boolean hasInActiveSearches() 	{ 
+			return mSearchQueue.size() > 0;
+		}
+		
+		private boolean hasActiveSearches() 	{ 
+			return mActiveQueue.size() > 0;
+		}
+		
+		private boolean hasSearches() {
+			return hasInActiveSearches() || hasActiveSearches();
+		}
+		
+		public void startInActiveSearches() throws InterruptedException {
+			while(hasInActiveSearches()) {
+				synchronized(mSearchQueue) {
+					while(!mSearchQueue.isEmpty()) {
+						Search search = mSearchQueue.remove(0);
+						MasterThread startThread = new MasterThread(search);
+						startThread.start();
+						mActiveQueue.add(startThread);						
+					}
+					mSearchQueue.notifyAll();
+				}
+			}
+		}
+		
+		public void endThreads() {
+			for(MasterThread mt : mActiveQueue) {
+				mt.stopProcess();
+			}
+		}
+		
+		public void run() 
+	    { 
+			this.mStopAllThreads = false;
+			while(!finishing()) {
+				try {
+					synchronized (this.mSearchQueue) {
+						while(mSearchQueue.isEmpty()) {
+							System.out.println("Waiting for search query!");
+							mSearchQueue.wait();
+						}
+						
+						while(hasSearches()) {
+							joinCompleteSearches();
+							startInActiveSearches();
+						}
+						mSearchQueue.notifyAll();
+					}
+					
+					
+				} catch(InterruptedException e) {  
+					System.out.println("SearchThreadManager:"  + this.getName() + ": Interupted, Finishing = " + Boolean.toString(finishing()) + ".");
+				}
+			}
+			
+			try {
+				cleanUp();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+	    }
+		
+		private boolean threadEnded(MasterThread mt) {
+			return mt.processSuccess() || mt.hasToStopWorking();
+		}
+		
+		private void cleanUp() throws InterruptedException {
+
+			endThreads();
+			
+			System.out.println("SearchThreadManager:cleaning up!");
+			synchronized(mSearchQueue) {
+				while(!mActiveQueue.isEmpty()) {
+					MasterThread mt = mActiveQueue.remove(0);
+					try {
+						mt.join();
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				mSearchQueue.notifyAll();
+			}
+		}
+		
+		private void joinCompleteSearches() throws InterruptedException {
+			while(hasActiveSearches()) {
+				//System.out.println("SearchThreadManager: Trying to join threads!" + Boolean.toString(hasInActiveSearches()));
+				for(int i = 0; i < mActiveQueue.size(); ) {
+					MasterThread mt = mActiveQueue.get(i);
+					if(threadEnded(mt)) {
+						mt.join();
+						mActiveQueue.remove(i);
+						System.out.println("SearchThreadManager: Successfully joined thread!" + mt.getId());
+					} else {
+						i = i + 1;
+					}
+					//TODO: Fix this later, should be no thread.sleep - wait for array to update
+				}
+			}
+		}
 		
 	};
 	
@@ -1039,8 +1065,10 @@ public class MainWindow implements ActionListener {
     	private ArrayList<Object[]> mResults;
     	private String[] mSearchInterfaceRequests;
     	private boolean mHasGivenResults;
-    	private SearchInterface mSearchInterface;
+    	private boolean mStopProcessing;
     	
+    	private SearchInterface mSearchInterface;
+    
     	WorkerThread(SearchInterface searchInterface){
     		System.out.println("WorkerThread():" + this.getName());
     		mSearchInterface = searchInterface;
@@ -1065,10 +1093,11 @@ public class MainWindow implements ActionListener {
     	}
     	
 	    public void run() 
-	    { 
+	    {
 	    	System.out.println("WorkerThread:run()" + this.getName());
     		ArrayList<Object[]> results = mSearchInterface.query(mSearchInterfaceRequests);
     		System.out.println("WorkerThread:run()" + this.getName() +": query complete!");
+    		
     		setResults(results);
     		setHasGivenResults(false);
 	    }
@@ -1104,7 +1133,6 @@ public class MainWindow implements ActionListener {
     	
     	private DataTable mDataTable;
     	
-    	
     	public MasterThread(Search search) {
     		mSearch = search;
     		mSearchInterface = search.getSearchInterface();
@@ -1122,7 +1150,7 @@ public class MainWindow implements ActionListener {
     	}
     	
     	public void stopProcess() {
-    		System.out.println("stopProcess()");
+    		System.out.println("MasterThread:stopProcess()");
     		mStopWorking = true;
     	}
     	
@@ -1164,10 +1192,10 @@ public class MainWindow implements ActionListener {
     	
     	public void processResults(String[] completeWork, ArrayList<Object[]> results) {
     		
-    		
     		if(!hasResults(results)) 
     			return;
     		
+  
     		try {
 				mResultsTable.insertRows(results);
 			} catch (SQLException e) {
@@ -1215,6 +1243,8 @@ public class MainWindow implements ActionListener {
 			int i = 0;
 			boolean givenWork = false;
 			while(!givenWork) {
+				if(hasToStopWorking()) 
+					return;
 				
 				if(!mThreadPool[i].isAlive()) {
 					try {
@@ -1229,6 +1259,7 @@ public class MainWindow implements ActionListener {
 					mThreadPool[i] = new WorkerThread(mSearchInterface);
         			mThreadPool[i].setWork(work);
         			mThreadPool[i].start();
+        			
         			
 					processResults(completeWork, results);
     				
@@ -1248,11 +1279,11 @@ public class MainWindow implements ActionListener {
 	    			try {
 	    				if(worker.isAlive()) {
 	    					doneCleanUp = false;
-	    					System.out.println("MasterThread: joining worker - " + worker.getId());
 	    					worker.join();
+	    					System.out.println("MasterThread: successfully joined worker thread -> " + worker.getId());
 	    				}
 	    				
-	    				if(!worker.hasGivenResults()) {
+	    				if(!hasToStopWorking() && !worker.hasGivenResults()) {
 	    					ArrayList<Object[]> results = worker.getResults();
 	    					String[] completeWork = worker.getWork();
 	    					processResults(completeWork, results);
@@ -1262,6 +1293,7 @@ public class MainWindow implements ActionListener {
 						e.printStackTrace();
 					}
 	    		}
+	    		System.out.println("MasterThread: cleanUp() success!");
     		}
     		mThreadPool = null;
     		mWorkHeadIndex = 0;
@@ -1279,11 +1311,14 @@ public class MainWindow implements ActionListener {
     		mProcessSuccess = set;
     	}
     	
-    	public void run() {
+    	public void setUp() {
     		System.out.println("MasterThread:Run():" + this.getName());
     		String tableName = mSearchInterface.getTitle();
+    		System.out.println("MasterThread:tableName():" + this.getName());
     		String[] columnIdentifiers = mSearchInterface.getColumnIdentifers();
+    		System.out.println("MasterThread:columnIdentifiers():" + this.getName());
     		int[] primaryKeys = mSearchInterface.getPrimaryKeys();
+    		System.out.println("MasterThread:primaryKeys():" + this.getName());
     		
     		mResultsTable = null;
 			try {
@@ -1299,6 +1334,7 @@ public class MainWindow implements ActionListener {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
 					stopProcess();
+					System.out.println("MasterThread:Action listener complete!");
 				}
     			
     		};
@@ -1309,15 +1345,19 @@ public class MainWindow implements ActionListener {
 				e.printStackTrace();
 			}
     		
-    		System.out.println("MasterThread:Run():" + this.getName() + ":Imported Database Table!");
+    		System.out.println("MasterThread: run():" + this.getName() + ": Imported Database Table!");
     		mThreadPool = makeThreadPool(mThreadPoolSize, MAX_PRIORITY);
+    		System.out.println("MasterThread: run():" + this.getName() + ": Made thread pool!");
+    	}
+    	
+    	
+    	public void run() {
     		
-    		System.out.println("MasterThread:Run():" + this.getName() + ":Made thread pool!");
-    		String[] work = null;
+    		setUp();
     		
     		setProcessSuccess(false);
-    		
-    		System.out.println("MasterThread:Run():" + this.getName() + ":Allocating work.");
+    		String[] work = null;
+    		System.out.println("MasterThread:run():" + this.getName() + ":Allocating work.");
     		while(hasWork(work = getNextWork())) {
     			if(hasToStopWorking()) {
     				System.out.println("Ending Process!");
@@ -1329,8 +1369,10 @@ public class MainWindow implements ActionListener {
     		cleanUp();
     		
     		if(!hasToStopWorking()) {
+    			System.out.println("MasterThread:run():" + this.getName() + ":was stopped from searching.");
     			setProcessSuccess(true);
     		}
+    		System.out.println("MasterThread:run():" + this.getName() + ":process complete!");
     	}
 
 		public boolean isRunning() {
