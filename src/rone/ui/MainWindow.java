@@ -36,6 +36,8 @@ import javax.swing.table.JTableHeader;
 
 import jp.sbi.garuda.backend.net.exception.GarudaConnectionNotInitializedException;
 import jp.sbi.garuda.backend.net.exception.NetworkConnectionException;
+import rone.backend.PercellomeSearchInterface;
+import rone.backend.ReactomeSearchInterface;
 import rone.backend.SearchDialog;
 import rone.backend.SearchInterface;
 import rone.backend.TargetMineSearchInterface;
@@ -136,7 +138,7 @@ public class MainWindow implements ActionListener {
 	private DatabaseTabbedPane getTabbedPane() {
 		Component[] components = this.mMainWindowJFrame.getContentPane().getComponents();
 		for(Component component : components) {
-			System.out.println(component.getClass().getName());
+			//System.out.println(component.getClass().getName());
 			if(component.getName() == TABBED_PANE_NAME) {
 				return (DatabaseTabbedPane) component;
 			}
@@ -217,6 +219,7 @@ public class MainWindow implements ActionListener {
 				mnSearch.add(mnTargetMine);
 				{
 					mntmTargetMineGeneSymbols = new JMenuItem("with Gene Symbols");
+					mntmTargetMineGeneSymbols.setAction(actionTargetMineWithGeneSymbols);
 					mnTargetMine.add(mntmTargetMineGeneSymbols);
 				}
 			}
@@ -225,6 +228,7 @@ public class MainWindow implements ActionListener {
 				mnSearch.add(mnReactome);
 				{
 					mntmReactomeGeneSymbols = new JMenuItem("with Gene Symbols");
+					mntmReactomeGeneSymbols.setAction(actionReactomeWithGeneSymbols);
 					mnReactome.add(mntmReactomeGeneSymbols);
 				}
 			}
@@ -233,6 +237,7 @@ public class MainWindow implements ActionListener {
 				mnSearch.add(mnBioCompendium);
 				{
 					mntmWithSelect = new JMenuItem("with Select");
+					mntmWithSelect.setAction(actionBioCompendiumWithSelect);
 					mnBioCompendium.add(mntmWithSelect);
 				}
 			}
@@ -242,6 +247,7 @@ public class MainWindow implements ActionListener {
 			menuBar.add(mnJoin);
 			{
 				mntmJoinTable = new JMenuItem("Join Table");
+				mntmJoinTable.setAction(actionTableJoin);
 				mnJoin.add(mntmJoinTable);
 			}
 			{
@@ -289,12 +295,12 @@ public class MainWindow implements ActionListener {
 		for (int i = 0; i < find.length; i++) { 
 			Pattern pattern = Pattern.compile(find[i], Pattern.DOTALL | Pattern.MULTILINE);
 			Matcher m = pattern.matcher(description);
-			System.out.println("----------");
+			//System.out.println("----------");
 			if (m.find()) {
-				System.out.println(m.group(0));
+				//System.out.println(m.group(0));
 				found[i] = m.group(0);
 			} else {
-				System.out.println("None");
+				//System.out.println("None");
 				found[i] = null;
 			}
 		}
@@ -313,8 +319,8 @@ public class MainWindow implements ActionListener {
     
 	
     public static void main(String[] args) {
-		
-			
+	
+    	
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 
@@ -327,6 +333,8 @@ public class MainWindow implements ActionListener {
 				
 			}
 		});
+	
+		
 	}
 
 	
@@ -348,8 +356,6 @@ public class MainWindow implements ActionListener {
 		mMainWindowJFrame.getContentPane().add(mDatabaseTabbedPane);
 		
 	}
-    
-    
 		
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -448,7 +454,7 @@ public class MainWindow implements ActionListener {
 		if(!hasFile(file)) 
 			return;
 		
-		System.out.println(contents);
+		//System.out.println(contents);
 		
 		switch (contents) {
 				
@@ -465,7 +471,7 @@ public class MainWindow implements ActionListener {
 	
 	
 	public void windowClosing(WindowEvent e) {
-		System.out.println("window closing");
+		//System.out.println("window closing");
 	}
 
 	
@@ -685,7 +691,7 @@ public class MainWindow implements ActionListener {
 				fileToSave = fileChooser.getSelectedFile();
 				
 				if(fileToSave.exists()) {
-					System.out.println("File exists!");
+					//System.out.println("File exists!");
 					int dialogButton = JOptionPane.YES_NO_OPTION;
 					int dialogResult = JOptionPane.showConfirmDialog(null, "Would you like to overwrite this file?","Warning", dialogButton);
 					if(dialogResult == JOptionPane.YES_OPTION) {
@@ -694,7 +700,7 @@ public class MainWindow implements ActionListener {
 						}
 					}
 				}else {
-					System.out.println("File does not exists!");
+					//System.out.println("File does not exists!");
 				}
 				
 				try {
@@ -707,7 +713,7 @@ public class MainWindow implements ActionListener {
 				
 			} while(!hasFile);
 			
-		    System.out.println("Save as file: " + fileToSave.getAbsolutePath());
+		    //System.out.println("Save as file: " + fileToSave.getAbsolutePath());
 		    
 		    if(mDatabaseTabbedPane.hasSelection()) {
 				
@@ -727,7 +733,7 @@ public class MainWindow implements ActionListener {
 					header = header + id[index] + "\n"; 
 					writer.write(header);
 					
-					System.out.println(header);
+					//System.out.println(header);
 					
 				    int rows[] = mDatabaseTabbedPane.getSelectedRows();
 				    for(int r = 0; r < rows.length; r++) {
@@ -849,16 +855,31 @@ public class MainWindow implements ActionListener {
 	private class ActionSearchTargetMineWithGeneSymbols extends AbstractAction {
 		public ActionSearchTargetMineWithGeneSymbols() {
 			putValue(NAME, "with Gene Symbols");
+
 		}
 		public void actionPerformed(ActionEvent e) {
+			String[] selection = mDatabaseTabbedPane.getSelection();
+			TargetMineSearchInterface targetMineSearchInterface = new TargetMineSearchInterface();
+			
+			Search search = new Search(targetMineSearchInterface, selection, mDatabaseTabbedPane);
+			
+			mSearchThreadManager.addSearch(search);
+			
 		}
 	}
 	
 	private class ActionSearchReactomeWithGeneSymbols extends AbstractAction {
 		public ActionSearchReactomeWithGeneSymbols() {
 			putValue(NAME, "with Gene Symbols");
+
 		}
 		public void actionPerformed(ActionEvent e) {
+			String[] selection = mDatabaseTabbedPane.getSelection();
+			ReactomeSearchInterface reactomeSearchInterface = new ReactomeSearchInterface();
+			
+			Search search = new Search(reactomeSearchInterface, selection, mDatabaseTabbedPane);
+			
+			mSearchThreadManager.addSearch(search);
 		}
 	}
 	
@@ -872,9 +893,23 @@ public class MainWindow implements ActionListener {
 	
 	private class ActionTableJoin extends AbstractAction {
 		public ActionTableJoin() {
-			putValue(NAME, "Join");
+			putValue(NAME, "Join Table");
 		}
 		public void actionPerformed(ActionEvent e) {
+			
+			EventQueue.invokeLater(new Runnable() {
+				public void run() {
+
+					try {	
+						TableJoinDialog tjd = new TableJoinDialog(mDatabaseTabbedPane);
+						tjd.setVisible(true);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					
+				}
+			});
+			
 		}
 	}
 	
@@ -892,12 +927,11 @@ public class MainWindow implements ActionListener {
 		}
 		public void actionPerformed(ActionEvent e) {
 			String[] selection = mDatabaseTabbedPane.getSelection();
-			TargetMineSearchInterface targetMineSearchInterface = new TargetMineSearchInterface();
+			PercellomeSearchInterface percellomeSearchInterface = new PercellomeSearchInterface();
 			
-			Search search = new Search(targetMineSearchInterface, selection, mDatabaseTabbedPane);
+			Search search = new Search(percellomeSearchInterface, selection, mDatabaseTabbedPane);
 			
 			mSearchThreadManager.addSearch(search);
-			
 		}
 	}
 	
@@ -945,7 +979,7 @@ public class MainWindow implements ActionListener {
 		
 		public void addSearch(Search search) {
 			synchronized(mSearchQueue) {
-				System.out.println("SearchThreadManager:addSearch():" + this.getName() + ": adding to queue.");
+				//System.out.println("SearchThreadManager:addSearch():" + this.getName() + ": adding to queue.");
 				mSearchQueue.add(search);
 				mSearchQueue.notifyAll();
 			}
@@ -994,20 +1028,20 @@ public class MainWindow implements ActionListener {
 				try {
 					synchronized (this.mSearchQueue) {
 						while(mSearchQueue.isEmpty()) {
-							System.out.println("Waiting for search query!");
+							//System.out.println("Waiting for search query!");
 							mSearchQueue.wait();
 						}
 						
-						while(hasSearches()) {
+						//while(hasSearches()) {
 							joinCompleteSearches();
 							startInActiveSearches();
-						}
+						//}
 						mSearchQueue.notifyAll();
 					}
 					
 					
 				} catch(InterruptedException e) {  
-					System.out.println("SearchThreadManager:"  + this.getName() + ": Interupted, Finishing = " + Boolean.toString(finishing()) + ".");
+					//System.out.println("SearchThreadManager:"  + this.getName() + ": Interupted, Finishing = " + Boolean.toString(finishing()) + ".");
 				}
 			}
 			
@@ -1026,7 +1060,7 @@ public class MainWindow implements ActionListener {
 
 			endThreads();
 			
-			System.out.println("SearchThreadManager:cleaning up!");
+			//System.out.println("SearchThreadManager:cleaning up!");
 			synchronized(mSearchQueue) {
 				while(!mActiveQueue.isEmpty()) {
 					MasterThread mt = mActiveQueue.remove(0);
@@ -1042,21 +1076,22 @@ public class MainWindow implements ActionListener {
 		}
 		
 		private void joinCompleteSearches() throws InterruptedException {
-			while(hasActiveSearches()) {
-				//System.out.println("SearchThreadManager: Trying to join threads!" + Boolean.toString(hasInActiveSearches()));
+			//while(hasActiveSearches()) {
+				////System.out.println("SearchThreadManager: Trying to join threads!" + Boolean.toString(hasInActiveSearches()));
 				for(int i = 0; i < mActiveQueue.size(); ) {
 					MasterThread mt = mActiveQueue.get(i);
 					if(threadEnded(mt)) {
 						mt.join();
 						mActiveQueue.remove(i);
-						System.out.println("SearchThreadManager: Successfully joined thread!" + mt.getId());
+						//System.out.println("SearchThreadManager: Successfully joined thread!" + mt.getId());
 					} else {
-						i = i + 1;
+						i++;
 					}
 					//TODO: Fix this later, should be no thread.sleep - wait for array to update
 				}
+				//System.out.println("SearchThreadManager:joinCompleteSearches(): done!");
 			}
-		}
+			//}
 		
 	};
 	
@@ -1070,7 +1105,7 @@ public class MainWindow implements ActionListener {
     	private SearchInterface mSearchInterface;
     
     	WorkerThread(SearchInterface searchInterface){
-    		System.out.println("WorkerThread():" + this.getName());
+    		//System.out.println("WorkerThread():" + this.getName());
     		mSearchInterface = searchInterface;
     		mResults = new ArrayList<Object[]>();
     	}
@@ -1094,9 +1129,9 @@ public class MainWindow implements ActionListener {
     	
 	    public void run() 
 	    {
-	    	System.out.println("WorkerThread:run()" + this.getName());
+	    	//System.out.println("WorkerThread:run()" + this.getName());
     		ArrayList<Object[]> results = mSearchInterface.query(mSearchInterfaceRequests);
-    		System.out.println("WorkerThread:run()" + this.getName() +": query complete!");
+    		//System.out.println("WorkerThread:run()" + this.getName() +": query complete!");
     		
     		setResults(results);
     		setHasGivenResults(false);
@@ -1105,7 +1140,6 @@ public class MainWindow implements ActionListener {
 		public boolean hasGivenResults() {
 			return mHasGivenResults;
 		}
-
 
 		public String[] getWork() {
 			return this.mSearchInterfaceRequests;
@@ -1144,13 +1178,13 @@ public class MainWindow implements ActionListener {
     		
     		mRequestsSearched = 0;
     		
-    		System.out.println("MasterThread():" + this.getName());
+    		//System.out.println("MasterThread():" + this.getName());
     		
     		setProcessSuccess(false);
     	}
     	
     	public void stopProcess() {
-    		System.out.println("MasterThread:stopProcess()");
+    		//System.out.println("MasterThread:stopProcess()");
     		mStopWorking = true;
     	}
     	
@@ -1266,11 +1300,12 @@ public class MainWindow implements ActionListener {
     				givenWork = true;
     			}
 				i = (i + 1) % mThreadPoolSize;
+				
 			}
     	}
     	
     	private void cleanUp() {
-    		System.out.println("MasterThread:cleanUp()");
+    		//System.out.println("MasterThread:cleanUp()");
     		boolean doneCleanUp = false;
     		while(!doneCleanUp) {
     			doneCleanUp = true;
@@ -1280,7 +1315,7 @@ public class MainWindow implements ActionListener {
 	    				if(worker.isAlive()) {
 	    					doneCleanUp = false;
 	    					worker.join();
-	    					System.out.println("MasterThread: successfully joined worker thread -> " + worker.getId());
+	    					//System.out.println("MasterThread: successfully joined worker thread -> " + worker.getId());
 	    				}
 	    				
 	    				if(!hasToStopWorking() && !worker.hasGivenResults()) {
@@ -1293,7 +1328,7 @@ public class MainWindow implements ActionListener {
 						e.printStackTrace();
 					}
 	    		}
-	    		System.out.println("MasterThread: cleanUp() success!");
+	    		//System.out.println("MasterThread: cleanUp() success!");
     		}
     		mThreadPool = null;
     		mWorkHeadIndex = 0;
@@ -1312,13 +1347,13 @@ public class MainWindow implements ActionListener {
     	}
     	
     	public void setUp() {
-    		System.out.println("MasterThread:Run():" + this.getName());
+    		//System.out.println("MasterThread:Run():" + this.getName());
     		String tableName = mSearchInterface.getTitle();
-    		System.out.println("MasterThread:tableName():" + this.getName());
+    		//System.out.println("MasterThread:tableName():" + this.getName());
     		String[] columnIdentifiers = mSearchInterface.getColumnIdentifers();
-    		System.out.println("MasterThread:columnIdentifiers():" + this.getName());
+    		//System.out.println("MasterThread:columnIdentifiers():" + this.getName());
     		int[] primaryKeys = mSearchInterface.getPrimaryKeys();
-    		System.out.println("MasterThread:primaryKeys():" + this.getName());
+    		//System.out.println("MasterThread:primaryKeys():" + this.getName());
     		
     		mResultsTable = null;
 			try {
@@ -1328,13 +1363,13 @@ public class MainWindow implements ActionListener {
 				e.printStackTrace();
 			}
 			
-			System.out.println("MasterThread:Run():" + this.getName() + ":Database created!");
+			//System.out.println("MasterThread:Run():" + this.getName() + ":Database created!");
     		ActionListener actionListener = new ActionListener() {
 
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
 					stopProcess();
-					System.out.println("MasterThread:Action listener complete!");
+					//System.out.println("MasterThread:Action listener complete!");
 				}
     			
     		};
@@ -1345,11 +1380,10 @@ public class MainWindow implements ActionListener {
 				e.printStackTrace();
 			}
     		
-    		System.out.println("MasterThread: run():" + this.getName() + ": Imported Database Table!");
+    		//System.out.println("MasterThread: run():" + this.getName() + ": Imported Database Table!");
     		mThreadPool = makeThreadPool(mThreadPoolSize, MAX_PRIORITY);
-    		System.out.println("MasterThread: run():" + this.getName() + ": Made thread pool!");
+    		//System.out.println("MasterThread: run():" + this.getName() + ": Made thread pool!");
     	}
-    	
     	
     	public void run() {
     		
@@ -1357,10 +1391,10 @@ public class MainWindow implements ActionListener {
     		
     		setProcessSuccess(false);
     		String[] work = null;
-    		System.out.println("MasterThread:run():" + this.getName() + ":Allocating work.");
+    		//System.out.println("MasterThread:run():" + this.getName() + ":Allocating work.");
     		while(hasWork(work = getNextWork())) {
     			if(hasToStopWorking()) {
-    				System.out.println("Ending Process!");
+    				//System.out.println("Ending Process!");
     				break;
     			}
     			giveWork(work);
@@ -1369,15 +1403,16 @@ public class MainWindow implements ActionListener {
     		cleanUp();
     		
     		if(!hasToStopWorking()) {
-    			System.out.println("MasterThread:run():" + this.getName() + ":was stopped from searching.");
+    			//System.out.println("MasterThread:run():" + this.getName() + ":was stopped from searching.");
     			setProcessSuccess(true);
     		}
-    		System.out.println("MasterThread:run():" + this.getName() + ":process complete!");
+    		//System.out.println("MasterThread:run():" + this.getName() + ":process complete!");
     	}
 
 		public boolean isRunning() {
 			return false;
 		}
     
+		
     }
 }

@@ -31,6 +31,10 @@ import javax.swing.JViewport;
 import javax.swing.event.ChangeEvent;
 import javax.swing.plaf.basic.BasicButtonUI;
 import javax.swing.plaf.basic.BasicTabbedPaneUI;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumnModel;
+
+import com.sun.tools.javac.util.Pair;
 
 import rone.filemanager.Database;
 
@@ -264,6 +268,7 @@ public class DatabaseTabbedPane extends JTabbedPane {
 	
     public JScrollPane[] getTabs() {
     	Component[] components = getComponents();
+    
     	ArrayList<JScrollPane> tabs = new ArrayList<JScrollPane>();
     	for(Component c : components) {
     		if(c.getClass().equals(JScrollPane.class)) 
@@ -314,4 +319,22 @@ public class DatabaseTabbedPane extends JTabbedPane {
         JOptionPane.showMessageDialog(null, "Selected Index: " + selectedIndex);
     }
 	
+    public ArrayList<Pair<String, DataTable>> getTabNames() {
+        
+    	JScrollPane[] scrollPanes = getTabs();
+    	ArrayList<Pair<String, DataTable>> tabNames = new ArrayList<Pair<String, DataTable>>();
+		for (int i = 0; i < scrollPanes.length; i++) {
+			JViewport viewport = scrollPanes[i].getViewport();
+            DataTable dataTable = (DataTable) viewport.getComponent(0);
+            String title = getTitleAt(i);
+			Pair<String, DataTable> pair = new Pair<String, DataTable>(title, dataTable);
+			tabNames.add(pair);
+		}
+       
+        return tabNames; 
+    }
+    
+    
+    
+    
 }

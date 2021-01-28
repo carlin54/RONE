@@ -17,7 +17,7 @@ import org.intermine.webservice.client.services.QueryService;
 public class TargetMineSearchInterface implements SearchInterface {
 	
 	public TargetMineSearchInterface() {
-		System.out.println("Hello World! TargetMine Search Interface!!");
+		//System.out.println("Hello World! TargetMine Search Interface!!");
 	};
 	
 	@Override
@@ -35,21 +35,21 @@ public class TargetMineSearchInterface implements SearchInterface {
 	public String[] getColumnIdentifers() {
 		
 		return new String[]{
-				"Gene.primaryIdentifier",
-                "Gene.symbol",
-                "Gene.name",
-                "Gene.pathways.identifier",
-                "Gene.pathways.name",
-                "Gene.pathways.organism.name",
-                "Gene.pathways.label1",
-                "Gene.pathways.label2"
+				"Gene Primary Identifier",
+                "Gene Symbol",
+                "Name",
+                "Pathways Identifier",
+                "Pathways Name",
+                "Organism Name",
+                "Gene Pathways Label 1",
+                "Gene Pathways Label 2"
 		};
 		
 	}
 	
 	@Override
 	public ArrayList<Object[]> query(String[] searchData) {
-		System.out.println("TargetMineSearchInterface: Query begun.");
+		//System.out.println("TargetMineSearchInterface: Query begun.");
 		final String ROOT = "https://targetmine.mizuguchilab.org/targetmine/service";
     	
     	ServiceFactory factory = new ServiceFactory(ROOT);
@@ -81,7 +81,7 @@ public class TargetMineSearchInterface implements SearchInterface {
         //lookup = lookup.replace(",", " ");
         lookup = lookup.replace("[", "");
         lookup = lookup.replace("]", "");
-        System.out.println(">" + lookup);
+        //System.out.println(">" + lookup);
         query.addConstraint(Constraints.lookup("Gene", lookup, null));
         
         QueryService service = factory.getQueryService();
@@ -89,6 +89,7 @@ public class TargetMineSearchInterface implements SearchInterface {
         Iterator<List<Object>> rows = service.getRowListIterator(query);
         ArrayList<Object[]> results = new ArrayList<Object[]>();
         
+        //System.out.println("TargetMineSearchInterface: Query complete! " + service.getCount(query));
         while (rows.hasNext()) {
         	Object[] row = rows.next().toArray();
         	for(int i = 0; i < row.length; i++) {
@@ -98,7 +99,8 @@ public class TargetMineSearchInterface implements SearchInterface {
         	}
         	results.add(row);
         }
-        return results;
+        //System.out.println("TargetMineSearchInterface: Returning results.");
+		return results;
 	}
 
 	@Override

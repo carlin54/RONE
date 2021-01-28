@@ -36,9 +36,14 @@ public class DataTable extends JTable {
 	private List<RowSorter.SortKey> sortKeys;
 	private boolean mUpdating; 
 	private String[] mColumnIdentifiers;
+
+	
+	public Database.Table getDatabaseTable(){
+		return this.mDatabaseTable;
+	}
 	
  	public String[] getIdentifiers() {
-		return mDatabaseTable.getColumnIdentifiers();
+		return mColumnIdentifiers;
 	}
 	
 	public String[] getSelected() {

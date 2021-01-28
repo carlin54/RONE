@@ -148,7 +148,8 @@ public class PercellomeSearchDialog extends JDialog {
 		String jsonString = null;
 		JSONObject jsonObj = null;
 		ArrayList<ArrayList<Object>> searchResults = new ArrayList<ArrayList<Object>>();
-		
+		int requestAttempts = 0;
+		static final int MAX_REQUEST_ATTEMPTS = 7;
 		for(int i = 0; i < affyProbeIDs.length; i++) {
 			try {
 				ArrayList<Object> row = new ArrayList<Object>();
@@ -189,6 +190,12 @@ public class PercellomeSearchDialog extends JDialog {
 				continue;
 			}catch (IOException e) {
 				e.printStackTrace();
+				if(requestAttempts < MAX_REQUEST_ATTEMPTS) {
+					i--;	
+					requestAttempts++;
+				}else {
+					requestAttempts = 0;
+				}
 				continue;
 			}
 			
@@ -379,14 +386,24 @@ public class PercellomeSearchDialog extends JDialog {
 		}
     }
     
-    
-    
     public void start() {
     	if(!mMasterThread.isAlive()) {
     		mMasterThread = new MasterThread();
     		mMasterThread.start();
     	}
     }
+    
+	private int getNumberOfPathways(String jsonQuery) {
+		try {
+			JSONObject jo = new JSONObject(jsonQuery);
+			
+			return jo.getInt("pathwaysFound");
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return -1;
+		}
+	}
     
     public static String fetchPecellomeURL(String urlString) throws IOException {
     	StringBuilder stringToBuild = new StringBuilder();
