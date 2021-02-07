@@ -28,7 +28,7 @@ public class TargetMineSearchInterface implements SearchInterface {
 	@Override
 	public String getIconLocation() {
 		Path currentRelativePath = Paths.get("");
-		return currentRelativePath.toAbsolutePath().toString() + "\\targetmine_logo.png";
+		return currentRelativePath.toAbsolutePath().toString() + "\\icons\\targetmine_icon.png";
 	}
 
 	@Override

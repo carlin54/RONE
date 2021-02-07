@@ -16,6 +16,7 @@ import javax.swing.table.TableRowSorter;
 
 import rone.filemanager.Database;
 import rone.filemanager.Table;
+import rone.ui.DatabaseTabbedPane.Tab;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -34,13 +35,20 @@ public class DataTable extends JTable {
 	private Database.Table mDatabaseTable;
 	private ArrayList<Object[]> mTableContence;
 	private List<RowSorter.SortKey> sortKeys;
-	private boolean mUpdating; 
 	private String[] mColumnIdentifiers;
-
+	
+	@Override 
+	public boolean equals(Object o) {
+	    return (o instanceof DataTable) 
+	    	&& (this.mDatabaseTable == ((DataTable) o).mDatabaseTable)
+	    	&& (this.mJTable == ((DataTable)o).mJTable);
+	}
 	
 	public Database.Table getDatabaseTable(){
 		return this.mDatabaseTable;
 	}
+	
+	
 	
  	public String[] getIdentifiers() {
 		return mColumnIdentifiers;
@@ -97,6 +105,7 @@ public class DataTable extends JTable {
 		return unique.toArray(new String[len]);
 		
 	}
+	
 	
 	private void init() {
 		mJTable = this;
@@ -188,11 +197,11 @@ public class DataTable extends JTable {
 		this.updateTable();
 	}
 	
-	public DataTable(String[] columnIdentifiers) {
+	/*public DataTable(String[] columnIdentifiers) {
 		init();
 		this.setCellSelectionEnabled(true);
 		this.mColumnIdentifiers = columnIdentifiers;
-	}
+	}*/
 	
 	public DataTable(Database.Table databaseTable) throws SQLException{
 		this.setDatabaseTable(databaseTable);
@@ -263,8 +272,8 @@ public class DataTable extends JTable {
 			int numRows = mTableContence.size();
 			int numCols =  mTableContence.get(0).length;
 			
-			System.out.println("Rows: " + numRows);
-			System.out.println("Cols: " + numCols);
+			//System.out.println("Rows: " + numRows);
+			//System.out.println("Cols: " + numCols);
 			
 			for(int iRow = 0; iRow < numRows; iRow++) {
 				Object[] row = mTableContence.get(iRow);	
@@ -289,13 +298,11 @@ public class DataTable extends JTable {
 	}
 	
 	public boolean hasColumn(String col) {
-		return mDatabaseTable.getColumnIdentifiers().toString().contains(col);
+		return mDatabaseTable.getIdentifiers().toString().contains(col);
 	}
 	
 	public Object getCell(int row, int col) {
 		return this.mTableContence.get(col)[row];
 	}
-	
-
-	
+		
 }

@@ -18,7 +18,10 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.RowSpec;
 import com.sun.org.apache.xml.internal.utils.ObjectPool;
-import com.sun.tools.javac.util.Pair;
+
+import rone.filemanager.Database;
+import rone.filemanager.Database.Join;
+import rone.ui.DatabaseTabbedPane.Tab;
 
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -29,11 +32,16 @@ import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.awt.event.ActionEvent;
 
 import javax.swing.BorderFactory;
@@ -54,7 +62,14 @@ import javax.swing.ImageIcon;
 import java.awt.Choice;
 import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
+import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListModel;
@@ -89,11 +104,11 @@ public class TableJoinDialog extends JFrame  {
 	private JButton btnTableBIncludeAll;
 	private JButton btnTableBExcludeAll;
 	private JPanel panelJoinOperation;
-	private JButton choiceJoinAddConstraint;
+	private JButton btnJoinOperationAddConstraint;
 	private JTable tableJoinConstraints;
-	private JButton btnJoinRemoveAllConstraints;
+	private JButton btnJoinOperationRemoveSelected;
 	private JLabel lblJoinJoinType;
-	private JComboBox choiceJoinJoinType;
+	private JComboBox choiceJoinOperationJoinType;
 	private JPanel panelNameTable;
 	private JLabel lblNameTableNameTable;
 	private JTextField txtFieldNameTableNewTableName;
@@ -101,6 +116,21 @@ public class TableJoinDialog extends JFrame  {
 	private JComboBox comboBoxJoinOperationTableA;
 	private JComboBox comboBoxJoinOperationTableB;
 	
+	
+	
+	
+	
+	private static final HashMap<String, Database.Join.Type> JOIN_TO_SQL = new HashMap<String, Database.Join.Type>(){
+		{
+			put("LEFT INCLUSIVE", Join.Type.LEFT_INCLUSIVE);
+			put("LEFT EXCLUSIVE", Join.Type.LEFT_EXCLUSIVE); 
+			put("RIGHT INCLUSIVE", Join.Type.RIGHT_INCLUSIVE); 
+			put("RIGHT EXCLUSIVE", Join.Type.RIGHT_EXCLUSIVE);
+			put("FULL OUTER INCLUSIVE", Join.Type.FULL_OUTER_INCLUSIVE); 
+			put("FULL OUTER EXCLUSIVE", Join.Type.FULL_OUTER_EXCLUSIVE); 
+			put("INNER", Join.Type.INNER);
+	    }
+	};
 	
 	public TableJoinDialog(DatabaseTabbedPane pane) {
 		setResizable(false);
@@ -324,8 +354,8 @@ public class TableJoinDialog extends JFrame  {
 		gbl_panelJoinOperation.rowWeights = new double[]{0.0, 0.0, 1.0, 0.0, 0.0};
 		panelJoinOperation.setLayout(gbl_panelJoinOperation);
 		
-		choiceJoinAddConstraint = new JButton("Add Constraint (=)");
-		choiceJoinAddConstraint.addActionListener(new ActionListener() {
+		btnJoinOperationAddConstraint = new JButton("Add Constraint (=)");
+		btnJoinOperationAddConstraint.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 			}
 		});
@@ -345,12 +375,12 @@ public class TableJoinDialog extends JFrame  {
 		gbc_comboBoxJoinOperationTableB.gridx = 1;
 		gbc_comboBoxJoinOperationTableB.gridy = 0;
 		panelJoinOperation.add(comboBoxJoinOperationTableB, gbc_comboBoxJoinOperationTableB);
-		GridBagConstraints gbc_choiceJoinAddConstraint = new GridBagConstraints();
-		gbc_choiceJoinAddConstraint.fill = GridBagConstraints.VERTICAL;
-		gbc_choiceJoinAddConstraint.insets = new Insets(0, 0, 5, 0);
-		gbc_choiceJoinAddConstraint.gridx = 2;
-		gbc_choiceJoinAddConstraint.gridy = 0;
-		panelJoinOperation.add(choiceJoinAddConstraint, gbc_choiceJoinAddConstraint);
+		GridBagConstraints gbc_btnJoinOperationAddConstraint = new GridBagConstraints();
+		gbc_btnJoinOperationAddConstraint.fill = GridBagConstraints.VERTICAL;
+		gbc_btnJoinOperationAddConstraint.insets = new Insets(0, 0, 5, 0);
+		gbc_btnJoinOperationAddConstraint.gridx = 2;
+		gbc_btnJoinOperationAddConstraint.gridy = 0;
+		panelJoinOperation.add(btnJoinOperationAddConstraint, gbc_btnJoinOperationAddConstraint);
 		
 		tableJoinConstraints = new JTable();
 		tableJoinConstraints.setBorder(new LineBorder(Color.DARK_GRAY));
@@ -363,13 +393,13 @@ public class TableJoinDialog extends JFrame  {
 		gbc_tableJoinConstraints.gridy = 1;
 		panelJoinOperation.add(tableJoinConstraints, gbc_tableJoinConstraints);
 		
-		btnJoinRemoveAllConstraints = new JButton("Remove Selected");
-		GridBagConstraints gbc_btnJoinRemoveAllConstraints = new GridBagConstraints();
-		gbc_btnJoinRemoveAllConstraints.insets = new Insets(0, 0, 5, 0);
-		gbc_btnJoinRemoveAllConstraints.fill = GridBagConstraints.BOTH;
-		gbc_btnJoinRemoveAllConstraints.gridx = 2;
-		gbc_btnJoinRemoveAllConstraints.gridy = 1;
-		panelJoinOperation.add(btnJoinRemoveAllConstraints, gbc_btnJoinRemoveAllConstraints);
+		btnJoinOperationRemoveSelected = new JButton("Remove Selected");
+		GridBagConstraints gbc_btnJoinOperationRemoveSelected = new GridBagConstraints();
+		gbc_btnJoinOperationRemoveSelected.insets = new Insets(0, 0, 5, 0);
+		gbc_btnJoinOperationRemoveSelected.fill = GridBagConstraints.BOTH;
+		gbc_btnJoinOperationRemoveSelected.gridx = 2;
+		gbc_btnJoinOperationRemoveSelected.gridy = 1;
+		panelJoinOperation.add(btnJoinOperationRemoveSelected, gbc_btnJoinOperationRemoveSelected);
 		
 		lblJoinJoinType = new JLabel("Join Type:");
 		lblJoinJoinType.setHorizontalAlignment(SwingConstants.LEFT);
@@ -380,13 +410,13 @@ public class TableJoinDialog extends JFrame  {
 		gbc_lblJoinJoinType.gridy = 3;
 		panelJoinOperation.add(lblJoinJoinType, gbc_lblJoinJoinType);
 		
-		choiceJoinJoinType = new JComboBox();
-		choiceJoinJoinType.setEnabled(false);
-		GridBagConstraints gbc_choiceJoinJoinType = new GridBagConstraints();
-		gbc_choiceJoinJoinType.fill = GridBagConstraints.HORIZONTAL;
-		gbc_choiceJoinJoinType.gridx = 2;
-		gbc_choiceJoinJoinType.gridy = 4;
-		panelJoinOperation.add(choiceJoinJoinType, gbc_choiceJoinJoinType);
+		choiceJoinOperationJoinType = new JComboBox();
+		choiceJoinOperationJoinType.setEnabled(false);
+		GridBagConstraints gbc_choiceJoinOperationJoinType = new GridBagConstraints();
+		gbc_choiceJoinOperationJoinType.fill = GridBagConstraints.HORIZONTAL;
+		gbc_choiceJoinOperationJoinType.gridx = 2;
+		gbc_choiceJoinOperationJoinType.gridy = 4;
+		panelJoinOperation.add(choiceJoinOperationJoinType, gbc_choiceJoinOperationJoinType);
 		
 		panelNameTable = new JPanel();
 		panelNameTable.setBorder(new TitledBorder(null, "5. Name Table", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -446,22 +476,153 @@ public class TableJoinDialog extends JFrame  {
 		this.setIconImage(imgicon.getImage());
 	}
 	
-	private ArrayList<Pair<String, DataTable>> mTableNames;
 	
-	private DataTable getDataTable(String select) {
-		mTableNames = mDatabaseTabbedPane.getTabNames();
-		
-		for(Pair<String, DataTable> pair : mTableNames) {
-			if(select.equals(pair.fst)) {
-				return pair.snd;
-			}
-		}			
-		
-		return null;
+	boolean canUpdateTxtNewTableName() {
+		return choiceTableSelectA.getSelectedIndex() != -1 && choiceTableSelectB.getSelectedIndex() != -1;
 	}
 	
-	private class ChoiceTableSelectListener implements ItemListener {
+	void updateTxtNewTableName() {
+		if(canUpdateTxtNewTableName()) {
+			String tableA = choiceTableSelectA.getSelectedItem().toString();
+			String tableB = choiceTableSelectB.getSelectedItem().toString();
+			txtFieldNameTableNewTableName.setText(tableA + " and " + tableB);
+		}
+	}
+	
+	private class ChoiceTablePopupMenuListener implements PopupMenuListener {
+
+		@Override
+		public void popupMenuCanceled(PopupMenuEvent arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void popupMenuWillBecomeInvisible(PopupMenuEvent arg0) {
+			// TODO Auto-generated method stub
+			
+		}
 		
+		private boolean shouldSkipExclude(JComboBox exclude) {
+			return exclude.getSelectedIndex() == -1;
+		}
+		
+		private ArrayList<String> getTableIdentifiers(){
+
+			ArrayList<DatabaseTabbedPane.Tab> tabs = mDatabaseTabbedPane.getTabs();
+			ArrayList<String> tableNames = new ArrayList<String>();
+			for(int i = 0; i < tabs.size(); i++) {
+				String tableName = tabs.get(i).getName();
+				tableNames.add(tableName);
+			}
+			return tableNames;
+		}
+		
+		private DefaultComboBoxModel generateModel(JComboBox exclude) {
+			DefaultComboBoxModel generatedModel = new DefaultComboBoxModel();
+			System.out.println("generateModel()");
+			
+			ArrayList<String> tableNames = getTableIdentifiers();
+			
+			boolean skipExclude = shouldSkipExclude(exclude);
+			if(skipExclude) {
+				System.out.println("Not Excluding!");
+				for(int i = 0; i < tableNames.size(); i++) {
+					String possibleChoice = tableNames.get(i);
+					System.out.println("Adding: " + possibleChoice);
+					generatedModel.addElement(new String(possibleChoice));
+				}
+
+			} else {
+				boolean shouldExclude;
+				String excludeString = exclude.getSelectedItem().toString();
+				System.out.println("Excluding: " + excludeString);
+				for(int i = 0; i < tableNames.size(); i++) {
+					String possibleChoice = tableNames.get(i);
+					shouldExclude = possibleChoice.equals(excludeString);
+					if(!shouldExclude) {
+						System.out.println("Adding: " + possibleChoice);
+						generatedModel.addElement(new String(possibleChoice));
+					}
+				}
+			}
+			System.out.println("generated model size: " + generatedModel.getSize());
+			return generatedModel;
+		}
+		
+		private boolean hasSelection(JComboBox comboBox) {
+			return comboBox.getSelectedIndex() != -1;
+		}
+		
+		public void processChoice(JComboBox choiceUpdate, JComboBox choiceExclude) {
+			System.out.println("processChoice()");
+			System.out.println("choiceUpdate (at the beginning): " + choiceUpdate.getItemCount());
+			System.out.println("choiceExclude (at the beginning): " + choiceExclude.getItemCount());
+			DefaultComboBoxModel updateModel = generateModel(choiceExclude);
+			System.out.println("updateModel Size: " + updateModel.getSize());
+			boolean hadSelection = hasSelection(choiceUpdate);
+			System.out.println("updateModel Size (after hadSelection): " + updateModel.getSize());
+			Object selectedItem =  choiceUpdate.getSelectedItem();
+			choiceUpdate.setModel(updateModel);
+			System.out.println("choiceUpdate (after setModel): " + updateModel.getSize() + " - " + Boolean.toString(hadSelection));
+			choiceUpdate.setSelectedIndex(-1);
+			if(hadSelection) {
+				System.out.println("Selected item: " + selectedItem.toString());
+				choiceUpdate.setSelectedItem(selectedItem);
+			} else {
+				//choiceUpdate.setSelectedIndex(-1);
+			}
+			System.out.println("choiceUpdate (after setSelectedItem): " + choiceUpdate.getItemCount());
+			System.out.println("choiceExclude (after setSelectedItem): " + choiceExclude.getItemCount());
+		}
+		
+		
+		
+		
+		@Override
+		public void popupMenuWillBecomeVisible(PopupMenuEvent arg0) {
+			boolean hadSelection;
+			Object selectedItem;
+			processChoice(choiceTableSelectA, choiceTableSelectB);
+			processChoice(choiceTableSelectB, choiceTableSelectA);
+			System.out.println("choiceTableSelectA: " + choiceTableSelectA.getItemCount());
+			System.out.println("choiceTableSelectB: " + choiceTableSelectB.getItemCount());
+			int s = 0;
+			
+			/*
+			mTableNames = mDatabaseTabbedPane.getTabNames();
+			DefaultComboBoxModel modelA = generateModel(choiceTableSelectB);
+			
+			hadSelection = hasSelection(choiceTableSelectA);
+			selectedItem =  choiceTableSelectA.getSelectedItem();
+			
+			choiceTableSelectA.setModel(modelA);
+			
+			if(hadSelection) {
+				choiceTableSelectA.setSelectedItem(selectedItem);
+			} else {
+				choiceTableSelectA.setSelectedIndex(-1);
+			}
+			
+			DefaultComboBoxModel modelB = generateModel(choiceTableSelectA);
+			
+			hadSelection = hasSelection(choiceTableSelectB);
+			selectedItem =  choiceTableSelectB.getSelectedItem();
+			
+			choiceTableSelectB.setModel(modelB);
+			
+			if(hadSelection) {
+				choiceTableSelectB.setSelectedItem(selectedItem);
+			} else {
+				choiceTableSelectB.setSelectedIndex(-1);
+			}*/
+			
+		}
+		
+	};
+	
+	private class ChoiceTableSelectListener implements ItemListener {
+			
 		public JComboBox mComboBoxToListenTo;
 		public JComboBox mComboBoxToListenToModify;
 		public JList mIncludeColumn;
@@ -492,12 +653,15 @@ public class TableJoinDialog extends JFrame  {
 		
 		@Override
 		public void itemStateChanged(ItemEvent e) {
+			System.out.println("ItemStateChange!");
         	choiceTableSelectA.getSelectedItem();
             if(e.getStateChange() == ItemEvent.SELECTED){
                 String selected = (String) e.getItem();
-                DataTable dataTable = getDataTable(selected);
-                assert(dataTable != null);
-                String[] columns = dataTable.getIdentifiers();
+                Tab tab = mDatabaseTabbedPane.getTab(selected);
+                
+                assert(tab != null);
+                
+                String[] columns = tab.getColumnIdentifers();
                 
                 DefaultListModel newExclude = new DefaultListModel(); 
                 for(String column : columns) {
@@ -506,19 +670,21 @@ public class TableJoinDialog extends JFrame  {
                 mExcludeColumn.setModel(newExclude);
                 mIncludeColumn.setModel(new DefaultListModel());
 
-            	mComboBoxToListenToModify.removeItem(selected);
-            	
         		
         		mIncludeAllButton.setEnabled(true);
         		mExcludeAllButton.setEnabled(false);
             	
+        		
+        		
             }
             
             if(e.getStateChange() == ItemEvent.DESELECTED){
-            	String deselected = (String) e.getItem(); 
+            	/*String deselected = (String) e.getItem(); 
             	ComboBoxModel newModifyModel = mComboBoxToListenToModify.getModel();
-            	mComboBoxToListenToModify.addItem(deselected);
+            	mComboBoxToListenToModify.addItem(deselected);*/
             }
+            
+            updateTxtNewTableName();
             
 		}
 		
@@ -569,8 +735,6 @@ public class TableJoinDialog extends JFrame  {
 		
 	}
 	
-
-
 	private class ButtonMoveControlListTableActionListener implements ActionListener {
 		
 		private JList mTo;
@@ -592,7 +756,7 @@ public class TableJoinDialog extends JFrame  {
 		
 		public void updateComboBoxJoinType() {
 			boolean enableComboBox = canSelectJoinType();
-			choiceJoinJoinType.setEnabled(enableComboBox);
+			choiceJoinOperationJoinType.setEnabled(enableComboBox);
 		}
 		
 		private ButtonMoveControlListTableActionListener(
@@ -787,11 +951,7 @@ public class TableJoinDialog extends JFrame  {
 		
 		@Override
 		public void itemStateChanged(ItemEvent e) {
-			if(canAddConstraint()) {
-				mBtnAddConstraint.setEnabled(true);
-			} else {
-				mBtnAddConstraint.setEnabled(false);
-			}
+			mBtnAddConstraint.setEnabled(canAddConstraint());
 		}
 		
 	}
@@ -821,8 +981,204 @@ public class TableJoinDialog extends JFrame  {
 		
 	}
 	
-	private ChoiceTableSelectListener mChoiceSelectTableA;
-	private ChoiceTableSelectListener mChoiceSelectTableB;
+	private class ButtonAddConstraintActionListener implements ActionListener {
+		
+		public boolean hasSelection() {
+			return comboBoxJoinOperationTableA.getSelectedIndex() != -1 && comboBoxJoinOperationTableA.getSelectedIndex() != -1;
+		}
+		
+		public boolean hasTableModel() {
+			return tableJoinConstraints.getColumnCount() == getNumColumns();
+		}
+		
+		public String[] getColumnNames() {
+			return new String[] {
+				choiceTableSelectA.getSelectedItem().toString(),
+				"Constraint",
+				choiceTableSelectB.getSelectedItem().toString()
+			};
+		}
+		
+		public String[] getNewRow() {
+			return new String[] {
+				comboBoxJoinOperationTableA.getSelectedItem().toString(),
+				" = ",
+				comboBoxJoinOperationTableB.getSelectedItem().toString()
+			};	
+		}
+		
+		public int getNumColumns() {
+			return 3;
+		}
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			
+			if(!hasSelection()) {
+				System.out.println("Doesn't hava a selection!");
+			}
+				
+			if(!hasTableModel()) {
+				System.out.println("Doesn't hava a table model!");	
+				DefaultTableModel dtm = new DefaultTableModel(new Object[0][0], getColumnNames());
+				tableJoinConstraints.setModel(dtm);
+			}
+			
+			TableModel oldTableModel = tableJoinConstraints.getModel();
+			DefaultTableModel newTableModel = new DefaultTableModel(new Object[0][0], getColumnNames());
+			
+			int numRows = oldTableModel.getRowCount();
+			int numColumns = oldTableModel.getColumnCount();
+			Object[] newRow = getNewRow();
+			for(int iRow = 0; iRow < numRows; iRow++) {	
+				Object[] row = new Object[numColumns]; 
+				
+				// copy row
+				for(int iCol = 0; iCol < numColumns; iCol++) {
+					row[iCol] = oldTableModel.getValueAt(iRow, iCol);
+				}
+				
+				// check row does not equal to new row
+				if(!Arrays.equals(row, newRow)) {
+					newTableModel.insertRow(0, row);
+				}
+					
+			}
+			
+			newTableModel.insertRow(0, newRow);
+			tableJoinConstraints.setModel(newTableModel);
+			
+			if(newTableModel.getRowCount() > 0) {
+				txtFieldNameTableNewTableName.setEnabled(true);
+				
+				btnJoinTable.setEnabled(true);
+			}
+		}
+		
+	}
+	
+	private class TextFieldNewTableNameKeyListener implements KeyListener {
+
+		@Override
+		public void keyPressed(KeyEvent arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void keyReleased(KeyEvent arg0) {
+			if(txtFieldNameTableNewTableName.isEnabled()) {
+				String textInField = txtFieldNameTableNewTableName.getText();
+				boolean enableJoinTable = !textInField.isBlank();
+				btnJoinTable.setEnabled(enableJoinTable);
+			}
+		}
+
+		@Override
+		public void keyTyped(KeyEvent arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+		
+	}
+	
+	
+	
+	private class ButtonJoinTableActionListener implements ActionListener {
+		
+		String getTableName() {
+			return txtFieldNameTableNewTableName.getText();
+		}
+		
+		Tab getTabA() {
+			String selectedA = choiceTableSelectA.getSelectedItem().toString();
+			return mDatabaseTabbedPane.getTab(selectedA);
+		}
+		
+		String[] getElements(ListModel listModel) {
+			
+			int size = listModel.getSize();
+			String[] elements = new String[size];
+			for(int i = 0; i < size; i++) {
+				String element = (String) listModel.getElementAt(i);
+				elements[i] = element; 
+			}
+			
+			return elements;
+		}
+		
+		int[] getTabASelect() {
+			Tab tabA = getTabA();
+			ListModel aModel = listTableAIncludeColumns.getModel();
+			String[] elements = getElements(aModel);
+			int[] aSelection = tabA.getColumnSelect(elements);
+			return aSelection; 
+		}
+		
+		String[] getTableConstraintsColumn(int col) {
+			TableModel tableModel = tableJoinConstraints.getModel();
+			int numRows = tableModel.getRowCount();
+			String[] column = new String[numRows];
+			for(int i = 0; i < numRows; i++) {
+				String cell = (String) tableModel.getValueAt(i, col);
+				column[i] = cell; 
+			}
+			return column;
+		}
+		
+		int[] getTabAKey() {
+			Tab tabA = getTabA();
+			String[] columnA = getTableConstraintsColumn(0);
+			int[] aKey = tabA.getColumnSelect(columnA);
+			return aKey;
+		}
+		
+		Tab getTabB() {
+			String selectedB = choiceTableSelectB.getSelectedItem().toString();
+			return mDatabaseTabbedPane.getTab(selectedB);
+		}
+		
+		int[] getTabBSelect() {
+			Tab tabB = getTabB();
+			ListModel bModel = listTableBIncludeColumns.getModel();
+			String[] elements = getElements(bModel);
+			int[] selection = tabB.getColumnSelect(elements);
+			return selection; 
+		}
+		
+		int[] getTabBKey() {
+			Tab tabB = getTabB();
+			String[] columnB = getTableConstraintsColumn(2);
+			int[] bKey = tabB.getColumnSelect(columnB);
+			return bKey;
+		}
+		
+		Database.Join.Type getJoinType(){
+			String selectedString = (String) choiceJoinOperationJoinType.getSelectedItem();
+			return JOIN_TO_SQL.get(selectedString);
+		}
+		
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+
+			String tableName = getTableName();
+			Tab tabA = getTabA();
+			int[] tabASelect = getTabASelect();
+			int[] tabAKey = getTabAKey();
+			
+			Tab tabB = getTabB();
+			int[] tabBSelect = getTabBSelect();
+			int[] tabBKey = getTabBKey();
+			
+			Database.Join.Type joinType = getJoinType();
+			
+			mDatabaseTabbedPane.addJoinOperations
+				(tableName, tabA, tabASelect, tabAKey, tabB, tabBSelect, tabBKey, joinType);
+		}
+		
+	}
+	
+	private ChoiceTableSelectListener mChoiceSelectTableASelectListener;
+	private ChoiceTableSelectListener mChoiceSelectTableBSelectListener;
 	
 	private ListTableButtonControlActionListener mListTableAIncludeColumnButtonControlActionListener;
 	private ListTableButtonControlActionListener mListTableAExcludeColumnButtonControlActionListener;
@@ -842,46 +1198,48 @@ public class TableJoinDialog extends JFrame  {
 	
 	private JComboBox mComboBoxJoinTypeItemListener;
 	private JComboBox mComboBoxJoinOperationTableAItemListener;
-	private JComboBox mComboBoxJoinOperationTableBActionListner;
+	private JComboBox mComboBoxJoinOperationTableBActionListener;
 	
 	private ChoiceJoinOperationItemListener mComboBoxJoinOperationTableItemListener;
 
 	private ChoiceListJoinType mListIncludeExcludeJoinTypeAddConstraintActionListener;
 	
+	private ButtonAddConstraintActionListener mButtonAddConstraintActionListener;
+	
+	private TextFieldNewTableNameKeyListener mTextFieldNewTableNameKeyListener; 
+	
+	private ChoiceTablePopupMenuListener mChoiceTablePopupMenuListener;
+	
+	private ButtonJoinTableActionListener mButtonJoinTableActionListener;
+	
 	void init() {
 		
 		// Pre Stage 1 
-		mTableNames = mDatabaseTabbedPane.getTabNames();
-		
-		for(Pair<String, DataTable> pair : mTableNames) {
-			String name = pair.fst;
-			choiceTableSelectA.addItem(name);
-			choiceTableSelectB.addItem(name);
-			
-			DataTable table = pair.snd;
-		}
-		
 		choiceTableSelectA.setSelectedIndex(-1);
 		choiceTableSelectB.setSelectedIndex(-1);
 		
 		// Stage 1 
-		mChoiceSelectTableA = new ChoiceTableSelectListener(
+		mChoiceSelectTableASelectListener = new ChoiceTableSelectListener(
 				choiceTableSelectA, 
 				choiceTableSelectB, 
 				listTableAIncludeColumns, 
 				listTableAExcludeColumns,
 				btnTableAIncludeAll,
 				btnTableAExcludeAll);
-		choiceTableSelectA.addItemListener(mChoiceSelectTableA);
+		choiceTableSelectA.addItemListener(mChoiceSelectTableASelectListener);
 		
-		mChoiceSelectTableB = new ChoiceTableSelectListener(
+		mChoiceSelectTableBSelectListener = new ChoiceTableSelectListener(
 				choiceTableSelectB, 
 				choiceTableSelectA, 
 				listTableBIncludeColumns, 
 				listTableBExcludeColumns,
 				btnTableBIncludeAll,
 				btnTableBExcludeAll);
-		choiceTableSelectB.addItemListener(mChoiceSelectTableB);
+		choiceTableSelectB.addItemListener(mChoiceSelectTableBSelectListener);
+		
+		mChoiceTablePopupMenuListener = new ChoiceTablePopupMenuListener();
+		choiceTableSelectA.addPopupMenuListener(new ChoiceTablePopupMenuListener());
+		choiceTableSelectB.addPopupMenuListener(new ChoiceTablePopupMenuListener());
 		
 
 		// Stage 2	
@@ -1022,7 +1380,7 @@ public class TableJoinDialog extends JFrame  {
 				new ChoiceListJoinType(
 						listTableAIncludeColumns, 
 						listTableBIncludeColumns, 
-						choiceJoinJoinType);
+						choiceJoinOperationJoinType);
 		
 		btnTableAInclude.addActionListener(mListIncludeExcludeJoinTypeAddConstraintActionListener);
 		btnTableAExclude.addActionListener(mListIncludeExcludeJoinTypeAddConstraintActionListener);
@@ -1034,34 +1392,43 @@ public class TableJoinDialog extends JFrame  {
 		btnTableBExcludeAll.addActionListener(mListIncludeExcludeJoinTypeAddConstraintActionListener);
 		
 		// Stage 4
-		choiceJoinJoinType.addItem("LEFT");
-		choiceJoinJoinType.addItem("INNER");
-		choiceJoinJoinType.addItem("RIGHT");
-		choiceJoinJoinType.addItem("SELF");
-		choiceJoinJoinType.addItem("FULL");
-		choiceJoinJoinType.addItem("RIGHT");
-		choiceJoinJoinType.addItem("CARTESIAN");
-		choiceJoinJoinType.setSelectedIndex(-1);
-		choiceJoinJoinType.setEnabled(false);
+		Database.Join.Type[] joinTypes = Database.Join.Type.values();
+		for(Database.Join.Type value : joinTypes) {
+			String key = value.toString();
+			JOIN_TO_SQL.put(key, value);
+			choiceJoinOperationJoinType.addItem(key);
+		}
+		choiceJoinOperationJoinType.setSelectedIndex(-1);
+		choiceJoinOperationJoinType.setEnabled(false);
 		
-		choiceJoinAddConstraint.setEnabled(false);
-		btnJoinRemoveAllConstraints.setEnabled(false);
 		tableJoinConstraints.setEnabled(false);
 		
 		mComboBoxJoinOperationTableItemListener = 
-				new ChoiceJoinOperationItemListener(comboBoxJoinOperationTableA, comboBoxJoinOperationTableB, choiceJoinAddConstraint, choiceJoinJoinType);
+				new ChoiceJoinOperationItemListener(comboBoxJoinOperationTableA, comboBoxJoinOperationTableB, btnJoinOperationAddConstraint, choiceJoinOperationJoinType);
 		
-		//comboBoxJoinOperationTableA.addItemListener(mComboBoxJoinOperationTableItemListener);
-		//comboBoxJoinOperationTableB.addItemListener(mComboBoxJoinOperationTableItemListener);
-		//choiceJoinJoinType.addItemListener(mComboBoxJoinOperationTableItemListener);
+		comboBoxJoinOperationTableA.addItemListener(mComboBoxJoinOperationTableItemListener);
+		comboBoxJoinOperationTableB.addItemListener(mComboBoxJoinOperationTableItemListener);
+		choiceJoinOperationJoinType.addItemListener(mComboBoxJoinOperationTableItemListener);
 		
 		comboBoxJoinOperationTableA.setEnabled(false);
 		comboBoxJoinOperationTableB.setEnabled(false);
 		
-		// Stage 5
-		this.txtFieldNameTableNewTableName.setEnabled(false);
-		this.btnJoinTable.setEnabled(false);
+		mButtonAddConstraintActionListener = new ButtonAddConstraintActionListener();
+		btnJoinOperationAddConstraint.addActionListener(mButtonAddConstraintActionListener);
+		btnJoinOperationAddConstraint.setEnabled(false);
 		
+		btnJoinOperationRemoveSelected.setEnabled(false);
+		
+		// Stage 5
+		mTextFieldNewTableNameKeyListener = new TextFieldNewTableNameKeyListener();
+		txtFieldNameTableNewTableName.setEnabled(false);
+		txtFieldNameTableNewTableName.addKeyListener(mTextFieldNewTableNameKeyListener);
+		
+		btnJoinTable.setEnabled(false);
+		mButtonJoinTableActionListener = new ButtonJoinTableActionListener();
+		btnJoinTable.addActionListener(mButtonJoinTableActionListener);
 	}
 
+	
+	
 }

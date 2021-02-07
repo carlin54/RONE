@@ -52,5 +52,6 @@
 	<classpathentry kind="lib" path="C:/Users/Richard/Documents/GitHub/RONE/lib/derby/derbyrun.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Richard/Documents/GitHub/RONE/lib/derby/derbyshared.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Richard/Documents/GitHub/RONE/lib/derby/derbytools.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Richard/Documents/GitHub/RONE/lib/javatuples-1.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

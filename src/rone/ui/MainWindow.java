@@ -37,19 +37,26 @@ import javax.swing.table.JTableHeader;
 import jp.sbi.garuda.backend.net.exception.GarudaConnectionNotInitializedException;
 import jp.sbi.garuda.backend.net.exception.NetworkConnectionException;
 import rone.backend.PercellomeSearchInterface;
+import rone.backend.PercellomeSearchInterface.SearchMode;
+import rone.backend.PercellomeSearchInterface.Species;
+import rone.backend.PercellomeWithGeneSymbolsSearchInterface;
+import rone.backend.PercellomeWithProbeIdSearchInterface;
 import rone.backend.ReactomeSearchInterface;
 import rone.backend.SearchDialog;
 import rone.backend.SearchInterface;
 import rone.backend.TargetMineSearchInterface;
 import rone.backend.garudahandler.GarudaHandler;
+import rone.backend.Search;
 import rone.filemanager.Database;
 import rone.filemanager.FileManager;
 import rone.filemanager.Table;
+
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JFileChooser;
 import javax.swing.BoxLayout;
+import javax.swing.Icon;
 import javax.swing.JPopupMenu;
 import java.awt.Toolkit;
 import java.net.*;
@@ -91,8 +98,10 @@ public class MainWindow implements ActionListener {
 	private final ActionFileExportToGarudaAsEnsemble actionExportGarudaToEnsemble = new ActionFileExportToGarudaAsEnsemble();
 	private final ActionFileExportToTable actionFileExportToTable = new ActionFileExportToTable();
 	private final ActionSearchTargetMineWithGeneSymbols actionTargetMineWithGeneSymbols = new ActionSearchTargetMineWithGeneSymbols();
-	private final ActionSearchPercellomeWithProbeID actionPercellomeProbeID = new ActionSearchPercellomeWithProbeID();
+	private final ActionSearchPercellomeWithProbeIds actionPercellomeWithProbeID = new ActionSearchPercellomeWithProbeIds();
+	private final ActionSearchPercellomeWithGeneSymbols actionPercellomeWithGeneSymbols = new ActionSearchPercellomeWithGeneSymbols();
 	private final ActionSearchReactomeWithGeneSymbols actionReactomeWithGeneSymbols = new ActionSearchReactomeWithGeneSymbols();
+
 	private final ActionSearchBioCompendiumWithSelect actionBioCompendiumWithSelect = new ActionSearchBioCompendiumWithSelect();
 	private final ActionTableJoin actionTableJoin = new ActionTableJoin();
 	private final ActionTableClear actionTableClear = new ActionTableClear();
@@ -102,10 +111,6 @@ public class MainWindow implements ActionListener {
 	private GarudaHandler mGarudaHandler;
 	private final Action mFileImportAction = new FileImportAction();
 	private final Action mFileExportTableAction = new FileExportTableAction();
-	private final Action mFileClearTableAction = new FileClearTableAction();
-	private final Action mReactomeImportAction =  new ReactomeImportAction();
-	private final Action mPercellomeImportAction =  new PercellomeImportAction();
-	private final Action mTargetMineImportAction = new TargetMineImportAction();
 	private final GarudaDiscoverActionGenelist mGarudaDiscoverActionGenelist = new GarudaDiscoverActionGenelist();
 	private final GarudaDiscoverActionEnsemble mGarudaDiscoverActionEnsemble = new GarudaDiscoverActionEnsemble();
 	
@@ -123,6 +128,7 @@ public class MainWindow implements ActionListener {
 	private JMenu mnSearch;
 	private JMenu mnPercellome;
 	private JMenuItem mntmPercellomeProbeIDs;
+	private JMenuItem mntmPercellomeGeneSymbols;
 	private JMenu mnTargetMine;
 	private JMenuItem mntmTargetMineGeneSymbols;
 	private JMenu mnReactome;
@@ -132,7 +138,6 @@ public class MainWindow implements ActionListener {
 	private JMenu mnJoin;
 	private JMenuItem mntmJoinTable;
 	private JMenuItem mntmClear;
-	private JTable table;
 	
 	static final String TABBED_PANE_NAME = "TABBED_PANE";
 	private DatabaseTabbedPane getTabbedPane() {
@@ -147,6 +152,8 @@ public class MainWindow implements ActionListener {
 	}
 	private Database mDatabaseInstance; 
 	
+	
+	
 	private void initialize() {
 		mMainWindow = this;
 		mMainWindowJFrame = new JFrame();
@@ -154,8 +161,9 @@ public class MainWindow implements ActionListener {
 		mDatabaseTabbedPane.setName("mDatabaseTabbedPane");
 		
 		Path currentRelativePath = Paths.get("");
-		String iconLocation = currentRelativePath.toAbsolutePath().toString() + "\\rone_logo.png";
-		mMainWindowJFrame.setIconImage(Toolkit.getDefaultToolkit().getImage(iconLocation));mMainWindowJFrame.setTitle("RONE");
+		String iconLocation = currentRelativePath.toAbsolutePath().toString() + "\\icons\\rone_icon.png";
+		mMainWindowJFrame.setIconImage(Toolkit.getDefaultToolkit().getImage(iconLocation));
+		mMainWindowJFrame.setTitle("RONE");
 		mMainWindowJFrame.setBounds(100, 100, 820, 540);
 		mMainWindowJFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				
@@ -210,8 +218,13 @@ public class MainWindow implements ActionListener {
 				mnSearch.add(mnPercellome);
 				{
 					mntmPercellomeProbeIDs = new JMenuItem("with Probe IDs (Affy IDs)");
-					mntmPercellomeProbeIDs.setAction(actionPercellomeProbeID);
+					mntmPercellomeProbeIDs.setAction(actionPercellomeWithProbeID);
 					mnPercellome.add(mntmPercellomeProbeIDs);
+				}
+				{
+					mntmPercellomeGeneSymbols = new JMenuItem("with Probe IDs (Affy IDs)");
+					mntmPercellomeGeneSymbols.setAction(actionPercellomeWithGeneSymbols);
+					mnPercellome.add(mntmPercellomeGeneSymbols);
 				}
 			}
 			{
@@ -258,12 +271,6 @@ public class MainWindow implements ActionListener {
 		JMenuItem mntmNewMenuItem = new JMenuItem("Discover");
 		JPopupMenu popupMenu = new JPopupMenu("Discover");
 		popupMenu.add(mntmNewMenuItem);
-		
-		mDatabaseInstance = Database.getInstance();
-		
-		mSearchQueue = new ConcurrentLinkedQueue<Search>();
-		mSearchThreadManager = new SearchThreadManager();
-		mSearchThreadManager.start();
 	}
 	
 
@@ -327,8 +334,9 @@ public class MainWindow implements ActionListener {
 				try {	
 					MainWindow window = new MainWindow();
 					window.mMainWindowJFrame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
+				} catch (Exception exception) {
+					exception.printStackTrace();
+					showError(exception);
 				}
 				
 			}
@@ -336,8 +344,7 @@ public class MainWindow implements ActionListener {
 	
 		
 	}
-
-	
+    	
     public MainWindow() {
 		initialize();
 		
@@ -366,66 +373,26 @@ public class MainWindow implements ActionListener {
 	
 	public void loadTable(String tableName, String[] columnIdentifiers, ArrayList<Object[]> tableToLoad) {
 		
-		mMainWindowJFrame.getContentPane().add(mDatabaseTabbedPane);
+		//mMainWindowJFrame.getContentPane().add(mDatabaseTabbedPane);
 		Database.Table importTable;
 		try {
-			importTable = mDatabaseInstance.createTable(tableName, columnIdentifiers, new int[]{});
-			importTable.insertRows(tableToLoad);
-			mDatabaseTabbedPane.importDatabaseTable(tableName, columnIdentifiers, importTable, null);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		
-		if(mDatabaseTabbedPane.isEmpty()) {
-			/*Database.Table importTable = mDatabaseInstance.createTable(tableName, columnIdentifiers, new int[]{});
-			importTable.insertRows(tableToLoad);
-			mDatabaseTabbedPane.importDatabaseTable(importTable);*/
-		} else {
-			/*ImportDataDialog importSelection = new ImportDataDialog(mMainWindowJFrame, fromWhere, tox_id, inc_id) ;
-			importSelection.setVisible(true);	
 			
-			String[] data = importSelection.getData();
-			if(data[0] != null) {
-				String keyTox = data[0];
-				String keyInc = data[1];
-				mDatabaseTabbedPane.importTable(keyTox, keyInc, incomingTable);*/
+			mDatabaseTabbedPane.addTab(tableName, columnIdentifiers, new int[0], tableToLoad);
+		} catch (SQLException sqlException) {
+			sqlException.printStackTrace();
+			showError(sqlException);
 		}
-	}
 		
-	
-	
-	private void loadList(File file, String header) {
-		Table listTable = null;
-		try {
-			listTable = FileManager.loadListFile(file, header);
-			mDatabaseTabbedPane.setTable(listTable);
-		} catch (IOException e) {
-			JOptionPane.showMessageDialog(null, e.getMessage(), "Failure", JOptionPane.ERROR_MESSAGE);
-			e.printStackTrace();
-		}
 	}
-	
-	
-	private void loadAGCTScenario(File file) {
-		Table scenario;
-		try {
-			scenario = FileManager.loadAGCTScenario(file);
-			loadTable(scenario, "Import AGCT Scenario");
-		} catch (IOException e) {
-			JOptionPane.showMessageDialog(null, e.getMessage(), "Failure", JOptionPane.ERROR_MESSAGE);
-			e.printStackTrace();
-		}
-	}
-	
 	
 	private void loadDataFile(File file, String seperator) {
 		ArrayList<Object[]> data = new ArrayList<Object[]>();
 				
 		try {
 			data = FileManager.loadDataFile(file, seperator);
-		} catch (IOException e) {
-			JOptionPane.showMessageDialog(null, e.getMessage(), "Failure", JOptionPane.ERROR_MESSAGE);
-			e.printStackTrace();
+		} catch (IOException ioException) {
+			ioException.printStackTrace();
+			showError(ioException);
 		}
 		
 		String[] columnIdentifiers = (String[])data.get(0);
@@ -433,17 +400,6 @@ public class MainWindow implements ActionListener {
 		loadTable(file.getName(), columnIdentifiers, data);
 	}
 	
-	
-	private void loadBioCompendium(File file) {
-		Table data;
-		try {
-			data = FileManager.loadBioCompendiumFile(file);
-			loadTable(data, "Import File Data");
-		} catch (IOException e) {
-			JOptionPane.showMessageDialog(null, e.getMessage(), "Failure", JOptionPane.ERROR_MESSAGE);
-			e.printStackTrace();
-		}
-	}
 	
 	private boolean hasFile(File file) {
 		return file != null && file.exists();
@@ -510,7 +466,7 @@ public class MainWindow implements ActionListener {
 	
 	
 	private void startDiscovery(String contence, String extension) {
-		String[] data = mDatabaseTabbedPane.getUniqueSelected();
+		String[] data = mDatabaseTabbedPane.getSelection();
 		
 		String list = new String("");
 		for(int i = 0; i < data.length; i++) {
@@ -589,64 +545,6 @@ public class MainWindow implements ActionListener {
 		}
 	}
 
-	
-	private class TargetMineImportAction extends AbstractAction {
-		
-		public TargetMineImportAction() {
-			putValue(NAME, "Import TargetMine");
-			putValue(SHORT_DESCRIPTION, "Import selected from TargetMine");
-		}
-		
-		public void actionPerformed(ActionEvent e) {
-			
-			String[] genelist = mDatabaseTabbedPane.getUniqueSelected();
-			
-			if(!hasValidSelection()) {
-				return;
-			}
-
-			
-		}
-	}
-	
-	
-	private class ReactomeImportAction extends AbstractAction {
-		public ReactomeImportAction() {
-			putValue(NAME, "Import Reactome");
-			putValue(SHORT_DESCRIPTION, "Import selected from Reactome");
-		}
-		public void actionPerformed(ActionEvent e) {
-			
-			String[] genelist = mDatabaseTabbedPane.getUniqueSelected();
-			
-			if(!hasValidSelection()) {
-				return;
-			}
-			
-
-			
-		}
-	}
-	
-	
-	private class PercellomeImportAction extends AbstractAction {
-		public PercellomeImportAction() {
-			putValue(NAME, "Import Percellome");
-			putValue(SHORT_DESCRIPTION, "Import selected from Percellome");
-		}
-		public void actionPerformed(ActionEvent e) {
-			
-			String[] genelist = mDatabaseTabbedPane.getUniqueSelected();
-			
-			if(!hasValidSelection()) {
-				return;
-			}
-			
-
-			
-		}
-	}
-	
 	
 	private class FileExportTableAction extends AbstractAction {
 		
@@ -760,36 +658,6 @@ public class MainWindow implements ActionListener {
 	}
 	
 	
-	private class FileClearTableAction extends AbstractAction {
-		
-		public FileClearTableAction() {
-			putValue(NAME, "Clear");
-			putValue(SHORT_DESCRIPTION, "Clear the contence of the table");
-		}
-		
-		public void actionPerformed(ActionEvent e) {
-			
-			if(!mDatabaseTabbedPane.isEmpty()) {
-				int result = JOptionPane.showConfirmDialog(null,
-						"Are you sure you would like to discard the current table?", "Clear Confirm", JOptionPane.YES_NO_OPTION);
-				
-				if(result != JOptionPane.YES_OPTION)
-					return;
-				
-			}
-			
-			try {
-				mDatabaseTabbedPane.clearTable();
-			} catch (SQLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			
-		}
-	
-	}
-	
-	
 	private class ActionFileImportFromFile extends AbstractAction {
 		public ActionFileImportFromFile() {
 			putValue(NAME, "from File");
@@ -836,6 +704,7 @@ public class MainWindow implements ActionListener {
 		}
 	}
 	
+	
 	private class ActionFileExportToGarudaAsEnsemble extends AbstractAction {
 		public ActionFileExportToGarudaAsEnsemble() {
 			putValue(NAME, "as Ensemble");
@@ -844,6 +713,7 @@ public class MainWindow implements ActionListener {
 		}
 	}
 	
+	
 	private class ActionFileExportToTable extends AbstractAction {
 		public ActionFileExportToTable() {
 			putValue(NAME, "to Table");
@@ -851,6 +721,7 @@ public class MainWindow implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 		}
 	}
+	
 	
 	private class ActionSearchTargetMineWithGeneSymbols extends AbstractAction {
 		public ActionSearchTargetMineWithGeneSymbols() {
@@ -861,12 +732,18 @@ public class MainWindow implements ActionListener {
 			String[] selection = mDatabaseTabbedPane.getSelection();
 			TargetMineSearchInterface targetMineSearchInterface = new TargetMineSearchInterface();
 			
-			Search search = new Search(targetMineSearchInterface, selection, mDatabaseTabbedPane);
+			Search search = new Search(targetMineSearchInterface, selection);
 			
-			mSearchThreadManager.addSearch(search);
+			try {
+				mDatabaseTabbedPane.addSearch(search);
+			} catch (SQLException sqlException) {
+				sqlException.printStackTrace();
+				showError(sqlException);
+			}
 			
 		}
 	}
+	
 	
 	private class ActionSearchReactomeWithGeneSymbols extends AbstractAction {
 		public ActionSearchReactomeWithGeneSymbols() {
@@ -877,11 +754,17 @@ public class MainWindow implements ActionListener {
 			String[] selection = mDatabaseTabbedPane.getSelection();
 			ReactomeSearchInterface reactomeSearchInterface = new ReactomeSearchInterface();
 			
-			Search search = new Search(reactomeSearchInterface, selection, mDatabaseTabbedPane);
+			Search search = new Search(reactomeSearchInterface, selection);
 			
-			mSearchThreadManager.addSearch(search);
+			try {
+				mDatabaseTabbedPane.addSearch(search);
+			} catch (SQLException sqlException) {
+				sqlException.printStackTrace();
+				showError(sqlException);
+			}
 		}
 	}
+	
 	
 	private class ActionSearchBioCompendiumWithSelect extends AbstractAction {
 		public ActionSearchBioCompendiumWithSelect() {
@@ -890,6 +773,7 @@ public class MainWindow implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 		}
 	}
+	
 	
 	private class ActionTableJoin extends AbstractAction {
 		public ActionTableJoin() {
@@ -901,10 +785,11 @@ public class MainWindow implements ActionListener {
 				public void run() {
 
 					try {	
-						TableJoinDialog tjd = new TableJoinDialog(mDatabaseTabbedPane);
-						tjd.setVisible(true);
-					} catch (Exception e) {
-						e.printStackTrace();
+						TableJoinDialog tableJoinDialog = new TableJoinDialog(mDatabaseTabbedPane);
+						tableJoinDialog.setVisible(true);
+					} catch (Exception exception) {
+						exception.printStackTrace();
+						showError(exception);
 					}
 					
 				}
@@ -912,6 +797,7 @@ public class MainWindow implements ActionListener {
 			
 		}
 	}
+	
 	
 	private class ActionTableClear extends AbstractAction {
 		public ActionTableClear() {
@@ -921,498 +807,73 @@ public class MainWindow implements ActionListener {
 		}
 	}
 	
-	private class ActionSearchPercellomeWithProbeID extends AbstractAction {
-		public ActionSearchPercellomeWithProbeID() {
+	
+	
+	public static void showError(Exception exceptionError) {
+	    String errorMessage = "Message: " + exceptionError.getMessage()
+	                + "\nStackTrace: " + Arrays.toString(exceptionError.getStackTrace());
+	    String title = exceptionError.getClass().getName();
+	    JOptionPane.showMessageDialog(null, errorMessage, title, JOptionPane.ERROR_MESSAGE);
+	}
+	
+	private Species getPercellomeSpecies() {
+		Object[] possibilities = PercellomeSearchInterface.Species.values();
+		Species s = (Species)JOptionPane.showInputDialog(
+		                    null,
+		                    "Select Species:\n",
+		                    "Percellome",
+		                    JOptionPane.PLAIN_MESSAGE,
+		                    PercellomeSearchInterface.getIcon(),
+		                    possibilities,
+		                    PercellomeSearchInterface.Species.values()[0]);
+		return s;
+	}
+	
+	private class ActionSearchPercellomeWithGeneSymbols extends AbstractAction {
+		public ActionSearchPercellomeWithGeneSymbols() {
+			putValue(NAME, "with Gene Symbols");
+		}
+		public void actionPerformed(ActionEvent e) {
+			String[] selection = mDatabaseTabbedPane.getSelection();
+			Species speciesSelect = getPercellomeSpecies();
+			SearchMode searchMode = SearchMode.WITH_GENE_SYMBOLS;
+			
+			if(speciesSelect == null) return; 
+			
+			PercellomeSearchInterface percellomeSearchInterface = new PercellomeSearchInterface(speciesSelect, searchMode);
+			
+			Search search = new Search(percellomeSearchInterface, selection);
+			
+			try {
+				mDatabaseTabbedPane.addSearch(search);
+			} catch (SQLException sqlException) {
+				sqlException.printStackTrace();
+				showError(sqlException);
+			}
+		}
+	}
+	
+	private class ActionSearchPercellomeWithProbeIds extends AbstractAction {
+		public ActionSearchPercellomeWithProbeIds() {
 			putValue(NAME, "with Probe IDs (Affy ID)");
 		}
 		public void actionPerformed(ActionEvent e) {
 			String[] selection = mDatabaseTabbedPane.getSelection();
-			PercellomeSearchInterface percellomeSearchInterface = new PercellomeSearchInterface();
+			Species speciesSelect = getPercellomeSpecies();
+			SearchMode searchMode = SearchMode.WITH_PROBE_IDS;
 			
-			Search search = new Search(percellomeSearchInterface, selection, mDatabaseTabbedPane);
+			if(speciesSelect == null) return; 
 			
-			mSearchThreadManager.addSearch(search);
-		}
-	}
-	
-	ConcurrentLinkedQueue<Search> mSearchQueue;
-
-	class Search {
-		private SearchInterface mSearchInterface;
-		private String[] mSearchInterfaceRequests;
-		private DatabaseTabbedPane mDatabaseTabbedPane;
-		
-		public SearchInterface getSearchInterface() 		{	return mSearchInterface;		}
-		public String[] getSearchInterfaceRequests() 		{	return mSearchInterfaceRequests;}
-		public DatabaseTabbedPane getDatabaseTabbedPane() 	{	return mDatabaseTabbedPane;		}
-		
-		Search(	SearchInterface searchInterface, 
-				String[] searchInterfaceRequests, 
-				DatabaseTabbedPane databaseTabbedPane)
-		{
-			this.mSearchInterface = searchInterface;
-			this.mSearchInterfaceRequests = searchInterfaceRequests;
-			this.mDatabaseTabbedPane = databaseTabbedPane;
-		}
-	}
-	
-
-	SearchThreadManager mSearchThreadManager; 
-	class SearchThreadManager extends Thread {
-		
-		private CopyOnWriteArrayList<Search> mSearchQueue; 
-		private CopyOnWriteArrayList<MasterThread> mActiveQueue; 
-		
-		private boolean mStopAllThreads;
-		
-		
-		SearchThreadManager(){
-			mStopAllThreads = false;
-			mSearchQueue = new CopyOnWriteArrayList<Search>();
-			mActiveQueue = new CopyOnWriteArrayList<MasterThread>();
-		}
-		
-		public void stopAllThreads() {
-			mSearchQueue.clear();
-			mStopAllThreads = true;
-		}
-		
-		public void addSearch(Search search) {
-			synchronized(mSearchQueue) {
-				//System.out.println("SearchThreadManager:addSearch():" + this.getName() + ": adding to queue.");
-				mSearchQueue.add(search);
-				mSearchQueue.notifyAll();
-			}
-		}
-		
-		public boolean finishing() {
-			return mStopAllThreads;
-		}
-		
-		private  boolean hasInActiveSearches() 	{ 
-			return mSearchQueue.size() > 0;
-		}
-		
-		private boolean hasActiveSearches() 	{ 
-			return mActiveQueue.size() > 0;
-		}
-		
-		private boolean hasSearches() {
-			return hasInActiveSearches() || hasActiveSearches();
-		}
-		
-		public void startInActiveSearches() throws InterruptedException {
-			while(hasInActiveSearches()) {
-				synchronized(mSearchQueue) {
-					while(!mSearchQueue.isEmpty()) {
-						Search search = mSearchQueue.remove(0);
-						MasterThread startThread = new MasterThread(search);
-						startThread.start();
-						mActiveQueue.add(startThread);						
-					}
-					mSearchQueue.notifyAll();
-				}
-			}
-		}
-		
-		public void endThreads() {
-			for(MasterThread mt : mActiveQueue) {
-				mt.stopProcess();
-			}
-		}
-		
-		public void run() 
-	    { 
-			this.mStopAllThreads = false;
-			while(!finishing()) {
-				try {
-					synchronized (this.mSearchQueue) {
-						while(mSearchQueue.isEmpty()) {
-							//System.out.println("Waiting for search query!");
-							mSearchQueue.wait();
-						}
-						
-						//while(hasSearches()) {
-							joinCompleteSearches();
-							startInActiveSearches();
-						//}
-						mSearchQueue.notifyAll();
-					}
-					
-					
-				} catch(InterruptedException e) {  
-					//System.out.println("SearchThreadManager:"  + this.getName() + ": Interupted, Finishing = " + Boolean.toString(finishing()) + ".");
-				}
-			}
+			PercellomeSearchInterface percellomeSearchInterface = new PercellomeSearchInterface(speciesSelect, searchMode);
+			
+			Search search = new Search(percellomeSearchInterface, selection);
 			
 			try {
-				cleanUp();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-	    }
-		
-		private boolean threadEnded(MasterThread mt) {
-			return mt.processSuccess() || mt.hasToStopWorking();
-		}
-		
-		private void cleanUp() throws InterruptedException {
-
-			endThreads();
-			
-			//System.out.println("SearchThreadManager:cleaning up!");
-			synchronized(mSearchQueue) {
-				while(!mActiveQueue.isEmpty()) {
-					MasterThread mt = mActiveQueue.remove(0);
-					try {
-						mt.join();
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-				mSearchQueue.notifyAll();
+				mDatabaseTabbedPane.addSearch(search);
+			} catch (SQLException sqlException) {
+				sqlException.printStackTrace();
+				showError(sqlException);
 			}
 		}
-		
-		private void joinCompleteSearches() throws InterruptedException {
-			//while(hasActiveSearches()) {
-				////System.out.println("SearchThreadManager: Trying to join threads!" + Boolean.toString(hasInActiveSearches()));
-				for(int i = 0; i < mActiveQueue.size(); ) {
-					MasterThread mt = mActiveQueue.get(i);
-					if(threadEnded(mt)) {
-						mt.join();
-						mActiveQueue.remove(i);
-						//System.out.println("SearchThreadManager: Successfully joined thread!" + mt.getId());
-					} else {
-						i++;
-					}
-					//TODO: Fix this later, should be no thread.sleep - wait for array to update
-				}
-				//System.out.println("SearchThreadManager:joinCompleteSearches(): done!");
-			}
-			//}
-		
-	};
-	
-    class WorkerThread extends Thread 
-	{ 
-    	private ArrayList<Object[]> mResults;
-    	private String[] mSearchInterfaceRequests;
-    	private boolean mHasGivenResults;
-    	private boolean mStopProcessing;
-    	
-    	private SearchInterface mSearchInterface;
-    
-    	WorkerThread(SearchInterface searchInterface){
-    		//System.out.println("WorkerThread():" + this.getName());
-    		mSearchInterface = searchInterface;
-    		mResults = new ArrayList<Object[]>();
-    	}
-    	
-    	public void setWork(String[] work) {
-    		this.mSearchInterfaceRequests = work;
-    	}
-    	
-    	public ArrayList<Object[]> getResults(){
-    		setHasGivenResults(true);
-    		return mResults;
-    	}
-
-    	public void setHasGivenResults(boolean set) {
-    		mHasGivenResults = set;
-    	}
-    	
-    	public void setResults(ArrayList<Object[]> results) {
-    		mResults = results;
-    	}
-    	
-	    public void run() 
-	    {
-	    	//System.out.println("WorkerThread:run()" + this.getName());
-    		ArrayList<Object[]> results = mSearchInterface.query(mSearchInterfaceRequests);
-    		//System.out.println("WorkerThread:run()" + this.getName() +": query complete!");
-    		
-    		setResults(results);
-    		setHasGivenResults(false);
-	    }
-
-		public boolean hasGivenResults() {
-			return mHasGivenResults;
-		}
-
-		public String[] getWork() {
-			return this.mSearchInterfaceRequests;
-		} 
-	
-	} 
-    
-    
-    class MasterThread extends Thread {
-    	private int mThreadPoolSize = 5;
-    	private int mWorkSize = 20;
-    	
-    	private WorkerThread mThreadPool[];
-    	
-    	private Boolean mProcessSuccess;
-    	private boolean mStopWorking;
-    	private int mWorkHeadIndex;
-    	private Database.Table mResultsTable;
-    	private Search mSearch;
-    	
-    	private SearchInterface mSearchInterface;
-    	private String[] mSearchInterfaceRequests;
-    	
-    	private int mRequestsSearched;
-    	
-    	private DataTable mDataTable;
-    	
-    	public MasterThread(Search search) {
-    		mSearch = search;
-    		mSearchInterface = search.getSearchInterface();
-    		mSearchInterfaceRequests = search.getSearchInterfaceRequests();
-    		mDatabaseTabbedPane = search.getDatabaseTabbedPane();
-    		
-    		mThreadPoolSize = mSearchInterface.getThreadPoolSize();
-    		mWorkSize = mSearchInterface.getWorkSize();
-    		
-    		mRequestsSearched = 0;
-    		
-    		//System.out.println("MasterThread():" + this.getName());
-    		
-    		setProcessSuccess(false);
-    	}
-    	
-    	public void stopProcess() {
-    		//System.out.println("MasterThread:stopProcess()");
-    		mStopWorking = true;
-    	}
-    	
-    	private int nextIndex(int i) {
-        	return ((i+mWorkSize > mSearchInterfaceRequests.length) ? mSearchInterfaceRequests.length : i+mWorkSize);
-        }
-    	
-    	public String[] getNextWork() {
-    		if(mWorkHeadIndex < mSearchInterfaceRequests.length) {
-    			int mNewWorkHead = nextIndex(mWorkHeadIndex);
-    			String[] slice = Arrays.copyOfRange(mSearchInterfaceRequests, mWorkHeadIndex, mNewWorkHead);
-    			mWorkHeadIndex = mNewWorkHead;
-    			return slice;
-    		}else{
-    			return new String[] {};
-    		}
-    	}
-    	
-    	private boolean hasResults(ArrayList<Object[]> results) {
-    		return (results != null) && results.size() > 0;
-    	}
-    	
-    	private int totalCompletedWork(String[] work) {
-    		return work == null ? 0 : work.length; 
-    	}
-    	
-    	private void updateTableModel(ArrayList<Object[]> results) {
-    		
-    		Iterator<Object[]> it = results.iterator();
-    		
-    		while(it.hasNext()) {
-    			Object[] row = it.next();
-    			DefaultTableModel model = (DefaultTableModel) mTable.getModel();
-    			model.addRow(row);
-    			mTable.setModel(model);
-    		}
-    		
-    	}
-    	
-    	public void processResults(String[] completeWork, ArrayList<Object[]> results) {
-    		
-    		if(!hasResults(results)) 
-    			return;
-    		
-  
-    		try {
-				mResultsTable.insertRows(results);
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-    		
-    		if(mDataTable.isVisible()) {
-    			try {
-					mDataTable.updateTable();
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-    		}
-    		
-    		mRequestsSearched = mRequestsSearched + totalCompletedWork(completeWork); 
-    		
-    	}
-    	
-    	private DefaultTableModel makeDefaultTableModel() {
-    		DefaultTableModel dtm = new DefaultTableModel();
-    		dtm.setColumnIdentifiers(mSearchInterface.getColumnIdentifers());
-    		return dtm; 
-    	}
-    	
-    	public boolean unsuccessful(ArrayList<Object[]> ptr) {
-    		return ptr == null || ptr.size() == 0;
-    	}
-    	
-    	public boolean hasWork(String[] work) {
-    		return work.length > 0;
-    	}
-    	
-    	private WorkerThread[] makeThreadPool(int size, int priority) {
-    		WorkerThread[] threadPool = new WorkerThread[size];
-    		for(int i = 0; i < mThreadPoolSize; i++) {
-    			threadPool[i] = new WorkerThread(mSearchInterface);
-    			threadPool[i].setPriority(priority);
-    		}
-    		return threadPool;
-    	}
-    	
-    	public void giveWork(String[] work) {
-			int i = 0;
-			boolean givenWork = false;
-			while(!givenWork) {
-				if(hasToStopWorking()) 
-					return;
-				
-				if(!mThreadPool[i].isAlive()) {
-					try {
-						mThreadPool[i].join();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					ArrayList<Object[]> results = mThreadPool[i].getResults();
-					String completeWork[] = mThreadPool[i].getWork();
-					
-					//TODO: check if i don't need a new worker thread
-					mThreadPool[i] = new WorkerThread(mSearchInterface);
-        			mThreadPool[i].setWork(work);
-        			mThreadPool[i].start();
-        			
-        			
-					processResults(completeWork, results);
-    				
-    				givenWork = true;
-    			}
-				i = (i + 1) % mThreadPoolSize;
-				
-			}
-    	}
-    	
-    	private void cleanUp() {
-    		//System.out.println("MasterThread:cleanUp()");
-    		boolean doneCleanUp = false;
-    		while(!doneCleanUp) {
-    			doneCleanUp = true;
-	    		for(int i = 0; i < mThreadPool.length; i++) {
-	    			WorkerThread worker = mThreadPool[i];
-	    			try {
-	    				if(worker.isAlive()) {
-	    					doneCleanUp = false;
-	    					worker.join();
-	    					//System.out.println("MasterThread: successfully joined worker thread -> " + worker.getId());
-	    				}
-	    				
-	    				if(!hasToStopWorking() && !worker.hasGivenResults()) {
-	    					ArrayList<Object[]> results = worker.getResults();
-	    					String[] completeWork = worker.getWork();
-	    					processResults(completeWork, results);
-	    				}
-	    				
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-	    		}
-	    		//System.out.println("MasterThread: cleanUp() success!");
-    		}
-    		mThreadPool = null;
-    		mWorkHeadIndex = 0;
-    	}
-    	
-    	private boolean hasToStopWorking() {
-    		return mStopWorking;
-    	}
-    	
-    	public Boolean processSuccess() {
-    		return mProcessSuccess;
-    	}
-    	
-    	private void setProcessSuccess(Boolean set) {
-    		mProcessSuccess = set;
-    	}
-    	
-    	public void setUp() {
-    		//System.out.println("MasterThread:Run():" + this.getName());
-    		String tableName = mSearchInterface.getTitle();
-    		//System.out.println("MasterThread:tableName():" + this.getName());
-    		String[] columnIdentifiers = mSearchInterface.getColumnIdentifers();
-    		//System.out.println("MasterThread:columnIdentifiers():" + this.getName());
-    		int[] primaryKeys = mSearchInterface.getPrimaryKeys();
-    		//System.out.println("MasterThread:primaryKeys():" + this.getName());
-    		
-    		mResultsTable = null;
-			try {
-				mResultsTable = mDatabaseInstance.createTable(tableName, columnIdentifiers, primaryKeys);
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			//System.out.println("MasterThread:Run():" + this.getName() + ":Database created!");
-    		ActionListener actionListener = new ActionListener() {
-
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					stopProcess();
-					//System.out.println("MasterThread:Action listener complete!");
-				}
-    			
-    		};
-    		try {
-				mDataTable = mDatabaseTabbedPane.importDatabaseTable(tableName, columnIdentifiers, mResultsTable, actionListener);
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-    		
-    		//System.out.println("MasterThread: run():" + this.getName() + ": Imported Database Table!");
-    		mThreadPool = makeThreadPool(mThreadPoolSize, MAX_PRIORITY);
-    		//System.out.println("MasterThread: run():" + this.getName() + ": Made thread pool!");
-    	}
-    	
-    	public void run() {
-    		
-    		setUp();
-    		
-    		setProcessSuccess(false);
-    		String[] work = null;
-    		//System.out.println("MasterThread:run():" + this.getName() + ":Allocating work.");
-    		while(hasWork(work = getNextWork())) {
-    			if(hasToStopWorking()) {
-    				//System.out.println("Ending Process!");
-    				break;
-    			}
-    			giveWork(work);
-			}
-	    		
-    		cleanUp();
-    		
-    		if(!hasToStopWorking()) {
-    			//System.out.println("MasterThread:run():" + this.getName() + ":was stopped from searching.");
-    			setProcessSuccess(true);
-    		}
-    		//System.out.println("MasterThread:run():" + this.getName() + ":process complete!");
-    	}
-
-		public boolean isRunning() {
-			return false;
-		}
-    
-		
-    }
+	}
 }

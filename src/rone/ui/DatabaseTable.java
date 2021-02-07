@@ -274,4 +274,5 @@ public class DatabaseTable extends JTable {
 		return mDataTable.get(row, col);
 	}
 	
+
 }

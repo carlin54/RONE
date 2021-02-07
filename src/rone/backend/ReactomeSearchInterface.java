@@ -22,7 +22,7 @@ public class ReactomeSearchInterface implements SearchInterface {
 	@Override
 	public String getIconLocation() {
 		Path currentRelativePath = Paths.get("");
-		return currentRelativePath.toAbsolutePath().toString() + "\\reactome_logo.png";
+		return currentRelativePath.toAbsolutePath().toString() + "\\icons\\reactome_icon.png";
 	}
 
 	@Override
@@ -108,7 +108,7 @@ public class ReactomeSearchInterface implements SearchInterface {
 		}
 		
 		ArrayList<Object[]> rows = new ArrayList<Object[]>();
-		//System.out.println(pathways.length());
+		////System.out.println(pathways.length());
 		for(int i = 0; i < pathways.length(); i++) {
 			
 			JSONObject pathway;
@@ -159,7 +159,7 @@ public class ReactomeSearchInterface implements SearchInterface {
 				if(obj != null) {
 					row = cleanRow(row);
 					rows.add(row);	
-					//System.out.println(Arrays.toString(row));
+					////System.out.println(Arrays.toString(row));
 					break;
 				}
 			}
@@ -201,10 +201,10 @@ public class ReactomeSearchInterface implements SearchInterface {
 						builder.append(System.getProperty("line.separator"));
 					}
 					jsonQuery = builder.toString();
-					System.out.print(jsonQuery);
+					//System.out.print(jsonQuery);
 					
 					numberOfPathways = getNumberOfPathways(jsonQuery);
-					System.out.println(jsonQuery);
+					//System.out.println(jsonQuery);
 					ArrayList<Object[]> searchResults = parseQuery(gene, jsonQuery);
 					
 					pathways.addAll(searchResults);

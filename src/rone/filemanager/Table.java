@@ -34,9 +34,6 @@ public class Table {
 	public Table(ArrayList<String> identifiers) {
 	}
 	
-	public Table(String[][] table){
-		
-	}
 	
 	public boolean hasColumn(String col) {
 		for(int i = 0; i < mIdentifiers.size(); i++) {
