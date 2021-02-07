@@ -352,7 +352,7 @@ public class MainWindow implements ActionListener {
 		
 		try {
 			//mDatabaseTabbedPane.setFillsViewportHeight(true);
-			this.mGarudaHandler = new GarudaHandler(this);
+			this.mGarudaHandler = new GarudaHandler(mMainWindowJFrame);
 		} catch (GarudaConnectionNotInitializedException | NetworkConnectionException e) {
 			//JOptionPane.showMessageDialog(mMainWindowJFrame, "Was unable to connect to Garuda Platform. Please restart to connect.");
 			e.printStackTrace();

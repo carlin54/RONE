@@ -40,14 +40,13 @@ public class GarudaHandler {
 	private DataTable mToxicologyTable;
 	
 	
-	public GarudaHandler(MainWindow mainWindow) throws GarudaConnectionNotInitializedException, NetworkConnectionException
+	public GarudaHandler(JFrame parentFrame) throws GarudaConnectionNotInitializedException, NetworkConnectionException
 	{
-		//this.mParentFrame = mainWindow;
-		//this.mToxicologyTable = geneTable;
+		this.mParentFrame = parentFrame;
 		
 		mGarudaBackend = new GarudaBackend(GarudaConstants.GARUDA_ID, GarudaConstants.GARUDA_NAME, this.mParentFrame);
 		
-		mGarudaBackend.addGarudaGlassPanel(this.mParentFrame, null);
+		mGarudaBackend.addGarudaGlassPanel(parentFrame, null);
 		
 		initGarudaListeners();
 		initPipeline();
