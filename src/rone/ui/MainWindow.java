@@ -29,6 +29,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.DefaultTableModel;
@@ -39,8 +40,6 @@ import jp.sbi.garuda.backend.net.exception.NetworkConnectionException;
 import rone.backend.PercellomeSearchInterface;
 import rone.backend.PercellomeSearchInterface.SearchMode;
 import rone.backend.PercellomeSearchInterface.Species;
-import rone.backend.PercellomeWithGeneSymbolsSearchInterface;
-import rone.backend.PercellomeWithProbeIdSearchInterface;
 import rone.backend.ReactomeSearchInterface;
 import rone.backend.SearchDialog;
 import rone.backend.SearchInterface;
@@ -80,6 +79,7 @@ import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derby.jdbc.EmbeddedDriver;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 
 import java.awt.ScrollPane;
 import javax.swing.JLabel;
@@ -94,8 +94,14 @@ public class MainWindow implements ActionListener {
 	
 	private final ActionFileImportFromFile actionImportActionFromFile = new ActionFileImportFromFile();
 	private final ActionFileExportToFile actionExportActionToFile = new ActionFileExportToFile();
-	private final ActionFileExportToGarudaAsGenelist actionExportGarudaToGenelist = new ActionFileExportToGarudaAsGenelist();
-	private final ActionFileExportToGarudaAsEnsemble actionExportGarudaToEnsemble = new ActionFileExportToGarudaAsEnsemble();
+	private final ActionFileExportToGarudaStartDiscovery actionExportGarudaToGenelistTXT = 
+			new ActionFileExportToGarudaStartDiscovery("as Genelist (txt)", FileContence.GENELIST, FileExtension.TXT);
+	private final ActionFileExportToGarudaStartDiscovery actionExportGarudaToEnsembleTXT = 
+			new ActionFileExportToGarudaStartDiscovery("as Genelist (csv)", FileContence.GENELIST, FileExtension.CSV);
+	private final ActionFileExportToGarudaStartDiscovery actionExportGarudaToGenelistCSV = 
+			new ActionFileExportToGarudaStartDiscovery("as Ensemble (txt)", FileContence.ENSEMBLE, FileExtension.TXT);
+	private final ActionFileExportToGarudaStartDiscovery actionExportGarudaToEnsembleCSV = 
+			new ActionFileExportToGarudaStartDiscovery("as Ensemble (csv)", FileContence.ENSEMBLE, FileExtension.CSV);
 	private final ActionFileExportToTable actionFileExportToTable = new ActionFileExportToTable();
 	private final ActionSearchTargetMineWithGeneSymbols actionTargetMineWithGeneSymbols = new ActionSearchTargetMineWithGeneSymbols();
 	private final ActionSearchPercellomeWithProbeIds actionPercellomeWithProbeID = new ActionSearchPercellomeWithProbeIds();
@@ -109,10 +115,6 @@ public class MainWindow implements ActionListener {
 	private MainWindow mMainWindow;
 	private JFrame mMainWindowJFrame;
 	private GarudaHandler mGarudaHandler;
-	private final Action mFileImportAction = new FileImportAction();
-	private final Action mFileExportTableAction = new FileExportTableAction();
-	private final GarudaDiscoverActionGenelist mGarudaDiscoverActionGenelist = new GarudaDiscoverActionGenelist();
-	private final GarudaDiscoverActionEnsemble mGarudaDiscoverActionEnsemble = new GarudaDiscoverActionEnsemble();
 	
 	private DatabaseTabbedPane mDatabaseTabbedPane;
 	private JMenu mnFile;
@@ -122,8 +124,8 @@ public class MainWindow implements ActionListener {
 	private JMenuItem mntmToFile;
 	private JMenuItem mntmToTable;
 	private JMenu mnToGaruda;
-	private JMenuItem mntmGenelist;
-	private JMenuItem mntmEnsemble;
+	private JMenuItem mntmGenelistTXT;
+	private JMenuItem mntmGenelistCSV;
 	private JMenuItem mntmClose;
 	private JMenu mnSearch;
 	private JMenu mnPercellome;
@@ -133,14 +135,15 @@ public class MainWindow implements ActionListener {
 	private JMenuItem mntmTargetMineGeneSymbols;
 	private JMenu mnReactome;
 	private JMenuItem mntmReactomeGeneSymbols;
-	private JMenu mnBioCompendium;
-	private JMenuItem mntmWithSelect;
 	private JMenu mnJoin;
 	private JMenuItem mntmJoinTable;
 	private JMenuItem mntmClear;
 	
 	static final String TABBED_PANE_NAME = "TABBED_PANE";
-	private DatabaseTabbedPane getTabbedPane() {
+	private JMenuItem mntmEnsembleTXT;
+	private JMenuItem mntmEnsembleCSV;
+	
+	public DatabaseTabbedPane getTabbedPane() {
 		Component[] components = this.mMainWindowJFrame.getContentPane().getComponents();
 		for(Component component : components) {
 			//System.out.println(component.getClass().getName());
@@ -150,9 +153,10 @@ public class MainWindow implements ActionListener {
 		}
 		return null;
 	}
-	private Database mDatabaseInstance; 
 	
-	
+	public JFrame getFrame() {
+		return this.mMainWindowJFrame;
+	}
 	
 	private void initialize() {
 		mMainWindow = this;
@@ -196,12 +200,24 @@ public class MainWindow implements ActionListener {
 					mnToGaruda = new JMenu("to Garuda");
 					mnExport.add(mnToGaruda);
 					{
-						mntmGenelist = new JMenuItem("Genelist");
-						mnToGaruda.add(mntmGenelist);
+						mntmGenelistTXT = new JMenuItem();
+						mntmGenelistTXT.setAction(actionExportGarudaToGenelistTXT);
+						mnToGaruda.add(mntmGenelistTXT);
 					}
 					{
-						mntmEnsemble = new JMenuItem("Ensemble");
-						mnToGaruda.add(mntmEnsemble);
+						mntmGenelistCSV = new JMenuItem();
+						mntmGenelistCSV.setAction(actionExportGarudaToGenelistCSV);
+						mnToGaruda.add(mntmGenelistCSV);
+					}
+					{
+						mntmEnsembleTXT = new JMenuItem();
+						mntmEnsembleTXT.setAction(actionExportGarudaToEnsembleTXT);
+						mnToGaruda.add(mntmEnsembleTXT);
+					}
+					{
+						mntmEnsembleCSV = new JMenuItem();
+						mntmEnsembleCSV.setAction(actionExportGarudaToEnsembleCSV);
+						mnToGaruda.add(mntmEnsembleCSV);
 					}
 				}
 			}
@@ -245,15 +261,6 @@ public class MainWindow implements ActionListener {
 					mnReactome.add(mntmReactomeGeneSymbols);
 				}
 			}
-			{
-				mnBioCompendium = new JMenu("bioCompendium (unavaliable)");
-				mnSearch.add(mnBioCompendium);
-				{
-					mntmWithSelect = new JMenuItem("with Select");
-					mntmWithSelect.setAction(actionBioCompendiumWithSelect);
-					mnBioCompendium.add(mntmWithSelect);
-				}
-			}
 		}
 		{
 			mnJoin = new JMenu("Table");
@@ -273,7 +280,6 @@ public class MainWindow implements ActionListener {
 		popupMenu.add(mntmNewMenuItem);
 	}
 	
-
     public static String getText(String url) throws Exception {
         URL website = new URL(url);
         URLConnection connection = website.openConnection();
@@ -324,7 +330,6 @@ public class MainWindow implements ActionListener {
 		return found;
     }
     
-	
     public static void main(String[] args) {
 	
     	
@@ -352,7 +357,7 @@ public class MainWindow implements ActionListener {
 		
 		try {
 			//mDatabaseTabbedPane.setFillsViewportHeight(true);
-			this.mGarudaHandler = new GarudaHandler(mMainWindowJFrame);
+			this.mGarudaHandler = new GarudaHandler(this);
 		} catch (GarudaConnectionNotInitializedException | NetworkConnectionException e) {
 			//JOptionPane.showMessageDialog(mMainWindowJFrame, "Was unable to connect to Garuda Platform. Please restart to connect.");
 			e.printStackTrace();
@@ -376,7 +381,6 @@ public class MainWindow implements ActionListener {
 		//mMainWindowJFrame.getContentPane().add(mDatabaseTabbedPane);
 		Database.Table importTable;
 		try {
-			
 			mDatabaseTabbedPane.addTab(tableName, columnIdentifiers, new int[0], tableToLoad);
 		} catch (SQLException sqlException) {
 			sqlException.printStackTrace();
@@ -385,19 +389,19 @@ public class MainWindow implements ActionListener {
 		
 	}
 	
-	private void loadDataFile(File file, String seperator) {
+	private void loadStructuredFile(File file, String seperator, boolean skipHeader) {
 		ArrayList<Object[]> data = new ArrayList<Object[]>();
 				
 		try {
-			data = FileManager.loadDataFile(file, seperator);
-		} catch (IOException ioException) {
-			ioException.printStackTrace();
-			showError(ioException);
+			data = FileManager.loadStructuredFile(file, seperator, skipHeader);
+			String[] columnIdentifiers = (String[])data.get(0);
+			data.remove(0);
+			loadTable(file.getName(), columnIdentifiers, data);
+		} catch (IOException e) {
+			e.printStackTrace();
+			showError(e);
 		}
-		
-		String[] columnIdentifiers = (String[])data.get(0);
-		data.remove(0);
-		loadTable(file.getName(), columnIdentifiers, data);
+
 	}
 	
 	
@@ -415,11 +419,11 @@ public class MainWindow implements ActionListener {
 		switch (contents) {
 				
 			case "CSV": 
-				loadDataFile(file, ",");
+				loadStructuredFile(file, ",", false);
 				break;
 				
 			case "Tab":
-				loadDataFile(file, "\t");
+				loadStructuredFile(file, "\t", false);
 				break;
 		}
 		
@@ -464,7 +468,6 @@ public class MainWindow implements ActionListener {
 		}
 	}
 	
-	
 	private void startDiscovery(String contence, String extension) {
 		String[] data = mDatabaseTabbedPane.getSelection();
 		
@@ -474,8 +477,8 @@ public class MainWindow implements ActionListener {
 		}
 		
 		int time = (int) new Date().getTime();
-		
-		String fileName = contence + "_" + time + "." + extension;
+		String tempLocation = FileManager.getLocationTemporary();
+		String fileName = tempLocation + "\\" + contence + "_" + time + "." + extension;
 		File file = null;
 		
 		try {
@@ -484,10 +487,7 @@ public class MainWindow implements ActionListener {
 			mGarudaHandler.garudaDiscover(file, contence);
 		} catch (IOException e) {
 			e.printStackTrace();
-			
-			JOptionPane.showMessageDialog(
-			        null, e.getMessage(), "Failure", JOptionPane.ERROR_MESSAGE);
-			
+			showError(e);
 		}
 		
 		
@@ -510,15 +510,13 @@ public class MainWindow implements ActionListener {
 	}
 	
 	
-	private class GarudaDiscoverActionGenelist extends AbstractAction {
-		public GarudaDiscoverActionGenelist() {
+	private class ActionGarudaDiscoverGenelist extends AbstractAction {
+		public ActionGarudaDiscoverGenelist() {
 			putValue(NAME, "Genelist");
 			putValue(SHORT_DESCRIPTION, "Discover Garuda Genelist");
 		}
 		public void actionPerformed(ActionEvent ae) {
-			
-			if(!hasValidSelection()) 
-				return;
+
 
 			startDiscovery("genelist", "txt");
 			
@@ -526,9 +524,9 @@ public class MainWindow implements ActionListener {
 	}
 	
 	
-	private class GarudaDiscoverActionEnsemble extends AbstractAction {
+	private class ActionGarudaDiscoverEnsemble extends AbstractAction {
 		
-		public GarudaDiscoverActionEnsemble() {
+		public ActionGarudaDiscoverEnsemble() {
 			putValue(NAME, "Ensemble");
 			putValue(SHORT_DESCRIPTION, "Discover Garuda Ensemble");
 			
@@ -694,24 +692,44 @@ public class MainWindow implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 		}
 	}
+	enum FileExtension {
+		TXT,
+		CSV
+	}
 	
+	enum FileContence {
+		GENELIST,
+		ENSEMBLE,
+		CSV,
+		TXT
+	}
 	
-	private class ActionFileExportToGarudaAsGenelist extends AbstractAction {
-		public ActionFileExportToGarudaAsGenelist() {
-			putValue(NAME, "as Genelist");
+	private class ActionFileExportToGarudaStartDiscovery extends AbstractAction {
+		
+		private static final long serialVersionUID = 1L;
+		String mLabelText; 
+		String mContence;
+		String mExtension; 
+		
+		public ActionFileExportToGarudaStartDiscovery(String labelText, FileContence contence, FileExtension extension) {
+			
+			mLabelText = labelText; 
+			mContence = contence.toString().toLowerCase(); 
+			mExtension = extension.toString().toLowerCase(); 
+			
+			putValue(NAME, mLabelText);
 		}
 		public void actionPerformed(ActionEvent e) {
+			
+			if(!hasValidSelection()) 
+				return;
+
+			startDiscovery(mContence, mExtension.toString());
 		}
 	}
 	
 	
-	private class ActionFileExportToGarudaAsEnsemble extends AbstractAction {
-		public ActionFileExportToGarudaAsEnsemble() {
-			putValue(NAME, "as Ensemble");
-		}
-		public void actionPerformed(ActionEvent e) {
-		}
-	}
+	
 	
 	
 	private class ActionFileExportToTable extends AbstractAction {
@@ -807,13 +825,19 @@ public class MainWindow implements ActionListener {
 		}
 	}
 	
-	
+
 	
 	public static void showError(Exception exceptionError) {
-	    String errorMessage = "Message: " + exceptionError.getMessage()
-	                + "\nStackTrace: " + Arrays.toString(exceptionError.getStackTrace());
-	    String title = exceptionError.getClass().getName();
-	    JOptionPane.showMessageDialog(null, errorMessage, title, JOptionPane.ERROR_MESSAGE);
+    	
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+
+				ErrorDialog e = new ErrorDialog(exceptionError);  
+
+			}
+		});
+		
+
 	}
 	
 	private Species getPercellomeSpecies() {

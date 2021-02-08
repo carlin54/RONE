@@ -2,6 +2,8 @@ package rone.filemanager;
 
 import java.awt.event.WindowEvent;
 import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,19 +12,11 @@ import java.util.regex.Pattern;
 
 import javax.swing.JOptionPane;
 
+import org.apache.commons.io.FilenameUtils;
+
 public class FileManager {
 	
-	public static String[] loadCSVIdentifiers(File file) throws IOException {
-		ArrayList<String> identifiers = new ArrayList<String>();
-		BufferedReader bufferReader = new BufferedReader(new FileReader(file));
-		String line = bufferReader.readLine();
-		String[] parsedLine = line.split(",");
-		identifiers.addAll(Arrays.asList(parsedLine));
-		bufferReader.close();
-		int len = identifiers.size();
-		return identifiers.toArray(new String[len]);	
-	}
-
+	
 	private static String parsePathwayID(String pathwayIdLine) {
 		int beginIndex = pathwayIdLine.length() - 20;
 		int endIndex = pathwayIdLine.length() - 12;
@@ -168,7 +162,48 @@ public class FileManager {
 		
 	}
 	
-	public static ArrayList<Object[]> loadDataFile(File file, String seperator) throws IOException {
+	public static ArrayList<Object[]> loadStructuredFile(File file, String seperator, boolean skipHeader) throws IOException {
+		
+		if (!file.exists()) 
+			return null;
+		
+		ArrayList<Object[]> data = new ArrayList<Object[]>();
+		
+		BufferedReader bufferReader = new BufferedReader(new FileReader(file));
+		
+		String line = null;
+		
+		if(!skipHeader)
+			line = bufferReader.readLine();
+		
+		while((line = bufferReader.readLine()) != null) {
+			String[] parsedLine = line.split(seperator);
+			data.add(parsedLine);
+		}
+		bufferReader.close();
+		
+		return data;
+			
+	}
+	
+	public static String[] loadCSVColumnHeaders(File file, String seperator) throws IOException {
+		ArrayList<String> identifiers = new ArrayList<String>();
+		BufferedReader bufferReader = new BufferedReader(new FileReader(file));
+		String line = bufferReader.readLine();
+		String[] parsedLine = line.split(seperator);
+		identifiers.addAll(Arrays.asList(parsedLine));
+		bufferReader.close();
+		int len = identifiers.size();
+		return identifiers.toArray(new String[len]);	
+	}
+
+	public static String getLocationTemporary() {
+		Path currentRelativePath = Paths.get("");
+		String location = currentRelativePath.toAbsolutePath().toString() + "\\temp";
+		return location;
+	}
+	
+	public static ArrayList<Object[]> loadCSV(File file, String seperator, boolean skipHeader) throws IOException {
 		
 		if (!file.exists()) 
 			return null;
@@ -177,61 +212,48 @@ public class FileManager {
 		
 		BufferedReader bufferReader = new BufferedReader(new FileReader(file));
 		String line = null;
+		
+		if(!skipHeader)
+			line = bufferReader.readLine();
+		
 		while((line = bufferReader.readLine()) != null) {
 			String[] parsedLine = line.split(seperator);
 			data.add(parsedLine);
 		}
+		
 		bufferReader.close();
 		
 		return data;
 			
 	}
 	
-	public static ArrayList<Object[]> loadCSV(File file, String seperator) throws IOException {
-		
+	public static ArrayList<Object[]> loadTextFile(File file, boolean skipHeader) throws IOException {
 		if (!file.exists()) 
 			return null;
 		
 		ArrayList<Object[]> data = new ArrayList<Object[]>();
 		
 		BufferedReader bufferReader = new BufferedReader(new FileReader(file));
-		String line = bufferReader.readLine();
+		String line = null;
+		
+		if(!skipHeader)
+			line = bufferReader.readLine();
+		
 		while((line = bufferReader.readLine()) != null) {
-			String[] parsedLine = line.split(seperator);
-			data.add(parsedLine);
+			Object[] row = new Object[1];
+			row[0] = line;
+			data.add(row);
 		}
 		bufferReader.close();
 		
 		return data;
-			
 	}
 	
-	public static ArrayList<Object[]> loadListFile(File listFile, String header) throws IOException {
-		
-		/*if (!listFile.exists()) return null;
-				
-		BufferedReader bufferReader = new BufferedReader(new FileReader(listFile));
-		ArrayList<Object[]> table = new ArrayList<Object[]>();
-		String line; 
-		
-		if(header == null) {
-			header = bufferReader.readLine();
-		}
-		
-		while((line = bufferReader.readLine()) != null) {
-			ArrayList<Object> row = new ArrayList<Object>();
-			row.add(line);
-			table.add(row);
-		}
-		
-		ArrayList<String> identifier = new ArrayList<String>(); 
-		identifier.add(header);
-		Table dt = new Table(table, identifier);
-		
-		bufferReader.close();
-		return dt;*/
-		
-		return new ArrayList<Object[]>();
+	public static ArrayList<Object[]> loadGarudaLoadDataRequest(File file) throws IOException
+	{
+		ArrayList<Object[]> loadedFile = new ArrayList<Object[]>();
+
+		return loadedFile; 
 	}
 	
 	public static String loadAGCTReferenceString(File clusterResultsFile) throws IOException {

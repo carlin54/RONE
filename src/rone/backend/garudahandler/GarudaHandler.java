@@ -2,12 +2,14 @@ package rone.backend.garudahandler;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import org.apache.commons.io.FilenameUtils;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 
@@ -37,22 +39,21 @@ public class GarudaHandler {
 	private GarudaBackend mGarudaBackend;
 	private JFrame mParentFrame;
 	private GarudaBackendPipelinePlugin mPipelinePlugin;
-	private DataTable mToxicologyTable;
+	private MainWindow mMainWindow;
 	
-	
-	public GarudaHandler(JFrame parentFrame) throws GarudaConnectionNotInitializedException, NetworkConnectionException
+	public GarudaHandler(MainWindow mainWindow) throws GarudaConnectionNotInitializedException, NetworkConnectionException
 	{
-		this.mParentFrame = parentFrame;
+		this.mMainWindow = mainWindow;
+		this.mParentFrame = mMainWindow.getFrame();
 		
-		mGarudaBackend = new GarudaBackend(GarudaConstants.GARUDA_ID, GarudaConstants.GARUDA_NAME, this.mParentFrame);
+		mGarudaBackend = new GarudaBackend(GarudaConstants.GARUDA_ID, GarudaConstants.GARUDA_NAME, mParentFrame);
 		
-		mGarudaBackend.addGarudaGlassPanel(parentFrame, null);
+		mGarudaBackend.addGarudaGlassPanel(mParentFrame, null);
 		
 		initGarudaListeners();
 		initPipeline();
 		
 		mGarudaBackend.activateGadget();
-
 	
 	}
 
@@ -104,7 +105,7 @@ public class GarudaHandler {
 		mGarudaBackend.getCompatibleGadgetList(fileToDiscover, fileFormat);
 	}
 	
-	public void garudaDiscover (DiscoveryTouple discoveryTouple)
+	public void garudaDiscover(DiscoveryTouple discoveryTouple)
 	{
 		if ( discoveryTouple == null || discoveryTouple.getFileFormat() == null || discoveryTouple.getFileToDiscover()== null)
 			throw new IllegalArgumentException( "Incompatible discovery touple") ;
@@ -112,7 +113,7 @@ public class GarudaHandler {
 		mGarudaBackend.getCompatibleGadgetList(discoveryTouple.getFileToDiscover(), discoveryTouple.getFileFormat());
 	}
 	
-	public void sendFileTo (CompatibleGadgetDetails targetGadget, boolean isStream) throws NoFileToSendException
+	public void sendFileTo(CompatibleGadgetDetails targetGadget, boolean isStream) throws NoFileToSendException
 	{
 		if (!isStream)
 			mGarudaBackend.sendDataToGadgetAsFile(targetGadget);
@@ -130,32 +131,28 @@ public class GarudaHandler {
 			mPipelinePlugin.sendPipelineFailedToGadgetResponse(pipelineResponseCode);
 	}
 	
-	private void loadTable(Table incomingTable, String fromWhere) {
-		
-		if(mToxicologyTable.isEmpty()) {
-			mToxicologyTable.setTable(incomingTable);
-		} else {
+	private String[] getColumnHeaders(File file, String senderName) {
+		String[] columnHeaders = null;
+		switch(senderName) {
+		case "GeneMapper": 
+			break;
 			
-			int inc_len = incomingTable.getIdentifiers().size();
-			String[] inc_id = incomingTable.getIdentifiers().toArray(new String[inc_len]);
+		case "Reactome gadget": 
 			
-			int tox_len = mToxicologyTable.getIdentifiers().size();
-			String[] tox_id = mToxicologyTable.getIdentifiers().toArray(new String[tox_len]);
+			break;
 			
-			ImportDataDialog importSelection = new ImportDataDialog(mParentFrame, fromWhere, tox_id, inc_id) ;
-			importSelection.setVisible(true);	
+		case "GeneMapper": 
 			
-			String[] data = importSelection.getData();
+			break;
 			
-			if(data[0] != null) {
-				String keyTox = data[0];
-				String keyInc = data[1];
-				mToxicologyTable.importTable(keyTox, keyInc, incomingTable);
-			}
+		case default: 
 			
+			break;
 		}
 		
 		
+		
+		return columnHeaders;
 	}
 	
 	private void initGarudaListeners () {
@@ -163,41 +160,74 @@ public class GarudaHandler {
 		mGarudaBackend.getIncomingRequestHandler().addLoadDataRequestActionListener(new LoadDataRequestActionListener() {
 
 			@Override
-			public void loadDataRequestReceivedAsFile(File file, String senderId, String senderName,
-					String originDeviceId, String currentDeviceId, String fileName, String fileFormat) {
+			public void loadDataRequestReceivedAsFile(
+					File file, 
+					String senderId, 
+					String senderName,
+					String originDeviceId, 
+					String currentDeviceId, 
+					String fileName, 
+					String fileFormat) {
+				
+				if(!file.exists())
+					return;
+				
+				
 				// TODO Auto-generated method stub
 				System.out.print("loadDataRequestReceivedAsFile!");
 				
-				switch (senderName) {
-					// TODO: maybe switch to senderId
-					case "GeneMapper":
-						
-					try {
-						Table shoeTable = FileManager.loadDataFile(file, ",");
-						ArrayList<String> s = shoeTable.getIdentifiers();
-						for(int i = 0; i < s.size(); i++) {
-							s.set(i,  	"(S) " + s.get(i));
-						}
-						loadTable(shoeTable, "SHOE");
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-						break;
-					case "Reactome gadget":
+				String tableName = senderName + " (" + fileFormat + ")"; 
+				
+				
+				
+				ArrayList<Object[]> loadedFile = null; 
+				String[] columnHeaders = null;
+				try {
+					switch(senderName) {
 					
-						try {
-							Table reactomeTable = FileManager.loadDataFile(file, ",");
-							loadTable(reactomeTable, "Reactome");
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						
+					case "Reactome gadget":
+						columnHeaders = new String[]{"Pathway", "Species", "Coverage %", "pval", "FDR"};
+						loadedFile = FileManager.loadStructuredFile(file, ",", false);
+						break;
+					
+					case "GeneMapper":
+						columnHeaders = new String[]{"Gene", "NM", "TF", "Region", "Strand", "MA Score", "PSSM Score", "ID", "Motif", "Consensus", "Similarity", "Pareto"};
+						loadedFile = FileManager.loadStructuredFile(file, ",", false);
 						break;
 						
+					default:
 						
+							String path = file.getAbsolutePath();
+							String extension = FilenameUtils.getExtension(path);
+							
+							switch(extension) {
+								case "csv": 
+									columnHeaders = null;
+									loadedFile = FileManager.loadCSV(file, ",", true);
+									break; 
+								
+								case "txt": 
+									columnHeaders = new String[1];
+									columnHeaders[0] = fileFormat;
+									loadedFile = FileManager.loadTextFile(file, true);
+									break; 
+								
+								default:
+									columnHeaders = new String[1];
+									columnHeaders[0] = senderName;
+									loadedFile = FileManager.loadTextFile(file, true);
+									break; 
+							}
+					}
+					
+					mMainWindow.getTabbedPane().addTab(tableName, columnHeaders, null, loadedFile);
+				
+				} catch (IOException | SQLException e) {
+					MainWindow.showError(e);
+					e.printStackTrace();
 				}
+				
+				
 				
 			}
 
