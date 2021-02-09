@@ -162,7 +162,7 @@ public class FileManager {
 		
 	}
 	
-	public static ArrayList<Object[]> loadStructuredFile(File file, String seperator) throws IOException {
+	public static ArrayList<Object[]> loadStructuredFile(File file, String seperator, boolean skipHeader) throws IOException {
 		
 		if (!file.exists()) 
 			return null;
@@ -172,6 +172,9 @@ public class FileManager {
 		BufferedReader bufferReader = new BufferedReader(new FileReader(file));
 		
 		String line = null;
+		
+		if(skipHeader)
+			line = bufferReader.readLine();
 		
 		while((line = bufferReader.readLine()) != null) {
 			String[] parsedLine = line.split(seperator);
