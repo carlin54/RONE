@@ -621,7 +621,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
     			if(mRowSorterKeys.isEmpty()) {
     				mRowSorterKeys.add(new RowSorter.SortKey(columnIndex, SortOrder.DESCENDING));
     			} else {
-    				
     				boolean foundSortKey = false;
     				for(int i = 0; i < mRowSorterKeys.size(); i++) {
     					RowSorter.SortKey sortKey = mRowSorterKeys.get(i);
@@ -642,18 +641,21 @@ public class DatabaseTabbedPane extends JTabbedPane {
     			}
     			
 				TableRowSorter<TableModel> sorter = new TableRowSorter<>(mTable.getModel());
+				
 				sorter.setSortKeys(mRowSorterKeys);
 				sorter.sort();
 				mTable.setRowSorter(sorter);
-				
+				mTable.repaint();
     		}
     		
     		public void clearSortColumns() {
     			mRowSorterKeys.clear();
 				TableRowSorter<TableModel> sorter = new TableRowSorter<>(mTable.getModel());
+
 				sorter.setSortKeys(mRowSorterKeys);
 				sorter.sort();
 				mTable.setRowSorter(sorter);
+				mTable.repaint();
     		}
     		
     		private boolean isSortingColumn(int columnIndex) {
@@ -669,6 +671,21 @@ public class DatabaseTabbedPane extends JTabbedPane {
     			String headerValue = tableColumn.getHeaderValue().toString();
     			String arrow = ((sortKey.getSortOrder().equals(SortOrder.DESCENDING)) ? "↓" : "↑");
 				return headerValue + " (" + arrow + ")";
+    		}
+    		
+    		private void makeUnsortable(MouseEvent e) {
+    			JTableHeader h = (JTableHeader)e.getSource();
+                int i = h.columnAtPoint(e.getPoint());
+                if (i < 0) {
+                    return ;
+                }
+                TableRowSorter<TableModel> sorter = new TableRowSorter<>(mTable.getModel());
+                
+               
+    			for(int j = 0; j < h.getColumnModel().getColumnCount(); j++) {
+    				
+    			}
+    			
     		}
     		
     		public void show(MouseEvent e) {
@@ -727,10 +744,10 @@ public class DatabaseTabbedPane extends JTabbedPane {
     				menuItem.addActionListener(new ClearColumnActionListener(this));
     				this.add(menuItem);
     			}
+    			
     			this.setVisible(true);
-    			//this.show(this.getComponent(), this.getX(), this.getY());
     			System.out.println(Boolean.toString(e.isPopupTrigger()));
-    			this.show(e.getComponent(), e.getX(), e.getY());
+    			show(e.getComponent(), e.getX(), e.getY());
     		}
     		
     		class SortByColumnActionListener implements ActionListener {
@@ -779,7 +796,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
     		dtm.setRowCount(0);
     		dtm.setColumnIdentifiers(columnIdentifiers);
     		
-    		
     		mTable = new JTable();
     		mTable.setModel(dtm);
     		mTable.setCellSelectionEnabled(true);
@@ -788,14 +804,14 @@ public class DatabaseTabbedPane extends JTabbedPane {
     		mTable.setAutoCreateRowSorter(true);
     		mTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     		mTable.getTableHeader().addMouseListener(mTableMouseListener);
-    		
+    		mTable.getTableHeader().setEnabled(false);
     		mTable.addMouseListener(new TableHeaderMouseListener());
-    		
-
     		
     		getViewport().add(mTable);
     		
     	}
+    	
+    	
     	
     	private JScrollPane getBody() {
     		return this; 
@@ -906,83 +922,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
             @Override
             public void mouseClicked(MouseEvent e) {
             	System.out.println("mouseClicked(MouseEvent e)");
-            	
-            	
-            	///
-                JTableHeader h = (JTableHeader) e.getSource();
-                int i = h.columnAtPoint(e.getPoint());
-                if (i < 0) {
-                    return;
-                }
-                Object o = h.getColumnModel().getColumn(i).getHeaderValue();
-                Object selectedColumn = o;
-                ///
-                
-            	
-            	/*
-                
-                final JPopupMenu popup = new JPopupMenu();
-                
-                JMenuItem menuItem = new JMenuItem("Sort by");
-                menuItem.addActionListener(new ActionListener() {
-
-					@Override
-					public void actionPerformed(ActionEvent arg0) {
-						System.out.println("Sort By!");
-						TableRowSorter<TableModel> sorter = new TableRowSorter<>(mTable.getModel());
-						mTable.setRowSorter(sorter);
-						sortKeys = new ArrayList<>();
-						sortKeys.add(new RowSorter.SortKey(i, SortOrder.ASCENDING));
-						sorter.setSortKeys(sortKeys);
-						sorter.sort();
-						
-					}
-                	
-                });
-                
-                menuItem.addMouseListener(new MouseAdapter() {
-                	 
-                    @Override
-                    public void mousePressed(MouseEvent e) {
-                        showPopup(e);
-                    }
-         
-                    @Override
-                    public void mouseReleased(MouseEvent e) {
-                        showPopup(e);
-                    }
-         
-                    private void showPopup(MouseEvent e) {
-                        if (e.isPopupTrigger()) {
-                        	if(e.getButton() == MouseEvent.BUTTON1)
-                        		popup.show(e.getComponent(),
-                        					e.getX(), e.getY());
-                        }
-                    }
-                }
-                );
-                
-                popup.add(menuItem);
-                menuItem = new JMenuItem("Order by");
-                menuItem.addActionListener(new ActionListener() {
-
-					@Override
-					public void actionPerformed(ActionEvent arg0) {
-						System.out.println("Order by!");
-						TableRowSorter<TableModel> sorter = new TableRowSorter<>(mTable.getModel());
-					
-						mTable.setRowSorter(sorter);
-						sortKeys.add(new RowSorter.SortKey(i, SortOrder.ASCENDING));
-						sorter.setSortKeys(sortKeys);
-						sorter.sort();
-					}
-                	
-                });
-                popup.add(menuItem);
-                popup.show(h, e.getPoint().x, e.getPoint().y);
-                
-                System.out.println(selectedColumn);
-                */
             }
 
 			@Override
@@ -1016,8 +955,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
 			}
             
         }
-    	
-    	private List<RowSorter.SortKey> sortKeys;
     	
     	public String[] getColumnIdentifers() {
     		TableColumnModel tcm = mTable.getTableHeader().getColumnModel();
@@ -1523,7 +1460,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
     	}
     	
     	public void stopProcess() {
-    		//System.out.println("MasterThread:stopProcess()");
     		mStopWorking = true;
     	}
     	
@@ -1617,7 +1553,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
     	}
     	
     	private void cleanUp() {
-    		//System.out.println("MasterThread:cleanUp()");
     		boolean doneCleanUp = false;
     		while(!doneCleanUp) {
     			doneCleanUp = true;
@@ -1627,7 +1562,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
 	    				if(worker.isAlive()) {
 	    					doneCleanUp = false;
 	    					worker.join();
-	    					//System.out.println("MasterThread: successfully joined worker thread -> " + worker.getId());
 	    				}
 	    				
 	    				if(!hasToStopWorking() && !worker.hasGivenResults()) {
@@ -1640,7 +1574,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
 						e.printStackTrace();
 					}
 	    		}
-	    		//System.out.println("MasterThread: cleanUp() success!");
     		}
     		mThreadPool = null;
     		mWorkHeadIndex = 0;
@@ -1660,24 +1593,18 @@ public class DatabaseTabbedPane extends JTabbedPane {
     	}
     	
     	public void setUp() {
-    		//System.out.println("MasterThread:Run():" + this.getName());
     		String tableName = mSearchInterface.getTitle();
-    		//System.out.println("MasterThread:tableName():" + this.getName());
     		String[] columnIdentifiers = mSearchInterface.getColumnIdentifers();
-    		//System.out.println("MasterThread:columnIdentifiers():" + this.getName());
     		int[] primaryKeys = mSearchInterface.getPrimaryKeys();
-    		//System.out.println("MasterThread:primaryKeys():" + this.getName());
     		
     		mResultsTable = null;
 			try {
 				mResultsTable = Database.getInstance().createTable(tableName, columnIdentifiers, primaryKeys);
 				
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
-			//System.out.println("MasterThread:Run():" + this.getName() + ":Database created!");
     		ActionListener actionListener = new ActionListener() {
 
 				@Override
@@ -1686,10 +1613,7 @@ public class DatabaseTabbedPane extends JTabbedPane {
 				}
     			
     		};
-    		
-    		//System.out.println("MasterThread: run():" + this.getName() + ": Imported Database Table!");
     		mThreadPool = makeThreadPool(mThreadPoolSize, MAX_PRIORITY);
-    		//System.out.println("MasterThread: run():" + this.getName() + ": Made thread pool!");
     	}
     	
     	public void run() {
@@ -1698,10 +1622,8 @@ public class DatabaseTabbedPane extends JTabbedPane {
     		
     		setProcessSuccess(false);
     		String[] work = null;
-    		//System.out.println("MasterThread:run():" + this.getName() + ":Allocating work.");
     		while(hasWork(work = getNextWork())) {
     			if(hasToStopWorking()) {
-    				//System.out.println("Ending Process!");
     				break;
     			}
     			giveWork(work);
@@ -1710,12 +1632,10 @@ public class DatabaseTabbedPane extends JTabbedPane {
     		cleanUp();
     		
     		if(!hasToStopWorking()) {
-    			//System.out.println("MasterThread:run():" + this.getName() + ":was stopped from searching.");
     			mResultsTab.setStatus(Tab.Status.SEARCH_COMPLETE);
     			mResultsTab.updateModel();
     			setProcessSuccess(true);
     		}
-    		//System.out.println("MasterThread:run():" + this.getName() + ":process complete!");
     	}
 
     

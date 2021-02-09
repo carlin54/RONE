@@ -91,15 +91,15 @@ public class GarudaHandler {
 	
 	public GarudaBackendPipelinePlugin accessPipelinePlugin () 
 	{
-		return mPipelinePlugin ;
+		return mPipelinePlugin;
 	}
 	
 	public void garudaDiscover(File fileToDiscover, String fileFormat)
 	{
 		if ( fileToDiscover == null || !fileToDiscover.exists())
-			throw new IllegalArgumentException( "File does not exist") ;
+			throw new IllegalArgumentException("File does not exist") ;
 		if ( fileFormat == null || fileFormat.equals(""))
-			throw new IllegalArgumentException( "Illegal file format.") ;
+			throw new IllegalArgumentException("Illegal file format.") ;
 		
 		
 		mGarudaBackend.getCompatibleGadgetList(fileToDiscover, fileFormat);
@@ -138,10 +138,6 @@ public class GarudaHandler {
 			break;
 			
 		case "Reactome gadget": 
-			
-			break;
-			
-		case "GeneMapper": 
 			
 			break;
 			
@@ -187,12 +183,12 @@ public class GarudaHandler {
 					
 					case "Reactome gadget":
 						columnHeaders = new String[]{"Pathway", "Species", "Coverage %", "pval", "FDR"};
-						loadedFile = FileManager.loadStructuredFile(file, ",", false);
+						loadedFile = FileManager.loadStructuredFile(file, ",");
 						break;
 					
 					case "GeneMapper":
 						columnHeaders = new String[]{"Gene", "NM", "TF", "Region", "Strand", "MA Score", "PSSM Score", "ID", "Motif", "Consensus", "Similarity", "Pareto"};
-						loadedFile = FileManager.loadStructuredFile(file, ",", false);
+						loadedFile = FileManager.loadStructuredFile(file, ",");
 						break;
 						
 					default:
@@ -224,7 +220,6 @@ public class GarudaHandler {
 				
 				} catch (IOException | SQLException e) {
 					MainWindow.showError(e);
-					e.printStackTrace();
 				}
 				
 				

@@ -729,10 +729,6 @@ public class MainWindow implements ActionListener {
 		}
 	}
 	
-	
-	
-	
-	
 	private class ActionFileExportToTable extends AbstractAction {
 		public ActionFileExportToTable() {
 			putValue(NAME, "to Table");
@@ -740,7 +736,6 @@ public class MainWindow implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 		}
 	}
-	
 	
 	private class ActionSearchTargetMineWithGeneSymbols extends AbstractAction {
 		public ActionSearchTargetMineWithGeneSymbols() {
@@ -763,7 +758,6 @@ public class MainWindow implements ActionListener {
 		}
 	}
 	
-	
 	private class ActionSearchReactomeWithGeneSymbols extends AbstractAction {
 		public ActionSearchReactomeWithGeneSymbols() {
 			putValue(NAME, "with Gene Symbols");
@@ -784,7 +778,6 @@ public class MainWindow implements ActionListener {
 		}
 	}
 	
-	
 	private class ActionSearchBioCompendiumWithSelect extends AbstractAction {
 		public ActionSearchBioCompendiumWithSelect() {
 			putValue(NAME, "with Select");
@@ -792,7 +785,6 @@ public class MainWindow implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 		}
 	}
-	
 	
 	private class ActionTableJoin extends AbstractAction {
 		public ActionTableJoin() {
@@ -817,7 +809,6 @@ public class MainWindow implements ActionListener {
 		}
 	}
 	
-	
 	private class ActionTableClear extends AbstractAction {
 		public ActionTableClear() {
 			putValue(NAME, "Clear");
@@ -825,8 +816,6 @@ public class MainWindow implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 		}
 	}
-	
-
 	
 	public static void showError(Exception exceptionError) {
     	
