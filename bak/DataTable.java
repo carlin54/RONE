@@ -31,7 +31,6 @@ import java.util.TreeSet;
 
 public class DataTable extends JTable {
 	
-	private JTable mJTable;
 	private Database.Table mDatabaseTable;
 	private ArrayList<Object[]> mTableContence;
 	private List<RowSorter.SortKey> sortKeys;
@@ -41,7 +40,7 @@ public class DataTable extends JTable {
 	public boolean equals(Object o) {
 	    return (o instanceof DataTable) 
 	    	&& (this.mDatabaseTable == ((DataTable) o).mDatabaseTable)
-	    	&& (this.mJTable == ((DataTable)o).mJTable);
+	    	&& (this == ((DataTable)o));
 	}
 	
 	public Database.Table getDatabaseTable(){
@@ -108,7 +107,6 @@ public class DataTable extends JTable {
 	
 	
 	private void init() {
-		mJTable = this;
 		sortKeys = new ArrayList<>();
 		setAutoCreateRowSorter(true);
 		
@@ -124,6 +122,7 @@ public class DataTable extends JTable {
                 Object o = h.getColumnModel().getColumn(i).getHeaderValue();
                 Object selectedColumn = o;
                 
+                /*
                 final JPopupMenu popup = new JPopupMenu();
                 
                 JMenuItem menuItem = new JMenuItem("Sort by");
@@ -132,8 +131,8 @@ public class DataTable extends JTable {
 					@Override
 					public void actionPerformed(ActionEvent arg0) {
 						System.out.println("Sort By!");
-						TableRowSorter<TableModel> sorter = new TableRowSorter<>(mJTable.getModel());
-						mJTable.setRowSorter(sorter);
+						TableRowSorter<TableModel> sorter = new TableRowSorter<>(getModel());
+						setRowSorter(sorter);
 						sortKeys = new ArrayList<>();
 						sortKeys.add(new RowSorter.SortKey(i, SortOrder.ASCENDING));
 						sorter.setSortKeys(sortKeys);
@@ -170,8 +169,8 @@ public class DataTable extends JTable {
 					@Override
 					public void actionPerformed(ActionEvent arg0) {
 						System.out.println("Order by!");
-						TableRowSorter<TableModel> sorter = new TableRowSorter<>(mJTable.getModel());
-						mJTable.setRowSorter(sorter);
+						TableRowSorter<TableModel> sorter = new TableRowSorter<>(getModel());
+						setRowSorter(sorter);
 						sortKeys.add(new RowSorter.SortKey(i, SortOrder.ASCENDING));
 						sorter.setSortKeys(sortKeys);
 						sorter.sort();
@@ -182,7 +181,7 @@ public class DataTable extends JTable {
                 popup.show(h, e.getPoint().x, e.getPoint().y);
                 
                 System.out.println(selectedColumn);
-                
+                */
             }
             
             
@@ -207,10 +206,6 @@ public class DataTable extends JTable {
 		this.setDatabaseTable(databaseTable);
 		init();
 	}
-	
-	public boolean isEmpty() {
-		return mDatabaseTable.isEmpty();
-	} 
 	
 	public boolean hasSelection() {
 		return this.getSelectedRowCount() > 0;
