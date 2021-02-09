@@ -377,18 +377,7 @@ public class MainWindow implements ActionListener {
 	}
 	
 	
-	public void loadTable(String tableName, String[] columnIdentifiers, ArrayList<Object[]> tableToLoad) {
-		
-		//mMainWindowJFrame.getContentPane().add(mDatabaseTabbedPane);
-		Database.Table importTable;
-		try {
-			mDatabaseTabbedPane.addTab(tableName, columnIdentifiers, new int[0], tableToLoad);
-		} catch (SQLException sqlException) {
-			sqlException.printStackTrace();
-			showError(sqlException);
-		}
-		
-	}
+	
 	
 	private void loadStructuredFile(File file, String seperator) {
 		ArrayList<Object[]> data = new ArrayList<Object[]>();
@@ -410,22 +399,42 @@ public class MainWindow implements ActionListener {
 		return file != null && file.exists();
 	}
 	
+	private void loadTable(File file, ArrayList<Object[]> tableToLoad) {
+		String[] columnIdentifiers = (String[])tableToLoad.get(0);
+		tableToLoad.remove(0);
+		
+		Database.Table importTable;
+		try {
+			mDatabaseTabbedPane.addTab(file.getName(), columnIdentifiers, new int[0], tableToLoad);
+		} catch (SQLException sqlException) {
+			sqlException.printStackTrace();
+			showError(sqlException);
+		}
+	}
+	
 	private void loadFile(File file, String contents) {
 		
 		if(!hasFile(file)) 
 			return;
 		
 		//System.out.println(contents);
-		
+		ArrayList<Object[]> data = null;
+		try {
 		switch (contents) {
 				
 			case "CSV": 
-				loadStructuredFile(file, ",");
+				data = FileManager.loadCSV(file, false);
+				loadTable(file, data);
 				break;
 				
 			case "Tab":
-				loadStructuredFile(file, "\t");
+				data = FileManager.loadStructuredFile(file, "\t", false);
+				loadTable(file, data);
+				
 				break;
+		}
+		} catch (IOException e) {
+			showError(e);
 		}
 		
 	}
