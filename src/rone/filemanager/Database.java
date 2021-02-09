@@ -366,7 +366,21 @@ public class Database {
 		}
 		
 		columnNamesSQL = makeColumnIdentifiersUnique(columnNamesSQL);
+		
+		for(int i = 0; i < columnNamesSQL.length; i++) {
+			columnNamesSQL[i] = "\"" + columnNamesSQL[i] + "\"";
+		}
+		
+		columnNamesSQL = addQuotations(columnNamesSQL);
 		return columnNamesSQL;
+		
+	}
+	
+	public String[] addQuotations(String[] columns) {
+		for(int i = 0; i < columns.length; i++) {
+			columns[i] = "\"" + columns[i] + "\"";
+		}
+		return columns;
 	}
 	
 	public String generateCreateTableSQL(String tableName, String[] columnNames, int[] primaryKeys) {
