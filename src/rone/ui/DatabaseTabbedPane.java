@@ -12,12 +12,15 @@ import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,9 +28,11 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.IntStream;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
+import javax.swing.DefaultCellEditor;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -40,14 +45,19 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.JViewport;
+import javax.swing.KeyStroke;
+import javax.swing.ListSelectionModel;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.plaf.basic.BasicButtonUI;
 import javax.swing.plaf.basic.BasicTabbedPaneUI;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
@@ -571,10 +581,53 @@ public class DatabaseTabbedPane extends JTabbedPane {
     		
     		mTable = new JTable();
     		mTable.setModel(dtm);
+    		mTable.setCellSelectionEnabled(true);
     		mTable.setRowSelectionAllowed(true);
     		mTable.setColumnSelectionAllowed(true);
     		mTable.setAutoCreateRowSorter(true);
+    		mTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     		mTable.getTableHeader().addMouseListener(mTableMouseListener);
+    		
+    		mTable.addMouseListener(new MouseListener() {
+
+				@Override
+				public void mousePressed(MouseEvent e) {
+    		        int row = mTable.rowAtPoint(e.getPoint());
+    		        int col = mTable.columnAtPoint(e.getPoint());
+    		        System.out.println("mTable.addMouseListener");
+    		        //System.out.println("mTable.setRowSelectionAllowed(true);");
+    		        	//mTable.clearSelection();
+    	    	    mTable.setRowSelectionAllowed(true);
+    	    		mTable.setColumnSelectionAllowed(true);
+				}
+
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void mouseEntered(MouseEvent arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void mouseExited(MouseEvent arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void mouseReleased(MouseEvent arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+
+    		});
+    		
+    		
     		
     		sortKeys = new ArrayList<>();
     		
@@ -605,6 +658,8 @@ public class DatabaseTabbedPane extends JTabbedPane {
 			return -1;
     	}
     	
+
+    	
     	public int[] getColumnSelect(String[] findColumnsIdentifiers) {
     		int len = findColumnsIdentifiers.length;
     		int[] foundColumnIdentifiersIndicies = new int[len];
@@ -631,10 +686,85 @@ public class DatabaseTabbedPane extends JTabbedPane {
     	public Icon getIcon() 			{	return null;		}
     	
     	private class TableMouseListener implements MouseListener {
-
+    		
+    		private class ColumnSort {
+    			int mColumnIndex; 
+    			SortOrder mSortOrder;
+    			
+    			int getColumnIndex() { return mColumnIndex; }
+    			SortOrder getSortOrder() { return mSortOrder; }
+    			
+    			public ColumnSort(int columnIndex, SortOrder sortOrder){
+    				mColumnIndex = columnIndex;
+    				mSortOrder = sortOrder;
+    			}
+    		};
+    		
+    		private boolean isSelectingColumns() {
+    			return true;
+    		}
+    		
+    		
+    		
+    		public void selectColumn(MouseEvent e) {
+                JTableHeader h = (JTableHeader) e.getSource();
+                int i = h.columnAtPoint(e.getPoint());
+                
+                if(isSelectingColumns()) {
+                	mTable.setColumnSelectionAllowed(true);
+    				mTable.setRowSelectionAllowed(false);
+    				//mTable.getTableHeader().setReorderingAllowed(false);
+                	// int[] selectedCols = mTable.getSelectedColumns();
+    				
+                	if(e.isControlDown()) {
+                		int[] selectedColumns = mTable.getSelectedColumns();
+                		boolean containsColumn = IntStream.of(selectedColumns).anyMatch(x -> x == i);
+                		
+                		
+                		if(containsColumn) {
+                			System.out.println("Contains Column!");
+                			mTable.clearSelection();
+                			
+                		
+                			int[] columnsToSelect = new int[selectedColumns.length-1];
+                			int jColumnsToSelect = 0;
+                			int jSelectedColumns = 0;
+                			
+                			for(; jSelectedColumns < selectedColumns.length; jSelectedColumns++) {
+                				if(selectedColumns[jSelectedColumns] != i) {
+                					columnsToSelect[jColumnsToSelect] = selectedColumns[jSelectedColumns];
+                					jColumnsToSelect++;
+                				}
+                			}
+                			
+                			for(int j = 0; j < columnsToSelect.length; j++) {
+                				int k = columnsToSelect[j];
+                				mTable.addColumnSelectionInterval(k, k);
+                			}
+                			
+                		} else {
+                			System.out.println("Does Not Contain The Column!");
+                			mTable.addColumnSelectionInterval(i,i);	
+                		}
+                		
+            			System.out.println("addColumnSelectionInterval");
+            			
+                	} else {
+            			System.out.println("Does Not Contain The Column!");
+            			mTable.setColumnSelectionInterval(i, i);
+            		}
+                	
+                }
+                
+    		}
+    		
+    		
             @Override
             public void mouseClicked(MouseEvent e) {
-            	// TODO: FIX THIS
+            	System.out.println("mouseClicked(MouseEvent e)");
+            	
+            	
+            	///
                 JTableHeader h = (JTableHeader) e.getSource();
                 int i = h.columnAtPoint(e.getPoint());
                 if (i < 0) {
@@ -642,6 +772,10 @@ public class DatabaseTabbedPane extends JTabbedPane {
                 }
                 Object o = h.getColumnModel().getColumn(i).getHeaderValue();
                 Object selectedColumn = o;
+                ///
+                
+            	
+            	/*
                 
                 final JPopupMenu popup = new JPopupMenu();
                 
@@ -661,6 +795,7 @@ public class DatabaseTabbedPane extends JTabbedPane {
 					}
                 	
                 });
+                
                 menuItem.addMouseListener(new MouseAdapter() {
                 	 
                     @Override
@@ -682,6 +817,7 @@ public class DatabaseTabbedPane extends JTabbedPane {
                     }
                 }
                 );
+                
                 popup.add(menuItem);
                 menuItem = new JMenuItem("Order by");
                 menuItem.addActionListener(new ActionListener() {
@@ -690,6 +826,7 @@ public class DatabaseTabbedPane extends JTabbedPane {
 					public void actionPerformed(ActionEvent arg0) {
 						System.out.println("Order by!");
 						TableRowSorter<TableModel> sorter = new TableRowSorter<>(mTable.getModel());
+					
 						mTable.setRowSorter(sorter);
 						sortKeys.add(new RowSorter.SortKey(i, SortOrder.ASCENDING));
 						sorter.setSortKeys(sortKeys);
@@ -701,24 +838,30 @@ public class DatabaseTabbedPane extends JTabbedPane {
                 popup.show(h, e.getPoint().x, e.getPoint().y);
                 
                 System.out.println(selectedColumn);
-                
+                */
             }
 
 			@Override
-			public void mouseEntered(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
+			public void mouseEntered(MouseEvent e) {
+				System.out.println("mouseEntered(MouseEvent e)");
 			}
 
 			@Override
-			public void mouseExited(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
+			public void mouseExited(MouseEvent e) {
+				System.out.println("mouseExited(MouseEvent e)");
 			}
 
 			@Override
-			public void mousePressed(MouseEvent arg0) {
-				// TODO Auto-generated method stub
+			public void mousePressed(MouseEvent e) {
+				System.out.println("mousePressed(MouseEvent e)");
+				if(SwingUtilities.isLeftMouseButton(e)) {
+            		System.out.println("mouseClicked(MouseEvent e):Button 1");
+            		selectColumn(e);
+            	}else if(SwingUtilities.isMiddleMouseButton(e)) {
+            		System.out.println("mouseClicked(MouseEvent e):Button 2");
+            	}else if(SwingUtilities.isRightMouseButton(e)) {
+            		System.out.println("mouseClicked(MouseEvent e):Button 3");
+            	}
 				
 			}
 

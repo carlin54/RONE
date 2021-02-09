@@ -389,11 +389,11 @@ public class MainWindow implements ActionListener {
 		
 	}
 	
-	private void loadStructuredFile(File file, String seperator, boolean skipHeader) {
+	private void loadStructuredFile(File file, String seperator) {
 		ArrayList<Object[]> data = new ArrayList<Object[]>();
 				
 		try {
-			data = FileManager.loadStructuredFile(file, seperator, skipHeader);
+			data = FileManager.loadStructuredFile(file, seperator);
 			String[] columnIdentifiers = (String[])data.get(0);
 			data.remove(0);
 			loadTable(file.getName(), columnIdentifiers, data);
@@ -419,11 +419,11 @@ public class MainWindow implements ActionListener {
 		switch (contents) {
 				
 			case "CSV": 
-				loadStructuredFile(file, ",", false);
+				loadStructuredFile(file, ",");
 				break;
 				
 			case "Tab":
-				loadStructuredFile(file, "\t", false);
+				loadStructuredFile(file, "\t");
 				break;
 		}
 		
