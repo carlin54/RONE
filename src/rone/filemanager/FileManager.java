@@ -199,8 +199,36 @@ public class FileManager {
 		String location = currentRelativePath.toAbsolutePath().toString() + "\\temp";
 		return location;
 	}
+	private static final char CHAR_QUOTATION = '\"';
+	private static boolean isEncasedInQuotations(String str) {
+		int len = str.length();
+		return len > 2 ? str.charAt(0) == CHAR_QUOTATION && str.charAt(len-1) == CHAR_QUOTATION : false;
+	}
 	
-	public static ArrayList<Object[]> loadCSV(File file, String seperator, boolean skipHeader) throws IOException {
+	private static boolean isLineEncasedInQuotations(String[] parsedLine) {
+		boolean allAreEncasedInQuotations = true;
+
+		return allAreEncasedInQuotations;
+	}
+	
+	private static String removeEncasing(String str){
+		int len = str.length();
+		return len > 2 ? str.substring(1,len-1) : "";
+	}
+	
+	private static String[] parseCSVLine(String line){
+		String[] splitLine = line.split(CHAR_COMMA);
+		for(int i = 0; i < splitLine.length; i++) {
+			String cell = splitLine[i];
+			if(isEncasedInQuotations(cell)) {
+				splitLine[i] = removeEncasing(cell);
+			}
+		}
+		return splitLine;
+	}
+	
+	private static final String CHAR_COMMA = ",";
+	public static ArrayList<Object[]> loadCSV(File file, boolean skipHeader) throws IOException {
 		
 		if (!file.exists()) 
 			return null;
@@ -210,15 +238,17 @@ public class FileManager {
 		BufferedReader bufferReader = new BufferedReader(new FileReader(file));
 		String line = null;
 		
-		if(!skipHeader)
+		if(skipHeader)
 			line = bufferReader.readLine();
 		
 		while((line = bufferReader.readLine()) != null) {
-			String[] parsedLine = line.split(seperator);
+			String[] parsedLine = parseCSVLine(line);
+			System.out.println(Arrays.toString(parsedLine));
 			data.add(parsedLine);
 		}
 		
 		bufferReader.close();
+		
 		
 		return data;
 			
