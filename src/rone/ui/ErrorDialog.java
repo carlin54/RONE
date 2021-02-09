@@ -171,7 +171,7 @@ public class ErrorDialog {
 		gbl_panelDetailsPanel.rowWeights = new double[]{0.0, Double.MIN_VALUE};
 		panelDetailsPanel.setLayout(gbl_panelDetailsPanel);
 		
-		JButton btnShowDetails = new JButton("Show Detail (\u25B2)");
+		JButton btnShowDetails = new JButton("Show Detail (↓)");
 		btnShowDetails.setHorizontalAlignment(SwingConstants.RIGHT);
 		btnShowDetails.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		GridBagConstraints gbc_btnShowDetails = new GridBagConstraints();
@@ -217,7 +217,7 @@ public class ErrorDialog {
 				Dimension size = new Dimension(f.getWidth(), SHOW_DETAILS_HEIGHT);
 				if(mShowDetails) {
 					size = new Dimension(f.getWidth(), SHOW_DETAILS_HEIGHT);
-					btnShowDetails.setText("Show Details (\u25B2)");
+					btnShowDetails.setText("Show Details (↑)");
 					
 					gbl_panelUpper.rowWeights = new double[]{0.0, 1.0, 0.0, Double.MIN_VALUE};
 					panelUpper.add(panelMiddleTextArea, gbc_panelMiddleTextArea);
@@ -225,7 +225,7 @@ public class ErrorDialog {
 					panelUpper.repaint();
 				} else {
 					size = new Dimension(f.getWidth(), HIDE_DETAILS_HEIGHT);
-					btnShowDetails.setText("Show Details (\u25BC)");
+					btnShowDetails.setText("Show Details (↓)");
 					
 					gbl_panelUpper.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
 					panelUpper.remove(panelMiddleTextArea);
