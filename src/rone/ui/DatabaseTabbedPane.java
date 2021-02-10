@@ -167,7 +167,8 @@ public class DatabaseTabbedPane extends JTabbedPane {
 	}
 	
 	public boolean hasSelection() {
-		return getSelection() != null;
+		Tab tab = this.getActiveTab();
+		return tab.hasSelection();
 	}
 	
 	public void addSearch(Search search) throws SQLException {
@@ -827,8 +828,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
     		
     	}
     	
-    	
-    	
     	private JScrollPane getBody() {
     		return this; 
     	}
@@ -900,12 +899,10 @@ public class DatabaseTabbedPane extends JTabbedPane {
                 		int[] selectedColumns = mTable.getSelectedColumns();
                 		boolean containsColumn = IntStream.of(selectedColumns).anyMatch(x -> x == i);
                 		
-                		
                 		if(containsColumn) {
                 			System.out.println("Contains Column!");
                 			mTable.clearSelection();
                 			
-                		
                 			int[] columnsToSelect = new int[selectedColumns.length-1];
                 			int jColumnsToSelect = 0;
                 			int jSelectedColumns = 0;
@@ -929,11 +926,8 @@ public class DatabaseTabbedPane extends JTabbedPane {
                 	} else {
             			mTable.setColumnSelectionInterval(i, i);
             		}
-                	
                 }
-                
     		}
-    		
     		
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -960,8 +954,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
             		System.out.println("mouseClicked(MouseEvent e):Button 3");
             		mTableSortPopupMenu.show(e);        
             	}
-				
-				
 			}
 
 			@Override
@@ -1075,7 +1067,7 @@ public class DatabaseTabbedPane extends JTabbedPane {
     	} 
     	
     	public boolean hasSelection() {
-    		return mTable.getSelectedRowCount() > 0;
+    		return mTable.getSelectedColumnCount() > 0;
     	}
     	
     	public boolean isCellEditable(int row, int column) {                
@@ -1255,7 +1247,8 @@ public class DatabaseTabbedPane extends JTabbedPane {
 		return selected;
 	}
     
-	private String[] createColumns(Tab a, int[] selectA, int[] keyA, Tab b, int[] selectB, int[] keyB) {
+	
+    private String[] createColumns(Tab a, int[] selectA, int[] keyA, Tab b, int[] selectB, int[] keyB) {
 		
 		String[] aIdentifers = a.getColumnIdentifers();
 		String[] bIdentifers = b.getColumnIdentifers();
@@ -1474,6 +1467,7 @@ public class DatabaseTabbedPane extends JTabbedPane {
 		
 	};
 
+	
 	private class MasterThread extends Thread {
     	private int mThreadPoolSize = 5;
     	private int mWorkSize = 20;
