@@ -378,7 +378,9 @@ public class Database {
 	
 	public String[] addQuotations(String[] columns) {
 		for(int i = 0; i < columns.length; i++) {
-			columns[i] = "\"" + columns[i] + "\"";
+			if(!isEncasedInQuotations(columns[i])) {
+				columns[i] = "\"" + columns[i] + "\"";
+			}
 		}
 		return columns;
 	}
@@ -423,7 +425,12 @@ public class Database {
 		query += ")";
 		return query;
 	}
-	
+
+	private static final char CHAR_QUOTATION = '\"';
+	private static boolean isEncasedInQuotations(String str) {
+		int len = str.length();
+		return len > 2 ? str.charAt(0) == CHAR_QUOTATION && str.charAt(len-1) == CHAR_QUOTATION : false;
+	}
 	
 	public Table createTable(String tableName, String[] columnNames, int[] primaryKeys) throws SQLException {
 		// generate query

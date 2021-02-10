@@ -208,11 +208,7 @@ public class FileManager {
 		return len > 2 ? str.charAt(0) == CHAR_QUOTATION && str.charAt(len-1) == CHAR_QUOTATION : false;
 	}
 	
-	private static boolean isLineEncasedInQuotations(String[] parsedLine) {
-		boolean allAreEncasedInQuotations = true;
-
-		return allAreEncasedInQuotations;
-	}
+	
 	
 	private static String removeEncasing(String str){
 		int len = str.length();
