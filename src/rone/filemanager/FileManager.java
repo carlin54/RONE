@@ -16,6 +16,35 @@ import org.apache.commons.io.FilenameUtils;
 
 public class FileManager {
 	
+	public static void exportCSV(File file, ArrayList<Object[]> data) throws IOException  {
+		if(file.exists()) {
+			boolean success = file.delete();
+			if(!success)
+				throw new IOException("Could not delete existing file.");
+		}
+		
+		if(!file.createNewFile())
+			throw new IOException("Create file required to write out data.");
+		
+		
+		if(!file.canWrite())
+			throw new IOException("Cannot write to newly created file.");
+		
+		
+		
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0; i < data.size(); i++) {
+			
+			Object[] row = data.get(i);
+			for(int j = 1; j < row.length-1; j++) {
+				sb.append("\"" + row[j-1].toString() + "\",");
+			}
+			sb.append("\"" + row[row.length-1].toString() + "\"\n");
+		}
+		PrintWriter writer = new PrintWriter(file);
+		writer.write(sb.toString());
+		writer.close();
+	}
 	
 	private static String parsePathwayID(String pathwayIdLine) {
 		int beginIndex = pathwayIdLine.length() - 20;
