@@ -197,6 +197,7 @@ public class MainWindow implements ActionListener {
 				}
 				{
 					mntmToTable = new JMenuItem("to Table");
+					mntmToTable.setAction(actionFileExportToTable);
 					mnExport.add(mntmToTable);
 				}
 				{
@@ -697,13 +698,13 @@ public class MainWindow implements ActionListener {
 			putValue(NAME, "to File");
 		}
 		public void actionPerformed(ActionEvent e) {
-	        String text = "JFileChooser, you're my only friend.";
 	        
 	        if(!mDatabaseTabbedPane.hasTab()) {
 	        	JOptionPane.showMessageDialog(mMainWindowJFrame,
 	        		    "No table to export data from.",
 	        		    "Export error",
 	        		    JOptionPane.ERROR_MESSAGE);
+	        	return;
 	        }
 	        
 	        JFileChooser chooser = new JFileChooser();
@@ -729,11 +730,6 @@ public class MainWindow implements ActionListener {
 			} catch (IOException e1) {
 				showError(e1);
 			}
-	        
-	        
-	        
-	        
-	        
 		}
 	}
 	enum FileExtension {
@@ -777,6 +773,45 @@ public class MainWindow implements ActionListener {
 			putValue(NAME, "to Table");
 		}
 		public void actionPerformed(ActionEvent e) {
+			
+			if(!mDatabaseTabbedPane.hasTab()) {
+	        	JOptionPane.showMessageDialog(mMainWindowJFrame,
+	        		    "No table to export data from.",
+	        		    "Export error",
+	        		    JOptionPane.ERROR_MESSAGE);
+	        	return;
+	        }
+			
+			if(mDatabaseTabbedPane.hasSelection()) {
+	        	JOptionPane.showMessageDialog(mMainWindowJFrame,
+	        		    "No selection from table. Select values from table to export to another tab.",
+	        		    "Export error",
+	        		    JOptionPane.ERROR_MESSAGE);
+	        	return;
+	        }
+	        
+			
+			String newTableName = (String)JOptionPane.showInputDialog(mMainWindowJFrame, "New table name:");
+			if(newTableName == null || newTableName.equals(""))
+				return;
+			
+			ArrayList<Object[]> selectedRows = mDatabaseTabbedPane.getActiveTab().getSelectedRows();
+			Object[] columnIdentifers = mDatabaseTabbedPane.getActiveTab().getSelectedColumnIdentifers();
+
+	        String[] stringColumnIdentifers = Arrays.copyOf(columnIdentifers, columnIdentifers.length, String[].class);
+	        		
+			EventQueue.invokeLater(new Runnable() {
+				public void run() {
+					try {
+						mDatabaseTabbedPane.addTab(newTableName, stringColumnIdentifers, null, selectedRows);
+					} catch (SQLException e) {
+						showError(e);
+					}
+				}
+			});
+			
+			
+			
 		}
 	}
 	
