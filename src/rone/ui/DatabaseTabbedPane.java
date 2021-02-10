@@ -105,14 +105,14 @@ public class DatabaseTabbedPane extends JTabbedPane {
 			mSearchThreadManager.join();
 		} catch (InterruptedException e) {
 			mSearchThreadManager.stop();
-			e.printStackTrace();
+			MainWindow.showError(e);
 		}
 		
 		try {
 			mJoinOperationThreadManager.join();
 		} catch (InterruptedException e) {
 			mJoinOperationThreadManager.stop();
-			e.printStackTrace();
+			MainWindow.showError(e);
 		}
 	}  
 	
@@ -209,13 +209,25 @@ public class DatabaseTabbedPane extends JTabbedPane {
         }
     }*/
 	
+	
+	
 	public String[] getSelection() {
 		
 		int i = getSelectedIndex();
-		Tab databaseTab = mDatabaseTabs.get(i);
+		Tab tab = mDatabaseTabs.get(i);
 		
-		if(databaseTab != null) {
-			return databaseTab.getSelected();
+		if(tab != null) {
+			ArrayList<Object[]> selected = tab.getSelectedRows();
+			int numRows = selected.size();
+			int numCols = selected.get(0).length;
+			int size = numRows * numCols;
+			String[] selection = new String[size];
+			for(int j = 0; j < numRows; j++) {
+				for(int k = 0; k < numCols; k++) {
+					selection[j*k + k] = (String) selected.get(j)[k];
+				}
+			}
+			return selection;
 		}
 		
 		return null;
@@ -386,8 +398,7 @@ public class DatabaseTabbedPane extends JTabbedPane {
 					try {
 						databaseTable = Database.getInstance().joinAndCreate(tabC.getName(), join);
 					} catch (SQLException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						MainWindow.showError(e);
 					}
 					
 					tabC.setTable(databaseTable);
@@ -456,7 +467,7 @@ public class DatabaseTabbedPane extends JTabbedPane {
 	    			executeJoinOperations();
 	    			
 	    		} catch (InterruptedException e) {
-	    			e.printStackTrace();
+	    			MainWindow.showError(e);
 	    		}
     		}
     	}
@@ -1420,7 +1431,7 @@ public class DatabaseTabbedPane extends JTabbedPane {
 			try {
 				cleanUp();
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				MainWindow.showError(e);
 			}
 	    }
 		
@@ -1439,8 +1450,7 @@ public class DatabaseTabbedPane extends JTabbedPane {
 					try {
 						mt.join();
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						MainWindow.showError(e);
 					}
 				}
 				mSearchQueue.notifyAll();
@@ -1543,7 +1553,7 @@ public class DatabaseTabbedPane extends JTabbedPane {
     		try {
     			mResultsTab.insertRows(results);
 			} catch (SQLException e) {
-				e.printStackTrace();
+				MainWindow.showError(e);
 			}
     		
     		if(mResultsTab.isVisible()) {
@@ -1554,7 +1564,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
     		
     		
     	}
-    	
     	
     	public boolean hasWork(String[] work) {
     		return work.length > 0;
@@ -1580,7 +1589,7 @@ public class DatabaseTabbedPane extends JTabbedPane {
 					try {
 						mThreadPool[i].join();
 					} catch (InterruptedException e) {
-						e.printStackTrace();
+						MainWindow.showError(e);
 					}
 					ArrayList<Object[]> results = mThreadPool[i].getResults();
 					String completeWork[] = mThreadPool[i].getWork();
@@ -1619,7 +1628,7 @@ public class DatabaseTabbedPane extends JTabbedPane {
 	    				}
 	    				
 					} catch (InterruptedException e) {
-						e.printStackTrace();
+						MainWindow.showError(e);
 					}
 	    		}
     		}
@@ -1650,7 +1659,7 @@ public class DatabaseTabbedPane extends JTabbedPane {
 				mResultsTable = Database.getInstance().createTable(tableName, columnIdentifiers, primaryKeys);
 				
 			} catch (SQLException e) {
-				e.printStackTrace();
+				MainWindow.showError(e);
 			}
 			
     		ActionListener actionListener = new ActionListener() {

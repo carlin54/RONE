@@ -413,7 +413,7 @@ public class Database {
         }
         query += " \r\n";
         
-        // primary keys
+        // primary keys	
         if(hasPrimaryKeys(primaryKeys)) {
     		int finalPrimaryKeyIdx = primaryKeys.length-1;
         	query += "\tPRIMARY KEY(";
@@ -587,16 +587,26 @@ public class Database {
 			int idx = select[i];
 			selectSQL += tableName + "." + identifers[idx] + ", ";
 		}
+		
 		int finalIdx = len-1;
-		selectSQL += tableName + "." + identifers[finalIdx];
+		if(finalIdx > -1) {
+			selectSQL += tableName + "." + identifers[finalIdx];
+		}
+		
 		return selectSQL;
 	}
 	
 	public String generateSelectSQL(Database.Table a, int[] aKey, Database.Table b, int[] bKey) {
-		String selectStatement = "SELECT "
-								 + generateSelectForTableSQL(a, aKey) 
-								 + ", "  
-								 + generateSelectForTableSQL(b, bKey);
+		String selectStatement = "SELECT ";
+		if(aKey.length > 0)
+			selectStatement += generateSelectForTableSQL(a, aKey);
+		
+		if(aKey.length > 0 && bKey.length > 0)
+			selectStatement += ", ";
+		
+		if(bKey.length > 0)
+			selectStatement += generateSelectForTableSQL(b, bKey);		
+		
 		return selectStatement;
 	}
 	
@@ -620,11 +630,12 @@ public class Database {
 		}
 		
 		int finalIdx = len-1;
-		int aIdxFinal = aKey[finalIdx];
-		int bIdxFinal = bKey[finalIdx];
-		
-		onStatement += aTableName + "." + aIdentifers[aIdxFinal] + " = " + bTableName + "." + bIdentifers[bIdxFinal] + "\r\n";
-		
+		if(finalIdx > -1) {
+			int aIdxFinal = aKey[finalIdx];
+			int bIdxFinal = bKey[finalIdx];
+			
+			onStatement += aTableName + "." + aIdentifers[aIdxFinal] + " = " + bTableName + "." + bIdentifers[bIdxFinal] + "\r\n";
+		}
 		return onStatement;
 		
 	}
@@ -642,8 +653,10 @@ public class Database {
 		}
 		
 		int finalIdx = isNull[len-1];
-		String identifer = identifers[finalIdx];
-		statementIsNull +=  tableName + "." + identifer + " IS NULL";
+		if(finalIdx > -1) {
+			String identifer = identifers[finalIdx];
+			statementIsNull +=  tableName + "." + identifer + " IS NULL";
+		}
 		return statementIsNull;
 	}
 	

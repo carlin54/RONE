@@ -32,6 +32,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
@@ -94,14 +95,10 @@ public class MainWindow implements ActionListener {
 	
 	private final ActionFileImportFromFile actionImportActionFromFile = new ActionFileImportFromFile();
 	private final ActionFileExportToFile actionExportToFile = new ActionFileExportToFile();
-	private final ActionFileExportToGarudaStartDiscovery actionExportGarudaToGenelistTXT = 
-			new ActionFileExportToGarudaStartDiscovery("as Genelist (txt)", FileContence.GENELIST, FileExtension.TXT);
-	private final ActionFileExportToGarudaStartDiscovery actionExportGarudaToEnsembleTXT = 
-			new ActionFileExportToGarudaStartDiscovery("as Genelist (csv)", FileContence.GENELIST, FileExtension.CSV);
-	private final ActionFileExportToGarudaStartDiscovery actionExportGarudaToGenelistCSV = 
-			new ActionFileExportToGarudaStartDiscovery("as Ensemble (txt)", FileContence.ENSEMBLE, FileExtension.TXT);
-	private final ActionFileExportToGarudaStartDiscovery actionExportGarudaToEnsembleCSV = 
-			new ActionFileExportToGarudaStartDiscovery("as Ensemble (csv)", FileContence.ENSEMBLE, FileExtension.CSV);
+	private final ActionFileExportToGarudaStartDiscovery actionExportGarudaToGenelistTXT = new ActionFileExportToGarudaStartDiscovery("as Genelist (txt)", FileContence.GENELIST, FileExtension.TXT);
+	private final ActionFileExportToGarudaStartDiscovery actionExportGarudaToEnsembleTXT = new ActionFileExportToGarudaStartDiscovery("as Genelist (csv)", FileContence.GENELIST, FileExtension.CSV);
+	private final ActionFileExportToGarudaStartDiscovery actionExportGarudaToGenelistCSV = new ActionFileExportToGarudaStartDiscovery("as Ensemble (txt)", FileContence.ENSEMBLE, FileExtension.TXT);
+	private final ActionFileExportToGarudaStartDiscovery actionExportGarudaToEnsembleCSV = new ActionFileExportToGarudaStartDiscovery("as Ensemble (csv)", FileContence.ENSEMBLE, FileExtension.CSV);
 	private final ActionFileExportToTable actionFileExportToTable = new ActionFileExportToTable();
 	private final ActionSearchTargetMineWithGeneSymbols actionTargetMineWithGeneSymbols = new ActionSearchTargetMineWithGeneSymbols();
 	private final ActionSearchPercellomeWithProbeIds actionPercellomeWithProbeID = new ActionSearchPercellomeWithProbeIds();
@@ -706,8 +703,11 @@ public class MainWindow implements ActionListener {
 	        		    JOptionPane.ERROR_MESSAGE);
 	        	return;
 	        }
-	        
+
 	        JFileChooser chooser = new JFileChooser();
+	        FileNameExtensionFilter filter = new FileNameExtensionFilter("Comma-Seperated Value Files", "csv", "csv");
+	        chooser.setFileFilter(filter);
+	        
 	        int result = chooser.showSaveDialog(null);
 	        File file = null;
 	        if (result == JFileChooser.APPROVE_OPTION) {
@@ -782,7 +782,7 @@ public class MainWindow implements ActionListener {
 	        	return;
 	        }
 			
-			if(mDatabaseTabbedPane.hasSelection()) {
+			if(!mDatabaseTabbedPane.hasSelection()) {
 	        	JOptionPane.showMessageDialog(mMainWindowJFrame,
 	        		    "No selection from table. Select values from table to export to another tab.",
 	        		    "Export error",
@@ -809,9 +809,6 @@ public class MainWindow implements ActionListener {
 					}
 				}
 			});
-			
-			
-			
 		}
 	}
 	

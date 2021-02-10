@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.IntStream;
 import java.awt.event.ActionEvent;
 
 import javax.swing.BorderFactory;
@@ -751,7 +752,7 @@ public class TableJoinDialog extends JFrame  {
 
 		private boolean canSelectJoinType() {
 			return 		listTableAIncludeColumns.getModel().getSize() > 0
-					&&  listTableBIncludeColumns.getModel().getSize() > 0;
+					||  listTableBIncludeColumns.getModel().getSize() > 0;
 		}
 		
 		public void updateComboBoxJoinType() {
@@ -801,17 +802,34 @@ public class TableJoinDialog extends JFrame  {
 			
 		}
 		
-		private boolean hasComboBox(JComboBox comboBox) {
-			return comboBox != null;
+		private DefaultComboBoxModel addToComboBox(ListModel listMode, DefaultComboBoxModel comboBoxModel) {
+			for(int i = 0; i < listMode.getSize(); i++) {
+				Object element = listMode.getElementAt(i);
+				comboBoxModel.addElement(element);
+			}
+			return comboBoxModel;
 		}
 		
+		private void insertIntoComboBox(JList exclude, JList include, JComboBox comboBox) {
+			DefaultComboBoxModel newModel = new DefaultComboBoxModel(); 
+			newModel = addToComboBox(exclude.getModel(), newModel);
+			newModel = addToComboBox(include.getModel(), newModel);
+			comboBox.setModel(newModel);
+		}
+		
+		
 		private void updateComboBoxes() {
-			if(hasComboBox(this.mFromComboBox)) {
-				insertListIntoComboBoxModel(this.mFrom, this.mFromComboBox);
-			}
 			
-			if(hasComboBox(this.mToComboBox)) {
-				insertListIntoComboBoxModel(this.mTo, this.mToComboBox);
+			if(isListEmpty(listTableAIncludeColumns) && isListEmpty(listTableBIncludeColumns)) {
+				comboBoxJoinOperationTableA.setEnabled(false);
+				comboBoxJoinOperationTableA.setModel(new DefaultComboBoxModel());
+				comboBoxJoinOperationTableB.setEnabled(false);
+				comboBoxJoinOperationTableB.setModel(new DefaultComboBoxModel());
+			} else {
+				comboBoxJoinOperationTableA.setEnabled(true);
+				insertIntoComboBox(listTableAIncludeColumns,listTableAExcludeColumns,comboBoxJoinOperationTableA);
+				comboBoxJoinOperationTableB.setEnabled(true);
+				insertIntoComboBox(listTableBIncludeColumns,listTableBExcludeColumns,comboBoxJoinOperationTableB);
 			}
 			
 			updateComboBoxJoinType();
@@ -856,9 +874,7 @@ public class TableJoinDialog extends JFrame  {
 						continue;
 					}
 				}
-				
 				newFromModel.addElement(element);
-				
 			}
 			
 			// set the new to models
@@ -909,6 +925,7 @@ public class TableJoinDialog extends JFrame  {
 					Object element = oldListModel.getElementAt(i);
 					newComboBoxModel.addElement(element);
 				}
+				
 				comboBox.setModel(newComboBoxModel);
 				comboBox.setSelectedIndex(-1);
 			}
@@ -970,7 +987,7 @@ public class TableJoinDialog extends JFrame  {
 		
 		private boolean canSelectJoinType() {
 			return 		mListIncludeColumnsA.getModel().getSize() > 0
-					&&  mListIncludeColumnsB.getModel().getSize() > 0;
+					||  mListIncludeColumnsB.getModel().getSize() > 0;
 		}
 		
 		@Override
@@ -1025,6 +1042,8 @@ public class TableJoinDialog extends JFrame  {
 			
 			TableModel oldTableModel = tableJoinConstraints.getModel();
 			DefaultTableModel newTableModel = new DefaultTableModel(new Object[0][0], getColumnNames());
+			
+			
 			
 			int numRows = oldTableModel.getRowCount();
 			int numColumns = oldTableModel.getColumnCount();
@@ -1427,6 +1446,67 @@ public class TableJoinDialog extends JFrame  {
 		btnJoinTable.setEnabled(false);
 		mButtonJoinTableActionListener = new ButtonJoinTableActionListener();
 		btnJoinTable.addActionListener(mButtonJoinTableActionListener);
+		
+		tableJoinConstraints.setEnabled(true);
+		tableJoinConstraints.setRowSelectionAllowed(true);
+		tableJoinConstraints.setColumnSelectionAllowed(true);
+		
+		tableJoinConstraints.setColumnSelectionAllowed(false);
+		this.tableJoinConstraints.addContainerListener(new ContainerListener() {
+
+			@Override
+			public void componentAdded(ContainerEvent e) {
+				btnJoinOperationRemoveSelected.setEnabled(true);
+				tableJoinConstraints.setEnabled(true);
+				tableJoinConstraints.setRowSelectionAllowed(true);
+				tableJoinConstraints.setColumnSelectionAllowed(true);
+			}
+
+			@Override
+			public void componentRemoved(ContainerEvent e) {
+				if(tableJoinConstraints.getRowCount() < 1) {
+					btnJoinOperationRemoveSelected.setEnabled(false);
+					tableJoinConstraints.setEnabled(false);
+				}else {
+					tableJoinConstraints.setEnabled(true);
+				}
+			}
+			
+		});
+		this.btnJoinOperationRemoveSelected.addActionListener(new ActionListener() {
+		
+			private boolean contains(int find, int[] array) {
+				for(int i : array) {
+					if(i == find) {
+						return true;
+					}
+				}
+				return false;
+			}
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int[] rows = tableJoinConstraints.getSelectedRows();
+				if(rows.length > 0)
+					return;
+				
+				TableModel oldTableModel = tableJoinConstraints.getModel();
+				DefaultTableModel newTableModel = new DefaultTableModel();
+				for(int iRow = 0; iRow < oldTableModel.getRowCount(); iRow++) {
+					if(!contains(iRow, rows)) {
+						Object[] newRow = new Object[oldTableModel.getColumnCount()];
+						for(int iCol = 0; iCol < oldTableModel.getColumnCount(); iCol++) {
+							Object cell = oldTableModel.getValueAt(iRow, iCol);
+							newRow[iCol] = newRow;
+						}
+						newTableModel.addRow(newRow);
+					} else {
+						System.out.println("Skipping row!");
+					}
+				}
+				tableJoinConstraints.setModel(newTableModel);
+			}
+			
+		});
 	}
 
 	

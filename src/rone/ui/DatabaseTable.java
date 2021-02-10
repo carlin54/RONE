@@ -59,7 +59,6 @@ public class DatabaseTable extends JTable {
 		
 		LinkedList<String> unique = new LinkedList<String>(); 
 		
-		
 		Object last_added = null;
 		for(int i = 0; i < rows.length; i++) {
 			int r = rows[i];
@@ -74,8 +73,6 @@ public class DatabaseTable extends JTable {
 				}else {
 					break;
 				}
-				
-				
 				
 				if(!cell.equals(last_added) && !unique.contains(cell)) {
 					unique.add(cell);
