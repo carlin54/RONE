@@ -484,6 +484,18 @@ public class DatabaseTabbedPane extends JTabbedPane {
     	
     }
     
+	public boolean hasTab() {
+		return !mDatabaseTabs.isEmpty();
+	}
+    
+    public Tab getActiveTab() {
+    	int i = this.getSelectedIndex();
+    	if(i < 0 || i > this.mDatabaseTabs.size()-1)
+    		return null;
+    	
+    	return this.mDatabaseTabs.get(i);
+    }
+    
     static public class Tab extends JScrollPane {
     	
     	public enum Status {
@@ -500,7 +512,8 @@ public class DatabaseTabbedPane extends JTabbedPane {
     	private ButtonTabComponent mHeader; 
     	private TableMouseListener mTableMouseListener;
     	private boolean mDatabaseChanged;
-
+    	private ArrayList<Object[]> mLoadedTable; 
+    	
     	private Database.Table getDatabaseTable() {
     		return mDatabaseTable;
     	}
@@ -526,6 +539,10 @@ public class DatabaseTabbedPane extends JTabbedPane {
     		// updateModel();
     	}
     	
+    	public ArrayList<Object[]> getRows() {
+    		return (ArrayList<Object[]>) mLoadedTable.clone();
+    	}
+    	
     	public void updateModel() {
 
     		if(mDatabaseTable == null)
@@ -534,11 +551,12 @@ public class DatabaseTabbedPane extends JTabbedPane {
     		if(mDatabaseChanged == false)
     			return;
     		
-    		ArrayList<Object[]> tableResults = null;
+    		mLoadedTable = null;
     		try {
-				tableResults = mDatabaseTable.getTable();
+    			mLoadedTable = mDatabaseTable.getTable();
 			} catch (SQLException e) {
-				e.printStackTrace();
+				mLoadedTable = new ArrayList<Object[]>();
+				MainWindow.showError(e);
 			}
     		
     		DefaultTableModel dtm = new DefaultTableModel();
@@ -548,9 +566,8 @@ public class DatabaseTabbedPane extends JTabbedPane {
     		String[] columnIdentifiers = getColumnIdentifers();
     		dtm.setColumnIdentifiers(columnIdentifiers);
     		
-    		if(!tableResults.isEmpty()) {
-    			System.out.println("updateModel():" + tableResults.get(0).length + ":" + this.getColumnIdentifers().length);
-	    		for(Object[] row : tableResults) {
+    		if(!mLoadedTable.isEmpty()) {
+	    		for(Object[] row : mLoadedTable) {
 	    			dtm.addRow(row);
 	    		}
     		}
@@ -561,7 +578,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
                 }
             });
     		mDatabaseChanged = false;
-    		
     	}
     	
     	private class TableHeaderMouseListener implements MouseListener {
@@ -804,7 +820,7 @@ public class DatabaseTabbedPane extends JTabbedPane {
     		mTable.setAutoCreateRowSorter(true);
     		mTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     		mTable.getTableHeader().addMouseListener(mTableMouseListener);
-    		mTable.getTableHeader().setEnabled(false);
+    		//mTable.getTableHeader().setEnabled(false);
     		mTable.addMouseListener(new TableHeaderMouseListener());
     		
     		getViewport().add(mTable);
@@ -965,25 +981,63 @@ public class DatabaseTabbedPane extends JTabbedPane {
     		return columnIdentifers;
     	}
     	
-    	public String[] getSelected() {
-    		
-    		int[] rows = mTable.getSelectedRows();
+    	/*public String[] getSelectColumns() {
     		int[] cols = mTable.getSelectedColumns();
+    		int len = cols.length;
+    		String[] columnIdentifers = new String[len];
     		
-    		Set<String> tree_set = new TreeSet<String>(); 
-    		for(int i = 0; i < rows.length; i++) {
-    			for(int j = 0; j < cols.length; j++) {
-    				int k = rows[i];
-    				String cell = (String)mTable.getValueAt(k, cols[j]);
-    				tree_set.add(cell);
-    			}
+    		TableColumnModel tableColumnModel = this.mTable.getTableHeader().getColumnModel();
+    		for(int i = 0; i < len; i++) {
+    			int idx = cols[i];
+    			String columnIdentifier = (String) tableColumnModel.getColumn(idx).getHeaderValue();
+    			columnIdentifers[i] = columnIdentifier;
     		}
-    		
-    		int len = tree_set.size();
-    		return tree_set.toArray(new String[len]);
-    	}
+    		return columnIdentifers;
+    	}*/
     	
-    	public String[] getUniqueSelected() {
+    	public Object[] getSelectedColumnIdentifers() {
+    		
+    		int[] cols = mTable.getSelectedColumns();
+			for (int i = 0; i < cols.length; i++) {
+				cols[i] = mTable.convertColumnIndexToModel(cols[i]);
+			}
+    		
+			TableColumnModel tcm = mTable.getTableHeader().getColumnModel();
+			Object[] selectedColumns = new Object[cols.length];
+			for(int i = 0; i < selectedColumns.length; i++) {
+				selectedColumns[i] = tcm.getColumn(i).getHeaderValue();
+			}
+			System.out.println(Arrays.toString(selectedColumns));
+    		return selectedColumns; 
+    	}
+
+    	public ArrayList<Object[]> getSelectedRows() {
+    		
+    		int[] cols = mTable.getSelectedColumns();
+			for (int i = 0; i < cols.length; i++) {
+				cols[i] = mTable.convertColumnIndexToModel(cols[i]);
+			}
+			int[] rows = mTable.getSelectedRows();
+			for (int i = 0; i < rows.length; i++) {
+				rows[i] = mTable.convertRowIndexToModel(rows[i]);
+			}
+    		
+			ArrayList<Object[]> selectedRows = new ArrayList<Object[]>();
+			for(int i = 0; i < rows.length; i++) {
+				Object[] row = new Object[cols.length];
+				for(int j = 0; j < cols.length; j++) {
+					int rowIdx = rows[i];
+					int colIdx = cols[j];
+					Object cell = mLoadedTable.get(rowIdx)[colIdx];
+					row[j] = cell;
+				}
+				System.out.println(Arrays.toString(row));
+				selectedRows.add(row);
+			}
+    		return selectedRows; 
+    	}
+
+    	/*public String[] getUniqueSelected() {
     		
     		int[] rows = mTable.getSelectedRows();
     		int[] cols = mTable.getSelectedColumns();
@@ -1014,7 +1068,7 @@ public class DatabaseTabbedPane extends JTabbedPane {
     		int len = unique.size();
     		return unique.toArray(new String[len]);
     		
-    	}
+    	}*/
     	
     	public boolean isEmpty() {
     		return !(mTable.getModel().getRowCount() > 0);
