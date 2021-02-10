@@ -93,7 +93,7 @@ public class MainWindow implements ActionListener {
 	private JMenuBar menuBar;
 	
 	private final ActionFileImportFromFile actionImportActionFromFile = new ActionFileImportFromFile();
-	private final ActionFileExportToFile actionExportActionToFile = new ActionFileExportToFile();
+	private final ActionFileExportToFile actionExportToFile = new ActionFileExportToFile();
 	private final ActionFileExportToGarudaStartDiscovery actionExportGarudaToGenelistTXT = 
 			new ActionFileExportToGarudaStartDiscovery("as Genelist (txt)", FileContence.GENELIST, FileExtension.TXT);
 	private final ActionFileExportToGarudaStartDiscovery actionExportGarudaToEnsembleTXT = 
@@ -158,6 +158,8 @@ public class MainWindow implements ActionListener {
 		return this.mMainWindowJFrame;
 	}
 	
+
+	
 	private void initialize() {
 		mMainWindow = this;
 		mMainWindowJFrame = new JFrame();
@@ -190,6 +192,7 @@ public class MainWindow implements ActionListener {
 				mnFile.add(mnExport);
 				{
 					mntmToFile = new JMenuItem("to File");
+					mntmToFile.setAction(actionExportToFile);
 					mnExport.add(mntmToFile);
 				}
 				{
@@ -403,7 +406,6 @@ public class MainWindow implements ActionListener {
 		String[] columnIdentifiers = (String[])tableToLoad.get(0);
 		tableToLoad.remove(0);
 		
-		Database.Table importTable;
 		try {
 			mDatabaseTabbedPane.addTab(file.getName(), columnIdentifiers, new int[0], tableToLoad);
 		} catch (SQLException sqlException) {
@@ -420,19 +422,17 @@ public class MainWindow implements ActionListener {
 		//System.out.println(contents);
 		ArrayList<Object[]> data = null;
 		try {
-		switch (contents) {
-				
-			case "CSV": 
-				data = FileManager.loadCSV(file, false);
-				loadTable(file, data);
-				break;
-				
-			case "Tab":
-				data = FileManager.loadStructuredFile(file, "\t", false);
-				loadTable(file, data);
-				
-				break;
-		}
+			switch (contents) {
+				case "CSV": 
+					data = FileManager.loadCSV(file, false);
+					loadTable(file, data);
+					break;
+					
+				case "Tab":
+					data = FileManager.loadStructuredFile(file, "\t", false);
+					loadTable(file, data);
+					break;
+			}
 		} catch (IOException e) {
 			showError(e);
 		}
@@ -526,10 +526,7 @@ public class MainWindow implements ActionListener {
 			putValue(SHORT_DESCRIPTION, "Discover Garuda Genelist");
 		}
 		public void actionPerformed(ActionEvent ae) {
-
-
 			startDiscovery("genelist", "txt");
-			
 		}
 	}
 	
@@ -700,6 +697,43 @@ public class MainWindow implements ActionListener {
 			putValue(NAME, "to File");
 		}
 		public void actionPerformed(ActionEvent e) {
+	        String text = "JFileChooser, you're my only friend.";
+	        
+	        if(!mDatabaseTabbedPane.hasTab()) {
+	        	JOptionPane.showMessageDialog(mMainWindowJFrame,
+	        		    "No table to export data from.",
+	        		    "Export error",
+	        		    JOptionPane.ERROR_MESSAGE);
+	        }
+	        
+	        JFileChooser chooser = new JFileChooser();
+	        int result = chooser.showSaveDialog(null);
+	        File file = null;
+	        if (result == JFileChooser.APPROVE_OPTION) {
+	            file = chooser.getSelectedFile();
+	        }
+	        
+	        DatabaseTabbedPane.Tab tab = mDatabaseTabbedPane.getActiveTab();
+	        Object[] columnIdentifers = null;
+	        ArrayList<Object[]> rows = null;
+	        if(tab.hasSelection()) {
+	        	columnIdentifers = tab.getSelectedColumnIdentifers();
+		        rows = tab.getSelectedRows();
+	        } else {
+	        	columnIdentifers = tab.getColumnIdentifers();
+		        rows = tab.getRows();
+	        }
+	        rows.add(0, columnIdentifers);
+	        try {
+				FileManager.exportCSV(file, rows);
+			} catch (IOException e1) {
+				showError(e1);
+			}
+	        
+	        
+	        
+	        
+	        
 		}
 	}
 	enum FileExtension {
@@ -830,7 +864,7 @@ public class MainWindow implements ActionListener {
     	
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
-
+				exceptionError.printStackTrace();
 				ErrorDialog e = new ErrorDialog(exceptionError);  
 
 			}
