@@ -65,6 +65,8 @@ import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.table.DefaultTableColumnModel;
@@ -1067,6 +1069,7 @@ public class TableJoinDialog extends JFrame  {
 			tableJoinConstraints.setModel(newTableModel);
 			
 			if(newTableModel.getRowCount() > 0) {
+				tableJoinConstraints.setEnabled(true);
 				txtFieldNameTableNewTableName.setEnabled(true);
 				
 				btnJoinTable.setEnabled(true);
@@ -1449,27 +1452,59 @@ public class TableJoinDialog extends JFrame  {
 		
 		tableJoinConstraints.setEnabled(true);
 		tableJoinConstraints.setRowSelectionAllowed(true);
-		tableJoinConstraints.setColumnSelectionAllowed(true);
+		tableJoinConstraints.setColumnSelectionAllowed(false);
 		
 		tableJoinConstraints.setColumnSelectionAllowed(false);
-		this.tableJoinConstraints.addContainerListener(new ContainerListener() {
+		tableJoinConstraints.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 
 			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				
+				if(tableJoinConstraints.getSelectedRowCount() > 0) {
+					btnJoinOperationRemoveSelected.setEnabled(true);
+				} else {
+					btnJoinOperationRemoveSelected.setEnabled(false);
+				}
+				
+				if(tableJoinConstraints.getRowCount() > 0) {
+					tableJoinConstraints.setEnabled(true);
+					btnJoinTable.setEnabled(true);
+					txtFieldNameTableNewTableName.setEnabled(true);
+				} else {
+					tableJoinConstraints.setEnabled(false);
+					btnJoinTable.setEnabled(false);
+					txtFieldNameTableNewTableName.setEnabled(false);
+				}
+				
+			}
+			
+		});
+		this.tableJoinConstraints.addContainerListener(new ContainerListener() {
+			
+			public void update() {
+				System.out.println("Update Called!");
+				if(tableJoinConstraints.getRowCount() > 0) {
+					tableJoinConstraints.setEnabled(true);
+					btnJoinTable.setEnabled(false);
+					txtFieldNameTableNewTableName.setEnabled(false);
+				} else {
+					tableJoinConstraints.setEnabled(false);
+					btnJoinTable.setEnabled(false);
+					txtFieldNameTableNewTableName.setEnabled(false);
+				}
+				
+			}
+			
+			@Override
 			public void componentAdded(ContainerEvent e) {
-				btnJoinOperationRemoveSelected.setEnabled(true);
-				tableJoinConstraints.setEnabled(true);
-				tableJoinConstraints.setRowSelectionAllowed(true);
-				tableJoinConstraints.setColumnSelectionAllowed(true);
+				update();
+				System.out.println("componentAdded()");
 			}
 
 			@Override
 			public void componentRemoved(ContainerEvent e) {
-				if(tableJoinConstraints.getRowCount() < 1) {
-					btnJoinOperationRemoveSelected.setEnabled(false);
-					tableJoinConstraints.setEnabled(false);
-				}else {
-					tableJoinConstraints.setEnabled(true);
-				}
+				update();
+				System.out.println("componentRemoved()");
 			}
 			
 		});
@@ -1486,7 +1521,7 @@ public class TableJoinDialog extends JFrame  {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				int[] rows = tableJoinConstraints.getSelectedRows();
-				if(rows.length > 0)
+				if(rows.length < 0)
 					return;
 				
 				TableModel oldTableModel = tableJoinConstraints.getModel();
@@ -1504,6 +1539,12 @@ public class TableJoinDialog extends JFrame  {
 					}
 				}
 				tableJoinConstraints.setModel(newTableModel);
+				
+				boolean enableJoinTable = false;
+				enableJoinTable = newTableModel.getRowCount() < 1;
+				txtFieldNameTableNewTableName.setEnabled(enableJoinTable);
+				btnJoinTable.setEnabled(enableJoinTable);
+				
 			}
 			
 		});
