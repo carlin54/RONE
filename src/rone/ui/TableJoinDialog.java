@@ -1195,7 +1195,43 @@ public class TableJoinDialog extends JFrame  {
 			
 			mDatabaseTabbedPane.addJoinOperations
 				(tableName, tabA, tabASelect, tabAKey, tabB, tabBSelect, tabBKey, joinType);
+			
+			clearForm();
+			
 		}
+		
+	}
+	
+	private void clearForm() {
+		// Stage 1
+		choiceTableSelectA.setSelectedIndex(-1);
+		choiceTableSelectB.setSelectedIndex(-1);
+		
+		// Stage 2
+		btnTableAInclude.setEnabled(false);
+		btnTableAExclude.setEnabled(false);
+		btnTableAIncludeAll.setEnabled(false);
+		btnTableAExcludeAll.setEnabled(false);
+		btnTableBInclude.setEnabled(false);
+		btnTableBExclude.setEnabled(false);
+		btnTableBIncludeAll.setEnabled(false);
+		btnTableBExcludeAll.setEnabled(false);
+		
+		// Stage 4
+		choiceJoinOperationJoinType.setSelectedIndex(-1);
+		choiceJoinOperationJoinType.setEnabled(false);
+		tableJoinConstraints.setEnabled(false);
+		comboBoxJoinOperationTableA.setEnabled(false);
+		comboBoxJoinOperationTableB.setEnabled(false);
+		btnJoinOperationAddConstraint.setEnabled(false);
+		btnJoinOperationRemoveSelected.setEnabled(false);
+		
+		// Stage 5
+		txtFieldNameTableNewTableName.setEnabled(false);
+		btnJoinTable.setEnabled(false);
+		tableJoinConstraints.setEnabled(true);
+		tableJoinConstraints.setRowSelectionAllowed(true);
+		tableJoinConstraints.setColumnSelectionAllowed(false);
 		
 	}
 	
@@ -1233,6 +1269,89 @@ public class TableJoinDialog extends JFrame  {
 	private ChoiceTablePopupMenuListener mChoiceTablePopupMenuListener;
 	
 	private ButtonJoinTableActionListener mButtonJoinTableActionListener;
+	
+	private class ConstraintTableListSelectionListener implements ListSelectionListener {
+		@Override
+		public void valueChanged(ListSelectionEvent e) {
+			
+			if(tableJoinConstraints.getSelectedRowCount() > 0) {
+				btnJoinOperationRemoveSelected.setEnabled(true);
+			} else {
+				btnJoinOperationRemoveSelected.setEnabled(false);
+			}
+			
+		}
+	}
+	
+	private class ConstraintTableContainerListener implements ContainerListener {
+		
+		public void update() {
+			System.out.println("Update Called!");
+			if(tableJoinConstraints.getRowCount() > 0) {
+				tableJoinConstraints.setEnabled(true);
+				btnJoinTable.setEnabled(false);
+				txtFieldNameTableNewTableName.setEnabled(false);
+			} else {
+				tableJoinConstraints.setEnabled(false);
+				btnJoinTable.setEnabled(false);
+				txtFieldNameTableNewTableName.setEnabled(false);
+			}
+			
+		}
+		
+		@Override
+		public void componentAdded(ContainerEvent e) {
+			update();
+			System.out.println("componentAdded()");
+		}
+
+		@Override
+		public void componentRemoved(ContainerEvent e) {
+			update();
+			System.out.println("componentRemoved()");
+		}
+	}
+
+	private class JoinOperationRemoveSelectActionListener implements ActionListener {
+
+		private boolean contains(int find, int[] array) {
+			for(int i : array) {
+				if(i == find) {
+					return true;
+				}
+			}
+			return false;
+		}
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			int[] rows = tableJoinConstraints.getSelectedRows();
+			if(rows.length < 0)
+				return;
+			
+			TableModel oldTableModel = tableJoinConstraints.getModel();
+			DefaultTableModel newTableModel = new DefaultTableModel();
+			for(int iRow = 0; iRow < oldTableModel.getRowCount(); iRow++) {
+				if(!contains(iRow, rows)) {
+					Object[] newRow = new Object[oldTableModel.getColumnCount()];
+					for(int iCol = 0; iCol < oldTableModel.getColumnCount(); iCol++) {
+						Object cell = oldTableModel.getValueAt(iRow, iCol);
+						newRow[iCol] = newRow;
+					}
+					newTableModel.addRow(newRow);
+				} else {
+					System.out.println("Skipping row!");
+				}
+			}
+			tableJoinConstraints.setModel(newTableModel);
+			
+			boolean enableJoinTable = false;
+			enableJoinTable = newTableModel.getRowCount() > 0;
+			txtFieldNameTableNewTableName.setEnabled(enableJoinTable);
+			btnJoinTable.setEnabled(enableJoinTable);
+			
+	}
+
+	}
 	
 	void init() {
 		
@@ -1387,14 +1506,7 @@ public class TableJoinDialog extends JFrame  {
 						false);
 		btnTableBExcludeAll.addActionListener(mButtonTableBExcludeAllControlListActionListener);
 		
-		btnTableAInclude.setEnabled(false);
-		btnTableAExclude.setEnabled(false);
-		btnTableAIncludeAll.setEnabled(false);
-		btnTableAExcludeAll.setEnabled(false);
-		btnTableBInclude.setEnabled(false);
-		btnTableBExclude.setEnabled(false);
-		btnTableBIncludeAll.setEnabled(false);
-		btnTableBExcludeAll.setEnabled(false);
+
 		// Stage 3
 			
 		// Pre-Stage 4 
@@ -1420,11 +1532,7 @@ public class TableJoinDialog extends JFrame  {
 			JOIN_TO_SQL.put(key, value);
 			choiceJoinOperationJoinType.addItem(key);
 		}
-		choiceJoinOperationJoinType.setSelectedIndex(-1);
-		choiceJoinOperationJoinType.setEnabled(false);
-		
-		tableJoinConstraints.setEnabled(false);
-		
+
 		mComboBoxJoinOperationTableItemListener = 
 				new ChoiceJoinOperationItemListener(comboBoxJoinOperationTableA, comboBoxJoinOperationTableB, btnJoinOperationAddConstraint, choiceJoinOperationJoinType);
 		
@@ -1432,124 +1540,21 @@ public class TableJoinDialog extends JFrame  {
 		comboBoxJoinOperationTableB.addItemListener(mComboBoxJoinOperationTableItemListener);
 		choiceJoinOperationJoinType.addItemListener(mComboBoxJoinOperationTableItemListener);
 		
-		comboBoxJoinOperationTableA.setEnabled(false);
-		comboBoxJoinOperationTableB.setEnabled(false);
-		
-		mButtonAddConstraintActionListener = new ButtonAddConstraintActionListener();
-		btnJoinOperationAddConstraint.addActionListener(mButtonAddConstraintActionListener);
-		btnJoinOperationAddConstraint.setEnabled(false);
-		
-		btnJoinOperationRemoveSelected.setEnabled(false);
+		btnJoinOperationAddConstraint.addActionListener(new ButtonAddConstraintActionListener());
 		
 		// Stage 5
-		mTextFieldNewTableNameKeyListener = new TextFieldNewTableNameKeyListener();
-		txtFieldNameTableNewTableName.setEnabled(false);
-		txtFieldNameTableNewTableName.addKeyListener(mTextFieldNewTableNameKeyListener);
+		txtFieldNameTableNewTableName.addKeyListener(new TextFieldNewTableNameKeyListener());
 		
-		btnJoinTable.setEnabled(false);
 		mButtonJoinTableActionListener = new ButtonJoinTableActionListener();
 		btnJoinTable.addActionListener(mButtonJoinTableActionListener);
-		
-		tableJoinConstraints.setEnabled(true);
-		tableJoinConstraints.setRowSelectionAllowed(true);
-		tableJoinConstraints.setColumnSelectionAllowed(false);
-		
-		tableJoinConstraints.setColumnSelectionAllowed(false);
-		tableJoinConstraints.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 
-			@Override
-			public void valueChanged(ListSelectionEvent e) {
-				
-				if(tableJoinConstraints.getSelectedRowCount() > 0) {
-					btnJoinOperationRemoveSelected.setEnabled(true);
-				} else {
-					btnJoinOperationRemoveSelected.setEnabled(false);
-				}
-				
-				if(tableJoinConstraints.getRowCount() > 0) {
-					tableJoinConstraints.setEnabled(true);
-					btnJoinTable.setEnabled(true);
-					txtFieldNameTableNewTableName.setEnabled(true);
-				} else {
-					tableJoinConstraints.setEnabled(false);
-					btnJoinTable.setEnabled(false);
-					txtFieldNameTableNewTableName.setEnabled(false);
-				}
-				
-			}
-			
-		});
-		this.tableJoinConstraints.addContainerListener(new ContainerListener() {
-			
-			public void update() {
-				System.out.println("Update Called!");
-				if(tableJoinConstraints.getRowCount() > 0) {
-					tableJoinConstraints.setEnabled(true);
-					btnJoinTable.setEnabled(false);
-					txtFieldNameTableNewTableName.setEnabled(false);
-				} else {
-					tableJoinConstraints.setEnabled(false);
-					btnJoinTable.setEnabled(false);
-					txtFieldNameTableNewTableName.setEnabled(false);
-				}
-				
-			}
-			
-			@Override
-			public void componentAdded(ContainerEvent e) {
-				update();
-				System.out.println("componentAdded()");
-			}
-
-			@Override
-			public void componentRemoved(ContainerEvent e) {
-				update();
-				System.out.println("componentRemoved()");
-			}
-			
-		});
-		this.btnJoinOperationRemoveSelected.addActionListener(new ActionListener() {
+		tableJoinConstraints.getSelectionModel().addListSelectionListener(new ConstraintTableListSelectionListener());
+		tableJoinConstraints.addContainerListener(new ConstraintTableContainerListener());
+		btnJoinOperationRemoveSelected.addActionListener(new JoinOperationRemoveSelectActionListener());
 		
-			private boolean contains(int find, int[] array) {
-				for(int i : array) {
-					if(i == find) {
-						return true;
-					}
-				}
-				return false;
-			}
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				int[] rows = tableJoinConstraints.getSelectedRows();
-				if(rows.length < 0)
-					return;
-				
-				TableModel oldTableModel = tableJoinConstraints.getModel();
-				DefaultTableModel newTableModel = new DefaultTableModel();
-				for(int iRow = 0; iRow < oldTableModel.getRowCount(); iRow++) {
-					if(!contains(iRow, rows)) {
-						Object[] newRow = new Object[oldTableModel.getColumnCount()];
-						for(int iCol = 0; iCol < oldTableModel.getColumnCount(); iCol++) {
-							Object cell = oldTableModel.getValueAt(iRow, iCol);
-							newRow[iCol] = newRow;
-						}
-						newTableModel.addRow(newRow);
-					} else {
-						System.out.println("Skipping row!");
-					}
-				}
-				tableJoinConstraints.setModel(newTableModel);
-				
-				boolean enableJoinTable = false;
-				enableJoinTable = newTableModel.getRowCount() < 1;
-				txtFieldNameTableNewTableName.setEnabled(enableJoinTable);
-				btnJoinTable.setEnabled(enableJoinTable);
-				
-			}
-			
-		});
+		
+		clearForm();
 	}
+	
 
-	
-	
 }
