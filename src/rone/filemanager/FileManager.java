@@ -226,11 +226,21 @@ public class FileManager {
 		return identifiers.toArray(new String[len]);	
 	}
 
-	public static String getLocationTemporary() {
+	public static void clearTemp() {
+		File tempDir = new File(getTemporaryDirectory());
+		File[] files = tempDir.listFiles();
+		
+		for(File file : files) {
+			file.delete();
+		}
+	}
+	
+	public static String getTemporaryDirectory() {
 		Path currentRelativePath = Paths.get("");
 		String location = currentRelativePath.toAbsolutePath().toString() + "\\temp";
 		return location;
 	}
+	
 	private static final char CHAR_QUOTATION = '\"';
 	private static boolean isEncasedInQuotations(String str) {
 		int len = str.length();

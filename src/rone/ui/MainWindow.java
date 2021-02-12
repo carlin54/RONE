@@ -1,27 +1,16 @@
 package rone.ui;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Stack;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,12 +18,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
 
 import jp.sbi.garuda.backend.net.exception.GarudaConnectionNotInitializedException;
 import jp.sbi.garuda.backend.net.exception.NetworkConnectionException;
@@ -42,56 +26,27 @@ import rone.backend.PercellomeSearchInterface;
 import rone.backend.PercellomeSearchInterface.SearchMode;
 import rone.backend.PercellomeSearchInterface.Species;
 import rone.backend.ReactomeSearchInterface;
-import rone.backend.SearchDialog;
-import rone.backend.SearchInterface;
 import rone.backend.TargetMineSearchInterface;
 import rone.backend.garudahandler.GarudaHandler;
 import rone.backend.Search;
-import rone.filemanager.Database;
 import rone.filemanager.FileManager;
-import rone.filemanager.Table;
 
 
 import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.JFileChooser;
 import javax.swing.BoxLayout;
-import javax.swing.Icon;
 import javax.swing.JPopupMenu;
 import java.awt.Toolkit;
 import java.net.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.io.*;
-import java.net.*;
-import java.io.*;
-
-import org.json.*;
-import java.sql.*; 
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
-import org.apache.derby.drda.NetworkServerControl;
-import org.apache.derby.jdbc.EmbeddedDriver;
 import javax.swing.JTabbedPane;
-import javax.swing.JTable;
-import javax.swing.JTextArea;
 
-import java.awt.ScrollPane;
-import javax.swing.JLabel;
-import javax.swing.JSplitPane;
-import java.awt.Label;
-import java.awt.List;
 
-public class MainWindow implements ActionListener {
-	
-	private JScrollPane scrollPane;
-	private JMenuBar menuBar;
+public class MainWindow {
 	
 	private final ActionFileImportFromFile actionImportActionFromFile = new ActionFileImportFromFile();
 	private final ActionFileExportToFile actionExportToFile = new ActionFileExportToFile();
@@ -105,11 +60,8 @@ public class MainWindow implements ActionListener {
 	private final ActionSearchPercellomeWithGeneSymbols actionPercellomeWithGeneSymbols = new ActionSearchPercellomeWithGeneSymbols();
 	private final ActionSearchReactomeWithGeneSymbols actionReactomeWithGeneSymbols = new ActionSearchReactomeWithGeneSymbols();
 
-	private final ActionSearchBioCompendiumWithSelect actionBioCompendiumWithSelect = new ActionSearchBioCompendiumWithSelect();
 	private final ActionTableJoin actionTableJoin = new ActionTableJoin();
-	private final ActionTableClear actionTableClear = new ActionTableClear();
 	
-	private MainWindow mMainWindow;
 	private JFrame mMainWindowJFrame;
 	private GarudaHandler mGarudaHandler;
 	
@@ -140,6 +92,19 @@ public class MainWindow implements ActionListener {
 	private JMenuItem mntmEnsembleTXT;
 	private JMenuItem mntmEnsembleCSV;
 	
+	enum FileExtension {
+		TXT,
+		CSV
+	}
+	
+	enum FileContence {
+		GENELIST,
+		ENSEMBLE,
+		CSV,
+		TXT
+	}
+	
+	
 	public DatabaseTabbedPane getTabbedPane() {
 		Component[] components = this.mMainWindowJFrame.getContentPane().getComponents();
 		for(Component component : components) {
@@ -156,9 +121,7 @@ public class MainWindow implements ActionListener {
 	}
 	
 
-	
 	private void initialize() {
-		mMainWindow = this;
 		mMainWindowJFrame = new JFrame();
 		mDatabaseTabbedPane = new DatabaseTabbedPane(JTabbedPane.TOP);
 		mDatabaseTabbedPane.setName("mDatabaseTabbedPane");
@@ -331,8 +294,7 @@ public class MainWindow implements ActionListener {
 		return found;
     }
     
-    public static void main(String[] args) {
-	
+    public static void main(String args[]) {
     	
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -347,11 +309,12 @@ public class MainWindow implements ActionListener {
 				
 			}
 		});
-	
 		
 	}
     	
     public MainWindow() {
+    	FileManager.clearTemp();
+    	
 		initialize();
 		
 		mMainWindowJFrame.getContentPane().setLayout(new BoxLayout(mMainWindowJFrame.getContentPane(), BoxLayout.X_AXIS));
@@ -361,8 +324,6 @@ public class MainWindow implements ActionListener {
 			this.mGarudaHandler = new GarudaHandler(this);
 		} catch (GarudaConnectionNotInitializedException | NetworkConnectionException e) {
 			showError(e);
-			//JOptionPane.showMessageDialog(mMainWindowJFrame, "Was unable to connect to Garuda Platform. Please restart to connect.");
-			e.printStackTrace();
 		}
 		
 		mDatabaseTabbedPane = new DatabaseTabbedPane(JTabbedPane.TOP);
@@ -370,31 +331,6 @@ public class MainWindow implements ActionListener {
 		mMainWindowJFrame.getContentPane().add(mDatabaseTabbedPane);
 		
 	}
-		
-	@Override
-	public void actionPerformed(ActionEvent e) {
-
-
-	}
-	
-	
-	
-	
-	private void loadStructuredFile(File file, String seperator) {
-		ArrayList<Object[]> data = new ArrayList<Object[]>();
-				
-		try {
-			data = FileManager.loadStructuredFile(file, seperator);
-			String[] columnIdentifiers = (String[])data.get(0);
-			data.remove(0);
-			loadTable(file.getName(), columnIdentifiers, data);
-		} catch (IOException e) {
-			e.printStackTrace();
-			showError(e);
-		}
-
-	}
-	
 	
 	private boolean hasFile(File file) {
 		return file != null && file.exists();
@@ -437,45 +373,6 @@ public class MainWindow implements ActionListener {
 		
 	}
 	
-	
-	public void windowClosing(WindowEvent e) {
-		//System.out.println("window closing");
-	}
-
-	
-	private class FileImportAction extends AbstractAction {
-		
-		final JFileChooser fc = new JFileChooser();
-		
-		public FileImportAction() {
-			putValue(NAME, "Open");
-			putValue(SHORT_DESCRIPTION, "Import a file");
-		}
-		
-		public void actionPerformed(ActionEvent e) {
-			
-			//In response to a button click:
-			int returnVal = fc.showOpenDialog(mMainWindowJFrame);
-			
-			if (returnVal == JFileChooser.APPROVE_OPTION) {
-				File file = fc.getSelectedFile();
-				
-				Object[] possibilities = {"CSV", "Tab Delimited Text"};
-				String content = (String)JOptionPane.showInputDialog(
-				                    mMainWindowJFrame,
-				                    "Complete the sentence:\n",
-				                    "File Type",
-				                    JOptionPane.PLAIN_MESSAGE,
-				                    null,
-				                    possibilities,
-				                    "Genelist");
-				
-				loadFile(file, content);
-			}
-			
-		}
-	}
-	
 	private void startDiscovery(String contence, String extension) {
 		String[] data = mDatabaseTabbedPane.getSelection();
 		
@@ -485,7 +382,7 @@ public class MainWindow implements ActionListener {
 		}
 		
 		int time = (int) new Date().getTime();
-		String tempLocation = FileManager.getLocationTemporary();
+		String tempLocation = FileManager.getTemporaryDirectory();
 		String fileName = tempLocation + "\\" + contence + "_" + time + "." + extension;
 		File file = null;
 		
@@ -517,151 +414,11 @@ public class MainWindow implements ActionListener {
 		return true;
 	}
 	
-	
-	private class ActionGarudaDiscoverGenelist extends AbstractAction {
-		public ActionGarudaDiscoverGenelist() {
-			putValue(NAME, "Genelist");
-			putValue(SHORT_DESCRIPTION, "Discover Garuda Genelist");
-		}
-		public void actionPerformed(ActionEvent ae) {
-			startDiscovery("genelist", "txt");
-		}
-	}
-	
-	
-	private class ActionGarudaDiscoverEnsemble extends AbstractAction {
-		
-		public ActionGarudaDiscoverEnsemble() {
-			putValue(NAME, "Ensemble");
-			putValue(SHORT_DESCRIPTION, "Discover Garuda Ensemble");
-			
-	
-		}
-		
-		public void actionPerformed(ActionEvent ae) {
-			
-			if(!hasValidSelection()) 
-				return;
-			
-			startDiscovery("ensemble", "txt");
-			
-		}
-	}
-
-	
-	private class FileExportTableAction extends AbstractAction {
-		
-		public FileExportTableAction() {
-			putValue(NAME, "Export");
-			putValue(SHORT_DESCRIPTION, "Export selected to CSV");
-		}
-		
-		public void actionPerformed(ActionEvent e) {
-			/*if(mToxicologyTable.isEmpty()) {
-				JOptionPane.showMessageDialog(mMainWindowJFrame, "There is no data in the table.");
-				return;
-			}*/
-			
-			JFrame parentFrame = new JFrame();
-			 
-			File fileToSave;
-			boolean hasFile = false;
-			do {
-				JFileChooser fileChooser = new JFileChooser();
-				fileChooser.setFileFilter(new FileFilter() {
-
-					   public String getDescription() {
-					       return "CSV (*.csv)";
-					   }
-
-					   public boolean accept(File f) {
-					       if (f.isDirectory()) {
-					           return true;
-					       } else {
-					           String filename = f.getName().toLowerCase();
-					           return filename.endsWith(".csv");
-					       }
-					   }
-					});
-				
-				fileChooser.setDialogTitle("Specify a file to save");   
-				int userSelection = fileChooser.showSaveDialog(parentFrame);
-				if (userSelection != JFileChooser.APPROVE_OPTION)
-				    return;
-				
-				fileToSave = fileChooser.getSelectedFile();
-				
-				if(fileToSave.exists()) {
-					//System.out.println("File exists!");
-					int dialogButton = JOptionPane.YES_NO_OPTION;
-					int dialogResult = JOptionPane.showConfirmDialog(null, "Would you like to overwrite this file?","Warning", dialogButton);
-					if(dialogResult == JOptionPane.YES_OPTION) {
-						if(!fileToSave.delete()) {
-							continue;
-						}
-					}
-				}else {
-					//System.out.println("File does not exists!");
-				}
-				
-				try {
-					fileToSave.createNewFile();
-					hasFile = true;
-				} catch (IOException e1) {
-					e1.printStackTrace();
-					continue;
-				}
-				
-			} while(!hasFile);
-			
-		    //System.out.println("Save as file: " + fileToSave.getAbsolutePath());
-		    
-		    if(mDatabaseTabbedPane.hasSelection()) {
-				
-			    BufferedWriter writer;
-				try {
-					writer = new BufferedWriter(new FileWriter(fileToSave));
-					int cols[] = mDatabaseTabbedPane.getSelectedColumns();
-					
-					String[] id = mDatabaseTabbedPane.getIdentifiers();
-					
-					String header = "";
-					for(int i = 0; i < cols.length-1; i++) {
-						int index = cols[i];
-						header = header + id[index] + ",";
-					}
-					int index = cols[cols.length-1];
-					header = header + id[index] + "\n"; 
-					writer.write(header);
-					
-					//System.out.println(header);
-					
-				    int rows[] = mDatabaseTabbedPane.getSelectedRows();
-				    for(int r = 0; r < rows.length; r++) {
-				    	String line = "";
-				    	for(int c = 0; c < cols.length-1; c++) {
-				    		line = line + "\"" + mDatabaseTabbedPane.getCell(r, c) + "\"" + ",";
-				    	}
-				    	line = line + mDatabaseTabbedPane.getCell(r, cols.length-1) + "\n";
-				    	writer.write(line);
-				    }
-					writer.close();
-					
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-			    
-			    
-			} else {
-				
-			}
-			
-		}
-		
-	}
-	
-	
 	private class ActionFileImportFromFile extends AbstractAction {
+
+
+
+		private static final long serialVersionUID = 1L;
 		public ActionFileImportFromFile() {
 			putValue(NAME, "from File");
 		}
@@ -689,8 +446,11 @@ public class MainWindow implements ActionListener {
 		}
 	}
 	
-	
 	private class ActionFileExportToFile extends AbstractAction {
+
+
+
+		private static final long serialVersionUID = 1L;
 		public ActionFileExportToFile() {
 			putValue(NAME, "to File");
 		}
@@ -732,17 +492,6 @@ public class MainWindow implements ActionListener {
 			}
 		}
 	}
-	enum FileExtension {
-		TXT,
-		CSV
-	}
-	
-	enum FileContence {
-		GENELIST,
-		ENSEMBLE,
-		CSV,
-		TXT
-	}
 	
 	private class ActionFileExportToGarudaStartDiscovery extends AbstractAction {
 		
@@ -769,6 +518,10 @@ public class MainWindow implements ActionListener {
 	}
 	
 	private class ActionFileExportToTable extends AbstractAction {
+
+
+
+		private static final long serialVersionUID = 1L;
 		public ActionFileExportToTable() {
 			putValue(NAME, "to Table");
 		}
@@ -813,6 +566,10 @@ public class MainWindow implements ActionListener {
 	}
 	
 	private class ActionSearchTargetMineWithGeneSymbols extends AbstractAction {
+
+
+
+		private static final long serialVersionUID = 1L;
 		public ActionSearchTargetMineWithGeneSymbols() {
 			putValue(NAME, "with Gene Symbols");
 
@@ -834,6 +591,10 @@ public class MainWindow implements ActionListener {
 	}
 	
 	private class ActionSearchReactomeWithGeneSymbols extends AbstractAction {
+
+
+
+		private static final long serialVersionUID = 1L;
 		public ActionSearchReactomeWithGeneSymbols() {
 			putValue(NAME, "with Gene Symbols");
 
@@ -853,15 +614,11 @@ public class MainWindow implements ActionListener {
 		}
 	}
 	
-	private class ActionSearchBioCompendiumWithSelect extends AbstractAction {
-		public ActionSearchBioCompendiumWithSelect() {
-			putValue(NAME, "with Select");
-		}
-		public void actionPerformed(ActionEvent e) {
-		}
-	}
-	
 	private class ActionTableJoin extends AbstractAction {
+
+
+
+		private static final long serialVersionUID = 1L;
 		public ActionTableJoin() {
 			putValue(NAME, "Join Table");
 		}
@@ -884,21 +641,12 @@ public class MainWindow implements ActionListener {
 		}
 	}
 	
-	private class ActionTableClear extends AbstractAction {
-		public ActionTableClear() {
-			putValue(NAME, "Clear");
-		}
-		public void actionPerformed(ActionEvent e) {
-		}
-	}
-	
 	public static void showError(Exception exceptionError) {
     	
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				exceptionError.printStackTrace();
-				ErrorDialog e = new ErrorDialog(exceptionError);  
-
+				new ErrorDialog(exceptionError);  
 			}
 		});
 		
@@ -919,6 +667,9 @@ public class MainWindow implements ActionListener {
 	}
 	
 	private class ActionSearchPercellomeWithGeneSymbols extends AbstractAction {
+
+
+		private static final long serialVersionUID = 1L;
 		public ActionSearchPercellomeWithGeneSymbols() {
 			putValue(NAME, "with Gene Symbols");
 		}
@@ -943,6 +694,8 @@ public class MainWindow implements ActionListener {
 	}
 	
 	private class ActionSearchPercellomeWithProbeIds extends AbstractAction {
+
+		private static final long serialVersionUID = 1L;
 		public ActionSearchPercellomeWithProbeIds() {
 			putValue(NAME, "with Probe IDs (Affy ID)");
 		}
@@ -965,4 +718,5 @@ public class MainWindow implements ActionListener {
 			}
 		}
 	}
+
 }
