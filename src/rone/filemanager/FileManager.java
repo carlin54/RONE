@@ -226,13 +226,20 @@ public class FileManager {
 		return identifiers.toArray(new String[len]);	
 	}
 
-	public static void clearTemp() {
+	public static boolean clearTemp() {
 		File tempDir = new File(getTemporaryDirectory());
-		File[] files = tempDir.listFiles();
-		
-		for(File file : files) {
-			file.delete();
+		if(tempDir.exists()) {
+			File[] files = tempDir.listFiles();
+			
+			for(File file : files) {
+				file.delete();
+			}
+			
+			return true;
+		}else {
+			return tempDir.mkdir();
 		}
+		
 	}
 	
 	public static String getTemporaryDirectory() {
