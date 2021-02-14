@@ -242,6 +242,10 @@ public class MainWindow {
 		JMenuItem mntmNewMenuItem = new JMenuItem("Discover");
 		JPopupMenu popupMenu = new JPopupMenu("Discover");
 		popupMenu.add(mntmNewMenuItem);
+		
+		
+		connectToGaruda();
+		
 	}
 	
     public static String getText(String url) throws Exception {
@@ -319,13 +323,6 @@ public class MainWindow {
 		
 		mMainWindowJFrame.getContentPane().setLayout(new BoxLayout(mMainWindowJFrame.getContentPane(), BoxLayout.X_AXIS));
 		
-		try {
-			//mDatabaseTabbedPane.setFillsViewportHeight(true);
-			this.mGarudaHandler = new GarudaHandler(this);
-		} catch (GarudaConnectionNotInitializedException | NetworkConnectionException e) {
-			showError(e);
-		}
-		
 		mDatabaseTabbedPane = new DatabaseTabbedPane(JTabbedPane.TOP);
 		mDatabaseTabbedPane.setName(TABBED_PANE_NAME);
 		mMainWindowJFrame.getContentPane().add(mDatabaseTabbedPane);
@@ -373,7 +370,33 @@ public class MainWindow {
 		
 	}
 	
+	private boolean isConnectedToGaruda() {
+		return mGarudaHandler != null ? mGarudaHandler.isConnected() : false;
+	}
+	
+	private boolean connectToGaruda() {
+		try {
+			this.mGarudaHandler = new GarudaHandler(this);
+			return true;
+		} catch (GarudaConnectionNotInitializedException | NetworkConnectionException e) {
+			this.mGarudaHandler = null;
+			return false;
+		}
+	}
+	
 	private void startDiscovery(String contence, String extension) {
+		
+		if(!isConnectedToGaruda()) {
+			boolean success = connectToGaruda();
+			if(!success) {
+				JOptionPane.showMessageDialog(mMainWindowJFrame,
+					    "Unable to connect to the Garuda Platform. \r\nOpen the Garuda Platform to connect.",
+					    "Connection Error",
+					    JOptionPane.ERROR_MESSAGE);
+				return; 
+			}
+		}
+		
 		String[] data = mDatabaseTabbedPane.getSelection();
 		
 		String list = new String("");
@@ -398,7 +421,6 @@ public class MainWindow {
 		
 	}
 	
-	
 	boolean hasValidSelection() {
 		
 		if(mDatabaseTabbedPane.isEmpty()) {
@@ -415,8 +437,6 @@ public class MainWindow {
 	}
 	
 	private class ActionFileImportFromFile extends AbstractAction {
-
-
 
 		private static final long serialVersionUID = 1L;
 		public ActionFileImportFromFile() {
@@ -447,8 +467,6 @@ public class MainWindow {
 	}
 	
 	private class ActionFileExportToFile extends AbstractAction {
-
-
 
 		private static final long serialVersionUID = 1L;
 		public ActionFileExportToFile() {
