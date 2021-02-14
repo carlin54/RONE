@@ -1,12 +1,12 @@
-Fri Feb 12 10:02:50 AEST 2021 : Apache Derby Network Server - 10.15.2.0 - (1873585) started and ready to accept connections on port 1528
+Sat Feb 13 17:38:38 AEST 2021 : Apache Derby Network Server - 10.15.2.0 - (1873585) started and ready to accept connections on port 1528
 ----------------------------------------------------------------
-Fri Feb 12 10:02:50 AEST 2021:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.15.2.0 - (1873585): instance a816c00e-0177-938c-1ffc-000001000c88 
-on database directory memory:C:\Users\Richard\Documents\GitHub\RONE\Singleton with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@4cc77c2e 
-Loaded from file:/C:/Users/Richard/Documents/GitHub/RONE/lib/derby/derby.jar
+Sat Feb 13 17:38:38 AEST 2021:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.15.2.0 - (1873585): instance a816c00e-0177-9a53-cb21-0000009dc7e0 
+on database directory memory:C:\Users\Richard\eclipse-workspace\RONE\Singleton with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@e73f9ac 
+Loaded from file:/C:/Users/Richard/eclipse-workspace/RONE/lib/derby/derby.jar
 java.vendor=Oracle Corporation
-java.runtime.version=14.0.2+12-46
-user.dir=C:\Users\Richard\Documents\GitHub\RONE
+java.runtime.version=15.0.1+9-18
+user.dir=C:\Users\Richard\eclipse-workspace\RONE
 os.name=Windows 10
 os.arch=amd64
 os.version=10.0
