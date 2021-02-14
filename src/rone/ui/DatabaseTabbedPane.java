@@ -78,6 +78,10 @@ import rone.filemanager.Database.Join;
 
 public class DatabaseTabbedPane extends JTabbedPane {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 845770918437336262L;
 	ArrayList<Tab> mDatabaseTabs; 
 	SearchThreadManager mSearchThreadManager; 
 	JoinOperationThreadManager mJoinOperationThreadManager;
@@ -510,7 +514,12 @@ public class DatabaseTabbedPane extends JTabbedPane {
     
     static public class Tab extends JScrollPane {
     	
-    	public enum Status {
+    	/**
+		 * 
+		 */
+		private static final long serialVersionUID = -7182226718587775509L;
+
+		public enum Status {
     		AVALIABLE,
     		WAITING,
     		SEARCHING,
@@ -869,7 +878,7 @@ public class DatabaseTabbedPane extends JTabbedPane {
     		for(int i = 0; i < findColumnsIdentifiers.length; i++) {
     			String findColumnIdentifer = findColumnsIdentifiers[i];
     			int indexColumnIdentifer = indexOf(findColumnIdentifer, columnsIdentifiers);
-    			foundColumnIdentifiersIndicies[i] = indexColumnIdentifer; 
+    			foundColumnIdentifiersIndicies[i] = mTable.convertColumnIndexToModel(indexColumnIdentifer);
     		}
     		return foundColumnIdentifiersIndicies;
     	}
@@ -1093,7 +1102,12 @@ public class DatabaseTabbedPane extends JTabbedPane {
     	
     	public class ButtonTabComponent extends JPanel {
 
-    	    static private final String TAB_ICON_LABEL_NAME = "TAB_HEADER_LABEL";
+    	    /**
+			 * 
+			 */
+			private static final long serialVersionUID = -1607002728575939037L;
+
+			static private final String TAB_ICON_LABEL_NAME = "TAB_HEADER_LABEL";
     	    
     	    Tab mTab;
     	    JLabel mLabel;
@@ -1142,7 +1156,11 @@ public class DatabaseTabbedPane extends JTabbedPane {
 
     	    private class TabButton extends JButton {
     	    	
-    	    	Tab mTab; 
+    	    	/**
+				 * 
+				 */
+				private static final long serialVersionUID = 5107206656315177278L;
+				Tab mTab; 
     	    	
     	        public TabButton(Tab tab) {
     	        	mTab = tab;
@@ -1259,33 +1277,16 @@ public class DatabaseTabbedPane extends JTabbedPane {
 	}
     
 	
-    private String[] createColumns(Tab a, int[] selectA, int[] keyA, Tab b, int[] selectB, int[] keyB) {
+    private String[] concatenate(String[] selectionA, String[] selectionB) {
 		
-		String[] aIdentifers = a.getColumnIdentifers();
-		String[] bIdentifers = b.getColumnIdentifers();
-		
-		String[] aSelectedColumns = getSelectedColumns(aIdentifers, selectA);
-		String[] bSelectedColumns = getSelectedColumns(bIdentifers, selectB);
-		
-		int aLen = aSelectedColumns.length;
-		int bLen = bSelectedColumns.length;
-		
-		int aKeyLen = keyA.length;
-		int bKeyLen = keyB.length;
-		
-		assert(aKeyLen == bKeyLen);
-		
+		int aLen = selectionA.length;
+		int bLen = selectionB.length;
 		int outputLength = aLen + bLen;
 		
 		String[] result = new String[outputLength];
-		
-		/*for(int i = 0; i < aKeyLen; i++) {
-			int idx = keyA[i];
-			result[i] = aSelectedColumns[idx];
-		}*/
-		
-		System.arraycopy(aSelectedColumns, 0, result, 0, aLen);
-		System.arraycopy(bSelectedColumns, 0, result, aLen, bLen);
+	
+		System.arraycopy(selectionA, 0, result, 0, aLen);
+		System.arraycopy(selectionB, 0, result, aLen, bLen);
 		
 		return result;
 	}
@@ -1301,12 +1302,19 @@ public class DatabaseTabbedPane extends JTabbedPane {
 	
     public void addJoinOperations(
     		String tableName, 
-			Tab tabA, int[] selectA, int[] keyA,
-			Tab tabB, int[] selectB, int[] keyB,
+			Tab tabA, String[] selectA, String[] keyA,
+			Tab tabB, String[] selectB, String[] keyB,
 			Database.Join.Type joinType){
     	
+    	int[] aSelect = tabA.getColumnSelect(selectA);
+    	int[] aKey = tabA.getColumnSelect(keyA);
+    	int[] bSelect = tabB.getColumnSelect(selectB);
+    	int[] bKey = tabB.getColumnSelect(keyB);
+    	
+    	
+    	
 		String safeTableName = makeSafeTabName(tableName);
-		String[] columnIdentifers = createColumns(tabA, selectA, keyA, tabB, selectB, keyB);
+		String[] columnIdentifers = concatenate(selectA, selectB);
 		String[] safeColumnIdentifers = makeSafeColumnIdentifers(columnIdentifers);
 		
 		Tab tabC = new Tab(safeTableName, safeColumnIdentifers);
@@ -1318,7 +1326,7 @@ public class DatabaseTabbedPane extends JTabbedPane {
 		addTab(tabC);
 		
 		JoinOperation joinOperation 
-			= new JoinOperation(tabA, selectA, keyA, tabB, selectB, keyB, joinType, tabC);    	
+			= new JoinOperation(tabA, aSelect, aKey, tabB, bSelect, bKey, joinType, tabC);    	
 		
 		mJoinOperationThreadManager.addJoinOperation(joinOperation);
     }

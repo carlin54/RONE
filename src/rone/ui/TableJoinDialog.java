@@ -1128,12 +1128,11 @@ public class TableJoinDialog extends JFrame  {
 			return elements;
 		}
 		
-		int[] getTabASelect() {
+		String[] getTabASelect() {
 			Tab tabA = getTabA();
 			ListModel aModel = listTableAIncludeColumns.getModel();
-			String[] elements = getElements(aModel);
-			int[] aSelection = tabA.getColumnSelect(elements);
-			return aSelection; 
+			String[] aSelect = getElements(aModel);
+			return aSelect; 
 		}
 		
 		String[] getTableConstraintsColumn(int col) {
@@ -1147,10 +1146,9 @@ public class TableJoinDialog extends JFrame  {
 			return column;
 		}
 		
-		int[] getTabAKey() {
+		String[] getTabAKey() {
 			Tab tabA = getTabA();
-			String[] columnA = getTableConstraintsColumn(0);
-			int[] aKey = tabA.getColumnSelect(columnA);
+			String[] aKey = getTableConstraintsColumn(0);
 			return aKey;
 		}
 		
@@ -1159,18 +1157,16 @@ public class TableJoinDialog extends JFrame  {
 			return mDatabaseTabbedPane.getTab(selectedB);
 		}
 		
-		int[] getTabBSelect() {
+		String[] getTabBSelect() {
 			Tab tabB = getTabB();
 			ListModel bModel = listTableBIncludeColumns.getModel();
-			String[] elements = getElements(bModel);
-			int[] selection = tabB.getColumnSelect(elements);
-			return selection; 
+			String[] bSelect = getElements(bModel);
+			return bSelect; 
 		}
 		
-		int[] getTabBKey() {
+		String[] getTabBKey() {
 			Tab tabB = getTabB();
-			String[] columnB = getTableConstraintsColumn(2);
-			int[] bKey = tabB.getColumnSelect(columnB);
+			String[] bKey = getTableConstraintsColumn(2);
 			return bKey;
 		}
 		
@@ -1184,12 +1180,12 @@ public class TableJoinDialog extends JFrame  {
 
 			String tableName = getTableName();
 			Tab tabA = getTabA();
-			int[] tabASelect = getTabASelect();
-			int[] tabAKey = getTabAKey();
+			String[] tabASelect = getTabASelect();
+			String[] tabAKey = getTabAKey();
 			
 			Tab tabB = getTabB();
-			int[] tabBSelect = getTabBSelect();
-			int[] tabBKey = getTabBKey();
+			String[] tabBSelect = getTabBSelect();
+			String[] tabBKey = getTabBKey();
 			
 			Database.Join.Type joinType = getJoinType();
 			
