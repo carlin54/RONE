@@ -1,16 +1,17 @@
 package rone.ui;
 
+
 import java.awt.Component;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import java.awt.event.ActionEvent;
-import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,6 +20,14 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import org.pf4j.DefaultPluginManager;
+import org.pf4j.Plugin;
+import org.pf4j.PluginDescriptor;
+import org.pf4j.PluginManager;
+import org.pf4j.PluginState;
+import org.pf4j.PluginWrapper;
+import org.pf4j.ZipPluginManager;
 
 import jp.sbi.garuda.backend.net.exception.GarudaConnectionNotInitializedException;
 import jp.sbi.garuda.backend.net.exception.NetworkConnectionException;
@@ -30,7 +39,8 @@ import rone.backend.TargetMineSearchInterface;
 import rone.backend.garudahandler.GarudaHandler;
 import rone.backend.Search;
 import rone.filemanager.FileManager;
-
+import rone.plugins.SearchExtension;
+import rone.plugins.SearchPlugin;
 
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
@@ -44,7 +54,6 @@ import java.io.*;
 import java.sql.SQLException;
 
 import javax.swing.JTabbedPane;
-
 
 public class MainWindow {
 	
@@ -246,6 +255,8 @@ public class MainWindow {
 		
 		connectToGaruda();
 		
+		
+		
 	}
 	
     public static String getText(String url) throws Exception {
@@ -315,11 +326,33 @@ public class MainWindow {
 		});
 		
 	}
-    	
+    
+    
     public MainWindow() {
     	FileManager.clearTemp();
+    	//
+    	System.out.println(System.getProperty("pf4j.pluginsDir", "plugins"));
     	
-		initialize();
+        PluginManager pluginManager = new DefaultPluginManager();
+        pluginManager.loadPlugins();
+        pluginManager.startPlugins();
+        List<PluginWrapper> pl = pluginManager.getPlugins();
+        List<Class<? extends SearchExtension>> se = pluginManager.getExtensionClasses(SearchExtension.class);
+        for(PluginWrapper pw : pl) {
+        	PluginDescriptor pd = pw.getDescriptor();
+        	PluginState ps = pw.getPluginState();
+        	ClassLoader cl = pw.getPluginClassLoader();
+        	Plugin p = pw.getPlugin();
+        	p.start();
+        	Class[] interfaces = p.getClass().getInterfaces();
+        	Class ga = p.getClass().getSuperclass();
+        	System.out.println(p.getClass().toString());
+        	System.out.println(ga.getClass().toString());
+        	System.out.println(p.getClass().isAssignableFrom(SearchPlugin.class));
+        }
+        
+    	//
+    	initialize();
 		
 		mMainWindowJFrame.getContentPane().setLayout(new BoxLayout(mMainWindowJFrame.getContentPane(), BoxLayout.X_AXIS));
 		
@@ -736,5 +769,4 @@ public class MainWindow {
 			}
 		}
 	}
-
 }

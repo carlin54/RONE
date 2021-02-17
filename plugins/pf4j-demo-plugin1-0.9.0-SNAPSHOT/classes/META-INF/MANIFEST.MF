@@ -1,0 +1,4 @@
+Plugin-Id: welcome-plugin
+Plugin-Version: 0.0.1
+Plugin-Provider: Decebal Suiu
+Plugin-Class: org.pf4j.demo.welcome.WelcomePlugin

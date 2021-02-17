@@ -1,12 +1,25 @@
 package rone.filemanager;
 
+import org.pf4j.PluginWrapper;
+import org.pf4j.RuntimeMode;
+import org.pf4j.Extension;
+import org.pf4j.Plugin;
+
 import java.awt.event.WindowEvent;
 import java.io.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.ServiceLoader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -225,7 +238,53 @@ public class FileManager {
 		int len = identifiers.size();
 		return identifiers.toArray(new String[len]);	
 	}
+	
+	public static String getSearchPluginDirectory() {
+		Path currentRelativePath = Paths.get("");
+		String location = currentRelativePath.toAbsolutePath().toString() + "\\plugins";
+		return location;
+	}
+	
+	
+	public class ExtensionLoader<C> {
 
+		  public C LoadClass(String directory, String classpath, Class<C> parentClass) throws ClassNotFoundException {
+		    File pluginsDir = new File(System.getProperty("user.dir") + directory);
+		    for (File jar : pluginsDir.listFiles()) {
+		      try {
+		        ClassLoader loader = URLClassLoader.newInstance(
+		            new URL[] { jar.toURL() },
+		            getClass().getClassLoader()
+		        );
+		        Class<?> clazz = Class.forName(classpath, true, loader);
+		        Class<? extends C> newClass = clazz.asSubclass(parentClass);
+		        // Apparently its bad to use Class.newInstance, so we use 
+		        // newClass.getConstructor() instead
+		        Constructor<? extends C> constructor = newClass.getConstructor();
+		        return constructor.newInstance();
+		        
+		      } catch (ClassNotFoundException e) {
+		        // There might be multiple JARs in the directory,
+		        // so keep looking
+		    	  System.out.println(jar.getAbsoluteFile());
+		        continue;
+		      } catch (MalformedURLException e) {
+		        e.printStackTrace();
+		      } catch (NoSuchMethodException e) {
+		        e.printStackTrace();
+		      } catch (InvocationTargetException e) {
+		        e.printStackTrace();
+		      } catch (IllegalAccessException e) {
+		        e.printStackTrace();
+		      } catch (InstantiationException e) {
+		        e.printStackTrace();
+		      }
+		    }
+		    throw new ClassNotFoundException("Class " + classpath
+		        + " wasn't found in directory " + System.getProperty("user.dir") + directory);
+		  }
+		}
+	
 	public static boolean clearTemp() {
 		File tempDir = new File(getTemporaryDirectory());
 		if(tempDir.exists()) {

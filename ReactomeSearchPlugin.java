@@ -1,31 +1,33 @@
-package rone.backend;
+package plugins;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class ReactomeSearchInterface implements SearchInterface {
+public class ReactomeSearchPlugin extends SearchPlugin {
 
 	@Override
-	public String getTitle() {
+	public boolean onPluginLoad() {
+		return true;
+	}
+
+	@Override
+	public String[] getPluginMenuLocation() {
+		return new String[] {"Reactome","with Genes"};
+	}
+
+	@Override
+	public String getPluginTitle() {
 		return "Reactome";
 	}
 
 	@Override
-	public String getIconLocation() {
-		Path currentRelativePath = Paths.get("");
-		return currentRelativePath.toAbsolutePath().toString() + "\\icons\\reactome_icon.png";
-	}
-
-	@Override
-	public String[] getColumnIdentifers() {
+	public String[] getPluginColumnIdentifers() {
 		return new String[]{
 				"Gene Symbol", 
 				"Species Name", 
@@ -40,20 +42,25 @@ public class ReactomeSearchInterface implements SearchInterface {
 	}
 
 	@Override
-	public int[] getPrimaryKeys() {
-		return new int[] {};
+	public void onPluginBeginSearch() {
+		return;
 	}
 
 	@Override
-	public int getWorkSize() {
+	public int getPluginSearchTimeout() {
+		return 60*1000;
+	}
+
+	@Override
+	public int getPluginSearchSize() {
 		return 1;
 	}
 
 	@Override
-	public int getThreadPoolSize() {
+	public int getPluginSearchThreadPoolSize() {
 		return 1;
 	}
-
+	
 	public static String[] getCommand(String gene, int resultsPerPage, int pageNumber) {
 		String url= "\"https://reactome.org/AnalysisService/identifier/" 
 					+ gene 
@@ -125,7 +132,7 @@ public class ReactomeSearchInterface implements SearchInterface {
 			}
 
 			
-			Object[] row = new Object[getColumnIdentifers().length];
+			Object[] row = new Object[getPluginColumnIdentifers().length];
 			
 			// "(R) Pathway" - "name":"Citric acid cycle (TCA cycle)"
 			row[0] = new String(gene);
@@ -171,11 +178,24 @@ public class ReactomeSearchInterface implements SearchInterface {
 		return rows;
 	}
 	
-	static final int MAX_REQUEST_ATTEMPTS = 1;
+	
+	private static final int MAX_REQUEST_ATTEMPTS = 1;
+	
+	private String[] selectionToStringArray(ArrayList<Object[]> selection) {
+		ArrayList<String> stringSelection = new ArrayList<String>();
+		for(int i = 0; i < selection.size(); i++) {
+			Object[] row = selection.get(i);
+			for(int j = 0; j < row.length; j++) {
+				stringSelection.add(row[j].toString());
+			}
+		}
+		String[] selectionAsStringArray = (String[])stringSelection.toArray();
+		return selectionAsStringArray;
+	}
 	
 	@Override
-	public ArrayList<Object[]> query(String[] genes) {
-		
+	public ArrayList<Object[]> onPluginSearch(Object[] columns, ArrayList<Object[]> selection) {
+		String[] genes = selectionToStringArray(selection);
 		String jsonQuery = null;
 		ArrayList<Object[]> pathways = new ArrayList<Object[]>();
 		int requestAttempts = 0;
@@ -226,6 +246,22 @@ public class ReactomeSearchInterface implements SearchInterface {
 		
 		}
 		return pathways;
+	}
+	
+	@Override
+	public boolean onPluginEndSearch() {
+		return true;
+	}
+
+	@Override
+	public boolean onPluginClose() {
+		return false;
+	}
+
+	@Override
+	public void pluginTimedOut(Object[] columns, ArrayList<Object[]> selection) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
