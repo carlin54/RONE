@@ -135,10 +135,15 @@ public class TableJoinDialog extends JFrame  {
 	    }
 	};
 	
+	@Override
+	public void dispose() {
+		this.clearForm();
+		this.setVisible(false);
+	}
+	
 	public TableJoinDialog(DatabaseTabbedPane pane) {
 		setResizable(false);
 		setAlwaysOnTop(true);
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setTitle("Join Table");
 		getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.X_AXIS));
 		
@@ -1212,6 +1217,12 @@ public class TableJoinDialog extends JFrame  {
 		btnTableBExclude.setEnabled(false);
 		btnTableBIncludeAll.setEnabled(false);
 		btnTableBExcludeAll.setEnabled(false);
+		
+		// Stage 3 
+		this.listTableAExcludeColumns.setModel(new DefaultListModel());
+		this.listTableAIncludeColumns.setModel(new DefaultListModel());
+		this.listTableBExcludeColumns.setModel(new DefaultListModel());
+		this.listTableBIncludeColumns.setModel(new DefaultListModel());
 		
 		// Stage 4
 		choiceJoinOperationJoinType.setSelectedIndex(-1);
