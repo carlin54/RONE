@@ -1,32 +1,21 @@
 package rone.ui;
 
-import java.awt.Dialog;
-
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import java.awt.BorderLayout;
 import javax.swing.JList;
 import javax.swing.JLabel;
 import javax.swing.DefaultListModel;
 import javax.swing.JComboBox;
 import javax.swing.BoxLayout;
-import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JSplitPane;
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.layout.RowSpec;
-import com.sun.org.apache.xml.internal.utils.ObjectPool;
 
 import rone.filemanager.Database;
 import rone.filemanager.Database.Join;
+import rone.filemanager.FileManager;
 import rone.ui.DatabaseTabbedPane.Tab;
 
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import javax.swing.JButton;
-import java.awt.List;
 import java.awt.event.ActionListener;
 import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
@@ -41,37 +30,19 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.IntStream;
 import java.awt.event.ActionEvent;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.border.BevelBorder;
-import com.jgoodies.forms.factories.DefaultComponentFactory;
-import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
-import java.awt.Button;
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.Panel;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
 import javax.swing.ImageIcon;
 
-import java.awt.Choice;
-import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
-import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -79,10 +50,8 @@ import javax.swing.ListModel;
 import javax.swing.border.LineBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.SwingConstants;
-import java.awt.TextField;
 
 public class TableJoinDialog extends JFrame  {
-	private MainWindow mMainWindow; 
 	private DatabaseTabbedPane mDatabaseTabbedPane; 
 	
 	private JPanel panel;
@@ -120,9 +89,6 @@ public class TableJoinDialog extends JFrame  {
 	private JComboBox comboBoxJoinOperationTableB;
 	
 	
-	
-	
-	
 	private static final HashMap<String, Database.Join.Type> JOIN_TO_SQL = new HashMap<String, Database.Join.Type>(){
 		{
 			put("LEFT INCLUSIVE", Join.Type.LEFT_INCLUSIVE);
@@ -142,7 +108,7 @@ public class TableJoinDialog extends JFrame  {
 	}
 	
 	public TableJoinDialog(DatabaseTabbedPane pane) {
-		setResizable(false);
+		setResizable(true);
 		setAlwaysOnTop(true);
 		setTitle("Join Table");
 		getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.X_AXIS));
@@ -478,8 +444,7 @@ public class TableJoinDialog extends JFrame  {
 	}
 	
 	private void setIcon() {
-		Path currentRelativePath = Paths.get("");
-		String iconLocation = currentRelativePath.toAbsolutePath().toString() + "\\rone_logo.png";
+		String iconLocation = FileManager.getIconDirectory() + "\\rone_icon.png";
 		ImageIcon imgicon = new ImageIcon(iconLocation);
 		this.setIconImage(imgicon.getImage());
 	}
@@ -589,42 +554,8 @@ public class TableJoinDialog extends JFrame  {
 		
 		@Override
 		public void popupMenuWillBecomeVisible(PopupMenuEvent arg0) {
-			boolean hadSelection;
-			Object selectedItem;
 			processChoice(choiceTableSelectA, choiceTableSelectB);
 			processChoice(choiceTableSelectB, choiceTableSelectA);
-			System.out.println("choiceTableSelectA: " + choiceTableSelectA.getItemCount());
-			System.out.println("choiceTableSelectB: " + choiceTableSelectB.getItemCount());
-			int s = 0;
-			
-			/*
-			mTableNames = mDatabaseTabbedPane.getTabNames();
-			DefaultComboBoxModel modelA = generateModel(choiceTableSelectB);
-			
-			hadSelection = hasSelection(choiceTableSelectA);
-			selectedItem =  choiceTableSelectA.getSelectedItem();
-			
-			choiceTableSelectA.setModel(modelA);
-			
-			if(hadSelection) {
-				choiceTableSelectA.setSelectedItem(selectedItem);
-			} else {
-				choiceTableSelectA.setSelectedIndex(-1);
-			}
-			
-			DefaultComboBoxModel modelB = generateModel(choiceTableSelectA);
-			
-			hadSelection = hasSelection(choiceTableSelectB);
-			selectedItem =  choiceTableSelectB.getSelectedItem();
-			
-			choiceTableSelectB.setModel(modelB);
-			
-			if(hadSelection) {
-				choiceTableSelectB.setSelectedItem(selectedItem);
-			} else {
-				choiceTableSelectB.setSelectedIndex(-1);
-			}*/
-			
 		}
 		
 	};
@@ -1227,13 +1158,19 @@ public class TableJoinDialog extends JFrame  {
 		// Stage 4
 		choiceJoinOperationJoinType.setSelectedIndex(-1);
 		choiceJoinOperationJoinType.setEnabled(false);
+		tableJoinConstraints.setModel(new DefaultTableModel());
 		tableJoinConstraints.setEnabled(false);
+		comboBoxJoinOperationTableA.setModel(new DefaultComboBoxModel());
+		comboBoxJoinOperationTableA.setSelectedIndex(-1);
 		comboBoxJoinOperationTableA.setEnabled(false);
+		comboBoxJoinOperationTableB.setModel(new DefaultComboBoxModel());
+		comboBoxJoinOperationTableB.setSelectedIndex(-1);
 		comboBoxJoinOperationTableB.setEnabled(false);
 		btnJoinOperationAddConstraint.setEnabled(false);
 		btnJoinOperationRemoveSelected.setEnabled(false);
 		
 		// Stage 5
+		txtFieldNameTableNewTableName.setText("");
 		txtFieldNameTableNewTableName.setEnabled(false);
 		btnJoinTable.setEnabled(false);
 		tableJoinConstraints.setEnabled(true);
@@ -1515,7 +1452,9 @@ public class TableJoinDialog extends JFrame  {
 		
 
 		// Stage 3
-			
+		
+		
+		
 		// Pre-Stage 4 
 		mListIncludeExcludeJoinTypeAddConstraintActionListener = 
 				new ChoiceListJoinType(

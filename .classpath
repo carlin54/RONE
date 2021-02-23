@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="plugin/Fibonacci.java|plugin/FourtyTwo.java|plugin/PlusOne.java|plugin/Square.java|rone/plugin/TargetMineSearchPlugin.java|rone/plugins/TargetMineSearch.java|rone/plugins/TargetMineSearchExtension.java" kind="src" path="src"/>
+	<classpathentry excluding="plugin/Fibonacci.java|plugin/FourtyTwo.java|plugin/PlusOne.java|plugin/Square.java|rone/plugin/TargetMineSearchPlugin.java|rone/plugins/TargetMineSearch.java|rone/plugins/TargetMineSearchExtension.java|rone/plugins/ReactomeSearchPlugin.java|rone/plugins/TargetMineSearchPlugin.java|rone/plugins/PercellomeSearchPlugin.java" kind="src" path="src"/>
 	<classpathentry kind="lib" path="lib/antlr-2.7.6-caching.jar"/>
 	<classpathentry kind="lib" path="lib/commons-codec-1.9-sources.jar"/>
 	<classpathentry kind="lib" path="lib/commons-codec-1.9.jar"/>

@@ -55,8 +55,9 @@ public class MainWindow {
 	private final ActionFileExportToGarudaStartDiscovery actionExportGarudaToEnsembleTXT = new ActionFileExportToGarudaStartDiscovery("as Genelist (csv)", FileContence.GENELIST, FileExtension.CSV);
 	private final ActionFileExportToGarudaStartDiscovery actionExportGarudaToGenelistCSV = new ActionFileExportToGarudaStartDiscovery("as Ensemble (txt)", FileContence.ENSEMBLE, FileExtension.TXT);
 	private final ActionFileExportToGarudaStartDiscovery actionExportGarudaToEnsembleCSV = new ActionFileExportToGarudaStartDiscovery("as Ensemble (csv)", FileContence.ENSEMBLE, FileExtension.CSV);
+	private final ActionTableJoin actionJoinTable = new ActionTableJoin();
 	private final ActionFileExportToTable actionFileExportToTable = new ActionFileExportToTable();
-
+	
 	private JFrame mMainWindowJFrame;
 	private GarudaHandler mGarudaHandler;
 	
@@ -72,22 +73,15 @@ public class MainWindow {
 	private JMenuItem mntmGenelistTXT;
 	private JMenuItem mntmGenelistCSV;
 	private JMenuItem mntmClose;
-	private JMenu mnSearch;
-	private JMenu mnPercellome;
-	private JMenuItem mntmPercellomeProbeIDs;
-	private JMenuItem mntmPercellomeGeneSymbols;
-	private JMenu mnTargetMine;
-	private JMenuItem mntmTargetMineGeneSymbols;
-	private JMenu mnReactome;
-	private JMenuItem mntmReactomeGeneSymbols;
 	private JMenu mnJoin;
 	private JMenuItem mntmJoinTable;
-	private JMenuItem mntmClear;
 	private JMenu mnPlugins;
 	
 	static final String TABBED_PANE_NAME = "TABBED_PANE";
 	private JMenuItem mntmEnsembleTXT;
 	private JMenuItem mntmEnsembleCSV;
+
+	private TableJoinDialog mTableJoinDialog;
 	
 	private PluginManager mPluginManager;
 	
@@ -195,12 +189,8 @@ public class MainWindow {
 			mMenuBar.add(mnJoin);
 			{
 				mntmJoinTable = new JMenuItem("Join Table");
-				// mntmJoinTable.setAction(actionTableJoin);
+				mntmJoinTable.setAction(actionJoinTable);
 				mnJoin.add(mntmJoinTable);
-			}
-			{
-				mntmClear = new JMenuItem("Clear");
-				mnJoin.add(mntmClear);
 			}
 		}
 		JMenuItem mntmNewMenuItem = new JMenuItem("Discover");
@@ -577,6 +567,27 @@ public class MainWindow {
 
 			startDiscovery(mContence, mExtension.toString());
 		}
+	}
+	
+	private class ActionTableJoin extends AbstractAction {
+
+		private static final long serialVersionUID = -3448876240153355423L;
+
+		public ActionTableJoin() {
+			putValue(NAME, "Join Table");
+		}
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if(mTableJoinDialog == null) {
+				mTableJoinDialog = new TableJoinDialog(mDatabaseTabbedPane);
+			}
+			if(!mTableJoinDialog.isVisible()) {
+				mTableJoinDialog.setVisible(true);
+				mTableJoinDialog.toFront();
+			}
+		}
+	
 	}
 	
 	private class ActionFileExportToTable extends AbstractAction {

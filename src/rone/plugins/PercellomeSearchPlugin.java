@@ -46,7 +46,7 @@ public class PercellomeSearchPlugin extends Plugin {
                     stringPossibilities,
                     PercellomeSearch.Species.Mouse);
 			
-			return PercellomeSearch.Species.valueOf(s.toString());
+			return (s != null) ? PercellomeSearch.Species.valueOf(s.toString()) : null;
 		}
 		
 		@Override

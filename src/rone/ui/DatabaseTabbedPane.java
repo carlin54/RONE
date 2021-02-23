@@ -109,9 +109,10 @@ public class DatabaseTabbedPane extends JTabbedPane {
 	}
 	
 	public void removeTab(Tab removeTab) {
-		//this.mSearchThreadManager.remove(removeTab);
-		//this.mJoinOperationThreadManager.removeTab(removeTab);
-		this.remove(removeTab);
+		System.out.println("DatabaseTabbedPane:RemoveTab: " + removeTab.mName);
+		mJoinOperationThreadManager.removeTab(removeTab);
+		mSearchThreadManager.removeTab(removeTab);
+		remove(removeTab);
 		mDatabaseTabs.remove(removeTab);
 	}
 	
@@ -185,6 +186,12 @@ public class DatabaseTabbedPane extends JTabbedPane {
 		resultsTab.setStatus(Tab.Status.SEARCHING);
 		resultsTab.setTable(tabTable);
 		addTab(resultsTab);
+		
+		
+		Tab.ButtonTabComponent.TabButton tabButton = resultsTab.getTabButton();
+		TabCloseActionListener tabCloseActionListener = new TabCloseActionListener(resultsTab);
+		tabButton.addActionListener(tabCloseActionListener);
+		
 		SearchOperation seachOperation = new SearchOperation(search, resultsTab);
 		mSearchThreadManager.addSearch(seachOperation);
 	}
@@ -368,23 +375,29 @@ public class DatabaseTabbedPane extends JTabbedPane {
 		}
 		
 		private void removeTab(Tab removeTab) {
-			
+			System.out.println("JoinOperationThreadManager:removeTab()" + removeTab.mName);
 			for(int i = 0; i < mJoinOperations.size(); i++) {
 				JoinOperation joinOperation = mJoinOperations.get(i);
+				Tab a = joinOperation.getTabA(); // depends
+				Tab b = joinOperation.getTabB(); // depends
 				Tab c = joinOperation.getTabC();
-				if(c.equals(removeTab)) {
-					Tab a = joinOperation.getTabA(); // depends
-					removeTab(a);
-					Tab b = joinOperation.getTabB(); // depends
-					removeTab(b);
-					mJoinOperations.remove(c);
-				}	
+				
+				// produces
+				if(a.equals(removeTab) || b.equals(removeTab)) {
+					System.out.println("JoinOperationThreadManager:removeTab() -> produces " + a.getName() + ", " + b.getName());
+					mJoinOperations.remove(joinOperation);
+					DatabaseTabbedPane.this.removeTab(c);
+				}
+				
+				// is product
+				if(c.equals(removeTab)){
+					System.out.println("JoinOperationThreadManager:removeTab() -> is product" + c.getName());
+					mJoinOperations.remove(joinOperation);
+					DatabaseTabbedPane.this.removeTab(c);
+				}
 				
 			}
-			synchronized (mWakeLock) {
-				mWake = true; 
-				mWake.notifyAll();
-    		}
+			
 			
 		}
 		
@@ -887,21 +900,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
             		}
                 }
     		}
-    		
-            @Override
-            public void mouseClicked(MouseEvent e) {
-            	System.out.println("mouseClicked(MouseEvent e)");
-            }
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				System.out.println("mouseEntered(MouseEvent e)");
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-				System.out.println("mouseExited(MouseEvent e)");
-			}
 
 			@Override
 			public void mousePressed(MouseEvent e) {
@@ -916,10 +914,29 @@ public class DatabaseTabbedPane extends JTabbedPane {
 			}
 
 			@Override
-			public void mouseReleased(MouseEvent arg0) {
+			public void mouseClicked(MouseEvent e) {
 				// TODO Auto-generated method stub
 				
 			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
             
         }
     	
@@ -1235,6 +1252,38 @@ public class DatabaseTabbedPane extends JTabbedPane {
 			mActiveQueue = new CopyOnWriteArrayList<MasterThread>();
 		}
 		
+		public void removeTab(Tab removeTab) {
+			System.out.println("SearchThreadManager:RemoveTab: " + removeTab.mName);
+			for(SearchOperation searchOperation : mSearchQueue) {
+				Tab searchOperationTab = searchOperation.mResultsTab;
+				boolean found = searchOperation.mResultsTab.equals(removeTab);
+				
+				if(found) {
+					mSearchQueue.remove(searchOperation);
+					DatabaseTabbedPane.this.removeTab(searchOperationTab);
+				}
+			}
+			
+			for(MasterThread masterThread : mActiveQueue) {
+				Tab masterThreadTab = masterThread.mResultsTab;
+				boolean found = masterThreadTab.equals(removeTab);
+				
+				if(found) {
+					masterThread.stopProcess();
+					System.out.println("SearchThreadManager:RemoveTab:found:" + removeTab.mName);
+					try {
+						masterThread.join();
+					} catch (InterruptedException e) {
+						masterThread.stop();
+						MainWindow.showError(e);
+					}
+					mActiveQueue.remove(masterThread);
+					DatabaseTabbedPane.this.removeTab(masterThreadTab);
+				}
+			}
+			
+		}
+
 		public void end() {
 			mSearchQueue.clear();
 			mEnd = true;
@@ -1546,7 +1595,7 @@ public class DatabaseTabbedPane extends JTabbedPane {
     		cleanUp();
     		
     		if(!hasToStopWorking()) {
-    			mResultsTab.setStatus(Tab.Status.SEARCH_COMPLETE);
+    			// mResultsTab.setStatus(Tab.Status.SEARCH_COMPLETE);
     			mResultsTab.updateModel();
     			setProcessSuccess(true);
     		}
