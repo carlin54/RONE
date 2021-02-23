@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -197,7 +198,11 @@ public class MainWindow {
 		JPopupMenu popupMenu = new JPopupMenu("Discover");
 		popupMenu.add(mntmNewMenuItem);
 		
-    	
+		Properties prop = FileManager.loadProperties();
+    	prop.put("Garuda_Reactome gadget", "[]");
+    	prop.put("Garuda_GeneMapper", "[]");
+    	prop.put("Garuda_Reactome", "[]");
+		FileManager.storeProperties(prop);
     	reloadPlugins();
 		connectToGaruda();
 		
@@ -341,7 +346,9 @@ public class MainWindow {
     	for(SearchExtension searchExtension : searchExtensions) {
     		searchExtension.setSearchCallback(new MainWindowSearchCallback(mDatabaseTabbedPane, searchExtension));
     		JMenu menu = searchExtension.getMenu();
-    		mnPlugins.add(searchExtension.getMenu());
+    		if(menu != null) {
+    			mnPlugins.add(searchExtension.getMenu());
+    		}
     	}
     	mMenuBar.add(mnPlugins);
     	

@@ -1,0 +1,6 @@
+#host settings
+#Wed Feb 24 01:51:42 AEST 2021
+Garuda_Reactome\ gadget=[]
+garuda=hello
+Garuda_Reactome=[]
+Garuda_GeneMapper=[]

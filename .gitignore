@@ -1,2 +1,16 @@
 
 derby.log
+*.class
+bin/rone/ui/MainWindow.class
+bin/rone/ui/MainWindow$FileExtension.class
+bin/rone/ui/MainWindow$FileContence.class
+bin/rone/ui/MainWindow$ActionFileImportFromFile.class
+bin/rone/ui/MainWindow$ActionFileExportToTable.class
+bin/rone/ui/MainWindow$ActionFileExportToTable$1.class
+bin/rone/ui/MainWindow$ActionFileExportToGarudaStartDiscovery.class
+bin/rone/ui/MainWindow$ActionFileExportToFile.class
+bin/rone/ui/MainWindow$2.class
+bin/rone/ui/MainWindow$1.class
+bin/rone/filemanager/FileManager.class
+bin/rone/filemanager/FileManager$ExtensionLoader.class
+derby.log
