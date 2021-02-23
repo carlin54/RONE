@@ -1,4 +1,6 @@
+Manifest-Version: 1.0
+Sealed: true
 Plugin-Id: targetmine-plugin
 Plugin-Version: 0.0.1
-Plugin-Provider: Decebal Suiu
+Plugin-Provider: Carlin. R. Connell
 Plugin-Class: rone.plugins.TargetMineSearchPlugin

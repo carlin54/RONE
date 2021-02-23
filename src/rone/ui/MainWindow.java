@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,25 +23,16 @@ import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.pf4j.DefaultPluginManager;
-import org.pf4j.Plugin;
-import org.pf4j.PluginDescriptor;
 import org.pf4j.PluginManager;
-import org.pf4j.PluginState;
 import org.pf4j.PluginWrapper;
-import org.pf4j.ZipPluginManager;
 
 import jp.sbi.garuda.backend.net.exception.GarudaConnectionNotInitializedException;
 import jp.sbi.garuda.backend.net.exception.NetworkConnectionException;
-import rone.backend.PercellomeSearchInterface;
-import rone.backend.PercellomeSearchInterface.SearchMode;
-import rone.backend.PercellomeSearchInterface.Species;
-import rone.backend.ReactomeSearchInterface;
-import rone.backend.TargetMineSearchInterface;
-import rone.backend.garudahandler.GarudaHandler;
-import rone.backend.Search;
 import rone.filemanager.FileManager;
+import rone.garuda.GarudaHandler;
+import rone.plugins.SearchCallback;
 import rone.plugins.SearchExtension;
-import rone.plugins.SearchPlugin;
+import rone.plugins.Selection;
 
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
@@ -64,17 +56,12 @@ public class MainWindow {
 	private final ActionFileExportToGarudaStartDiscovery actionExportGarudaToGenelistCSV = new ActionFileExportToGarudaStartDiscovery("as Ensemble (txt)", FileContence.ENSEMBLE, FileExtension.TXT);
 	private final ActionFileExportToGarudaStartDiscovery actionExportGarudaToEnsembleCSV = new ActionFileExportToGarudaStartDiscovery("as Ensemble (csv)", FileContence.ENSEMBLE, FileExtension.CSV);
 	private final ActionFileExportToTable actionFileExportToTable = new ActionFileExportToTable();
-	private final ActionSearchTargetMineWithGeneSymbols actionTargetMineWithGeneSymbols = new ActionSearchTargetMineWithGeneSymbols();
-	private final ActionSearchPercellomeWithProbeIds actionPercellomeWithProbeID = new ActionSearchPercellomeWithProbeIds();
-	private final ActionSearchPercellomeWithGeneSymbols actionPercellomeWithGeneSymbols = new ActionSearchPercellomeWithGeneSymbols();
-	private final ActionSearchReactomeWithGeneSymbols actionReactomeWithGeneSymbols = new ActionSearchReactomeWithGeneSymbols();
 
-	private final ActionTableJoin actionTableJoin = new ActionTableJoin();
-	
 	private JFrame mMainWindowJFrame;
 	private GarudaHandler mGarudaHandler;
 	
 	private DatabaseTabbedPane mDatabaseTabbedPane;
+	private JMenuBar mMenuBar;
 	private JMenu mnFile;
 	private JMenu mnImport;
 	private JMenuItem mntmFromFile;
@@ -96,10 +83,13 @@ public class MainWindow {
 	private JMenu mnJoin;
 	private JMenuItem mntmJoinTable;
 	private JMenuItem mntmClear;
+	private JMenu mnPlugins;
 	
 	static final String TABBED_PANE_NAME = "TABBED_PANE";
 	private JMenuItem mntmEnsembleTXT;
 	private JMenuItem mntmEnsembleCSV;
+	
+	private PluginManager mPluginManager;
 	
 	enum FileExtension {
 		TXT,
@@ -142,11 +132,11 @@ public class MainWindow {
 		mMainWindowJFrame.setBounds(100, 100, 820, 540);
 		mMainWindowJFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				
-		JMenuBar menuBar = new JMenuBar();
-		mMainWindowJFrame.setJMenuBar(menuBar);
+		mMenuBar = new JMenuBar();
+		mMainWindowJFrame.setJMenuBar(mMenuBar);
 		{
 			mnFile = new JMenu("File");
-			menuBar.add(mnFile);
+			mMenuBar.add(mnFile);
 			{
 				mnImport = new JMenu("Import");
 				mnFile.add(mnImport);
@@ -199,48 +189,13 @@ public class MainWindow {
 				mnFile.add(mntmClose);
 			}
 		}
-		{
-			mnSearch = new JMenu("Search");
-			menuBar.add(mnSearch);
-			{
-				mnPercellome = new JMenu("Percellome");
-				mnSearch.add(mnPercellome);
-				{
-					mntmPercellomeProbeIDs = new JMenuItem("with Probe IDs (Affy IDs)");
-					mntmPercellomeProbeIDs.setAction(actionPercellomeWithProbeID);
-					mnPercellome.add(mntmPercellomeProbeIDs);
-				}
-				{
-					mntmPercellomeGeneSymbols = new JMenuItem("with Probe IDs (Affy IDs)");
-					mntmPercellomeGeneSymbols.setAction(actionPercellomeWithGeneSymbols);
-					mnPercellome.add(mntmPercellomeGeneSymbols);
-				}
-			}
-			{
-				mnTargetMine = new JMenu("TargetMine");
-				mnSearch.add(mnTargetMine);
-				{
-					mntmTargetMineGeneSymbols = new JMenuItem("with Gene Symbols");
-					mntmTargetMineGeneSymbols.setAction(actionTargetMineWithGeneSymbols);
-					mnTargetMine.add(mntmTargetMineGeneSymbols);
-				}
-			}
-			{
-				mnReactome = new JMenu("Reactome");
-				mnSearch.add(mnReactome);
-				{
-					mntmReactomeGeneSymbols = new JMenuItem("with Gene Symbols");
-					mntmReactomeGeneSymbols.setAction(actionReactomeWithGeneSymbols);
-					mnReactome.add(mntmReactomeGeneSymbols);
-				}
-			}
-		}
+		
 		{
 			mnJoin = new JMenu("Table");
-			menuBar.add(mnJoin);
+			mMenuBar.add(mnJoin);
 			{
 				mntmJoinTable = new JMenuItem("Join Table");
-				mntmJoinTable.setAction(actionTableJoin);
+				// mntmJoinTable.setAction(actionTableJoin);
 				mnJoin.add(mntmJoinTable);
 			}
 			{
@@ -252,9 +207,9 @@ public class MainWindow {
 		JPopupMenu popupMenu = new JPopupMenu("Discover");
 		popupMenu.add(mntmNewMenuItem);
 		
-		
+    	
+    	reloadPlugins();
 		connectToGaruda();
-		
 		
 		
 	}
@@ -327,31 +282,86 @@ public class MainWindow {
 		
 	}
     
+    public class MainWindowSearchCallback implements SearchCallback {
+    	
+    	private DatabaseTabbedPane mDatabaseTabbedPane;
+    	private SearchExtension mSearchExtension;
+    	
+    	MainWindowSearchCallback(DatabaseTabbedPane databaseTabbedPane, SearchExtension searchExtension){
+    		mDatabaseTabbedPane = databaseTabbedPane;
+    		mSearchExtension = searchExtension;
+    	}
+    	
+		@Override
+		public void startSearch(rone.plugins.Search search) {
+			try {
+				mDatabaseTabbedPane.addSearch(search);
+			} catch (SQLException e) {
+				MainWindow.showError(e);
+			}
+		}
+		@Override
+		public Selection getSelection() {
+			return mDatabaseTabbedPane.getSelection();
+		}
+
+    	
+    }
+    
+    void removePluginMenu() {
+    	Component[] components = this.mMenuBar.getComponents();
+    	for(Component component : components) {
+    		if(component instanceof JMenu) {
+    			JMenu menu = (JMenu)component;
+    			if(menu.getText().equals("Plugins")) {
+    				mMenuBar.remove(component);
+    				break;
+    			}
+    		}
+    	}
+    }
+    
+    public void getStartedPlugins() {
+    	List<PluginWrapper> startedPlugins = mPluginManager.getStartedPlugins();
+
+        for (PluginWrapper plugin : startedPlugins) {
+			String pluginId = plugin.getDescriptor().getPluginId();
+			System.out.println(String.format("Extensions added by plugin '%s':", pluginId));
+			Set<String> extensionClassNames = mPluginManager.getExtensionClassNames(pluginId);
+			for (String extension : extensionClassNames) {
+				 System.out.println("   " + extension);
+			}
+        }
+    }
+    
+    public void reloadPlugins() {
+    	
+    	mPluginManager = new DefaultPluginManager();
+    	mPluginManager.loadPlugins();
+    	
+    	removePluginMenu();
+    	mnPlugins = new JMenu("Plugins");
+    	
+    	mPluginManager.startPlugins();
+    	getStartedPlugins();
+    	List<SearchExtension> searchExtensions = mPluginManager.getExtensions(rone.plugins.SearchExtension.class);
+    	mPluginManager.getExtensions(rone.plugins.SearchExtension.class);
+    	
+    	
+    	for(SearchExtension searchExtension : searchExtensions) {
+    		searchExtension.setSearchCallback(new MainWindowSearchCallback(mDatabaseTabbedPane, searchExtension));
+    		JMenu menu = searchExtension.getMenu();
+    		mnPlugins.add(searchExtension.getMenu());
+    	}
+    	mMenuBar.add(mnPlugins);
+    	
+		
+    }
     
     public MainWindow() {
-    	FileManager.clearTemp();
-    	//
-    	System.out.println(System.getProperty("pf4j.pluginsDir", "plugins"));
     	
-        PluginManager pluginManager = new DefaultPluginManager();
-        pluginManager.loadPlugins();
-        pluginManager.startPlugins();
-        List<PluginWrapper> pl = pluginManager.getPlugins();
-        List<Class<? extends SearchExtension>> se = pluginManager.getExtensionClasses(SearchExtension.class);
-        for(PluginWrapper pw : pl) {
-        	PluginDescriptor pd = pw.getDescriptor();
-        	PluginState ps = pw.getPluginState();
-        	ClassLoader cl = pw.getPluginClassLoader();
-        	Plugin p = pw.getPlugin();
-        	p.start();
-        	Class[] interfaces = p.getClass().getInterfaces();
-        	Class ga = p.getClass().getSuperclass();
-        	System.out.println(p.getClass().toString());
-        	System.out.println(ga.getClass().toString());
-        	System.out.println(p.getClass().isAssignableFrom(SearchPlugin.class));
-        }
-        
-    	//
+    	FileManager.clearTemp();
+
     	initialize();
 		
 		mMainWindowJFrame.getContentPane().setLayout(new BoxLayout(mMainWindowJFrame.getContentPane(), BoxLayout.X_AXIS));
@@ -359,6 +369,8 @@ public class MainWindow {
 		mDatabaseTabbedPane = new DatabaseTabbedPane(JTabbedPane.TOP);
 		mDatabaseTabbedPane.setName(TABBED_PANE_NAME);
 		mMainWindowJFrame.getContentPane().add(mDatabaseTabbedPane);
+		
+		reloadPlugins();
 		
 	}
 	
@@ -383,7 +395,6 @@ public class MainWindow {
 		if(!hasFile(file)) 
 			return;
 		
-		//System.out.println(contents);
 		ArrayList<Object[]> data = null;
 		try {
 			switch (contents) {
@@ -430,7 +441,7 @@ public class MainWindow {
 			}
 		}
 		
-		String[] data = mDatabaseTabbedPane.getSelection();
+		String[] data = mDatabaseTabbedPane.getSelection().toStringArray();
 		
 		String list = new String("");
 		for(int i = 0; i < data.length; i++) {
@@ -570,8 +581,6 @@ public class MainWindow {
 	
 	private class ActionFileExportToTable extends AbstractAction {
 
-
-
 		private static final long serialVersionUID = 1L;
 		public ActionFileExportToTable() {
 			putValue(NAME, "to Table");
@@ -616,82 +625,6 @@ public class MainWindow {
 		}
 	}
 	
-	private class ActionSearchTargetMineWithGeneSymbols extends AbstractAction {
-
-
-
-		private static final long serialVersionUID = 1L;
-		public ActionSearchTargetMineWithGeneSymbols() {
-			putValue(NAME, "with Gene Symbols");
-
-		}
-		public void actionPerformed(ActionEvent e) {
-			String[] selection = mDatabaseTabbedPane.getSelection();
-			TargetMineSearchInterface targetMineSearchInterface = new TargetMineSearchInterface();
-			
-			Search search = new Search(targetMineSearchInterface, selection);
-			
-			try {
-				mDatabaseTabbedPane.addSearch(search);
-			} catch (SQLException sqlException) {
-				sqlException.printStackTrace();
-				showError(sqlException);
-			}
-			
-		}
-	}
-	
-	private class ActionSearchReactomeWithGeneSymbols extends AbstractAction {
-
-
-
-		private static final long serialVersionUID = 1L;
-		public ActionSearchReactomeWithGeneSymbols() {
-			putValue(NAME, "with Gene Symbols");
-
-		}
-		public void actionPerformed(ActionEvent e) {
-			String[] selection = mDatabaseTabbedPane.getSelection();
-			ReactomeSearchInterface reactomeSearchInterface = new ReactomeSearchInterface();
-			
-			Search search = new Search(reactomeSearchInterface, selection);
-			
-			try {
-				mDatabaseTabbedPane.addSearch(search);
-			} catch (SQLException sqlException) {
-				sqlException.printStackTrace();
-				showError(sqlException);
-			}
-		}
-	}
-	
-	private class ActionTableJoin extends AbstractAction {
-
-
-
-		private static final long serialVersionUID = 1L;
-		public ActionTableJoin() {
-			putValue(NAME, "Join Table");
-		}
-		public void actionPerformed(ActionEvent e) {
-			
-			EventQueue.invokeLater(new Runnable() {
-				public void run() {
-
-					try {	
-						TableJoinDialog tableJoinDialog = new TableJoinDialog(mDatabaseTabbedPane);
-						tableJoinDialog.setVisible(true);
-					} catch (Exception exception) {
-						exception.printStackTrace();
-						showError(exception);
-					}
-					
-				}
-			});
-			
-		}
-	}
-	
 	public static void showError(Exception exceptionError) {
     	
 		EventQueue.invokeLater(new Runnable() {
@@ -704,69 +637,4 @@ public class MainWindow {
 
 	}
 	
-	private Species getPercellomeSpecies() {
-		Object[] possibilities = PercellomeSearchInterface.Species.values();
-		Species s = (Species)JOptionPane.showInputDialog(
-		                    null,
-		                    "Select Species:\n",
-		                    "Percellome",
-		                    JOptionPane.PLAIN_MESSAGE,
-		                    PercellomeSearchInterface.getIcon(),
-		                    possibilities,
-		                    PercellomeSearchInterface.Species.values()[0]);
-		return s;
-	}
-	
-	private class ActionSearchPercellomeWithGeneSymbols extends AbstractAction {
-
-
-		private static final long serialVersionUID = 1L;
-		public ActionSearchPercellomeWithGeneSymbols() {
-			putValue(NAME, "with Gene Symbols");
-		}
-		public void actionPerformed(ActionEvent e) {
-			String[] selection = mDatabaseTabbedPane.getSelection();
-			Species speciesSelect = getPercellomeSpecies();
-			SearchMode searchMode = SearchMode.WITH_GENE_SYMBOLS;
-			
-			if(speciesSelect == null) return; 
-			
-			PercellomeSearchInterface percellomeSearchInterface = new PercellomeSearchInterface(speciesSelect, searchMode);
-			
-			Search search = new Search(percellomeSearchInterface, selection);
-			
-			try {
-				mDatabaseTabbedPane.addSearch(search);
-			} catch (SQLException sqlException) {
-				sqlException.printStackTrace();
-				showError(sqlException);
-			}
-		}
-	}
-	
-	private class ActionSearchPercellomeWithProbeIds extends AbstractAction {
-
-		private static final long serialVersionUID = 1L;
-		public ActionSearchPercellomeWithProbeIds() {
-			putValue(NAME, "with Probe IDs (Affy ID)");
-		}
-		public void actionPerformed(ActionEvent e) {
-			String[] selection = mDatabaseTabbedPane.getSelection();
-			Species speciesSelect = getPercellomeSpecies();
-			SearchMode searchMode = SearchMode.WITH_PROBE_IDS;
-			
-			if(speciesSelect == null) return; 
-			
-			PercellomeSearchInterface percellomeSearchInterface = new PercellomeSearchInterface(speciesSelect, searchMode);
-			
-			Search search = new Search(percellomeSearchInterface, selection);
-			
-			try {
-				mDatabaseTabbedPane.addSearch(search);
-			} catch (SQLException sqlException) {
-				sqlException.printStackTrace();
-				showError(sqlException);
-			}
-		}
-	}
 }

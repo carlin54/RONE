@@ -7,55 +7,35 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.IntStream;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
-import javax.swing.DefaultCellEditor;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.JViewport;
-import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowSorter;
-import javax.swing.RowSorter.SortKey;
 import javax.swing.SortOrder;
 import javax.swing.SwingUtilities;
-import javax.swing.event.ChangeEvent;
 import javax.swing.plaf.basic.BasicButtonUI;
-import javax.swing.plaf.basic.BasicTabbedPaneUI;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
@@ -63,24 +43,14 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
-import org.javatuples.Triplet;
-
-import com.sun.tools.javac.util.ArrayUtils;
-import com.sun.tools.javac.util.Pair;
-
-import rone.backend.SearchInterface;
 import rone.filemanager.Database;
-import rone.filemanager.Table;
-import rone.backend.Search;
-import rone.filemanager.Database.Join;
+import rone.filemanager.FileManager;
+import rone.plugins.Selection;
 
 
 
 public class DatabaseTabbedPane extends JTabbedPane {
 	
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 845770918437336262L;
 	ArrayList<Tab> mDatabaseTabs; 
 	SearchThreadManager mSearchThreadManager; 
@@ -172,84 +142,56 @@ public class DatabaseTabbedPane extends JTabbedPane {
 	
 	public boolean hasSelection() {
 		Tab tab = this.getActiveTab();
-		return tab.hasSelection();
+		return tab != null ? tab.hasSelection() : false;
 	}
 	
-	public void addSearch(Search search) throws SQLException {
+	public boolean hasActiveTab() {
+		return this.getActiveTab() != null;
+	}
+	
+	public String[] getSelectedColumns() {
 		
-		SearchInterface searchInterface = search.getSearchInterface();
-		String tableName = searchInterface.getTitle();
+		if(this.hasActiveTab()) {
+			return this.getActiveTab().getSelectedColumnIdentifers();
+		}else {
+			return null;
+		}
+		
+	}
+	
+	public ArrayList<Object[]> getSelectedRows(){
+		if(this.hasActiveTab()) {
+			return this.getActiveTab().getSelectedRows();
+		}else {
+			return null;
+		}
+	}
+	
+	public Selection getSelection() {
+		return new Selection(this.getSelectedColumns(), this.getSelectedRows());
+	}
+	
+	public void addSearch(rone.plugins.Search search) throws SQLException {
+		
+		String tableName = search.getTitle();
 		String safeTableName = makeSafeTabName(tableName);
-		String[] columnIdentifiers = searchInterface.getColumnIdentifers();
+		String[] columnIdentifiers = search.getColumnIdentifers();
 		String[] safeColumnIdentifiers = makeSafeColumnIdentifers(columnIdentifiers);
-		int[] primaryKeys = searchInterface.getPrimaryKeys();
+		
 		Database.Table tabTable 
-			= Database.getInstance().createTable(safeTableName, safeColumnIdentifiers, primaryKeys);
+			= Database.getInstance().createTable(safeTableName, safeColumnIdentifiers, new int[] {});
 		
 		Tab resultsTab = new Tab(safeTableName, safeColumnIdentifiers);
 		resultsTab.setStatus(Tab.Status.SEARCHING);
 		resultsTab.setTable(tabTable);
 		addTab(resultsTab);
-		SearchOperation seachOperation = new SearchOperation(resultsTab, search);
+		SearchOperation seachOperation = new SearchOperation(search, resultsTab);
 		mSearchThreadManager.addSearch(seachOperation);
 	}
 	
 	public ArrayList<Tab> getTabs() {
     	return this.mDatabaseTabs;
     }
-	
-	/*public JTable getActiveDataTable() {
-    	int i = getSelectedIndex();
-        System.out.println("Close tab, index of tab component: " + i);
-        if (i != -1) {
-            Tab tab = getTabs()[i];
-            tab.getUniqueSelected();
-            JViewport viewport = scrollPane.getViewport();
-            DataTable dataTable = (JTable) viewport.getComponent(0);
-            
-            return dataTable;
-        } else {
-        	return null;
-        }
-    }*/
-	
-	
-	
-	public String[] getSelection() {
-		
-		int i = getSelectedIndex();
-		Tab tab = mDatabaseTabs.get(i);
-		
-		if(tab != null) {
-			ArrayList<Object[]> selected = tab.getSelectedRows();
-			int numRows = selected.size();
-			int numCols = selected.get(0).length;
-			int size = numRows * numCols;
-			String[] selection = new String[size];
-			for(int j = 0; j < numRows; j++) {
-				for(int k = 0; k < numCols; k++) {
-					selection[j*k + k] = (String) selected.get(j)[k];
-				}
-			}
-			return selection;
-		}
-		
-		return null;
-	}
-
-    /*public void stateChanged(ChangeEvent e) {
-        JTabbedPane tabbedPane = (JTabbedPane) e.getSource();
-        int selectedIndex = tabbedPane.getSelectedIndex();
-        DataTable dataTable = getActiveDataTable();
-        try {
-			dataTable.updateTable();
-		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-       
-        JOptionPane.showMessageDialog(null, "Selected Index: " + selectedIndex);
-    }*/
 	
     private class JoinOperation
     {
@@ -514,9 +456,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
     
     static public class Tab extends JScrollPane {
     	
-    	/**
-		 * 
-		 */
 		private static final long serialVersionUID = -7182226718587775509L;
 
 		public enum Status {
@@ -992,22 +931,8 @@ public class DatabaseTabbedPane extends JTabbedPane {
     		}
     		return columnIdentifers;
     	}
-    	
-    	/*public String[] getSelectColumns() {
-    		int[] cols = mTable.getSelectedColumns();
-    		int len = cols.length;
-    		String[] columnIdentifers = new String[len];
-    		
-    		TableColumnModel tableColumnModel = this.mTable.getTableHeader().getColumnModel();
-    		for(int i = 0; i < len; i++) {
-    			int idx = cols[i];
-    			String columnIdentifier = (String) tableColumnModel.getColumn(idx).getHeaderValue();
-    			columnIdentifers[i] = columnIdentifier;
-    		}
-    		return columnIdentifers;
-    	}*/
-    	
-    	public Object[] getSelectedColumnIdentifers() {
+ 
+    	public String[] getSelectedColumnIdentifers() {
     		
     		int[] cols = mTable.getSelectedColumns();
 			for (int i = 0; i < cols.length; i++) {
@@ -1015,11 +940,11 @@ public class DatabaseTabbedPane extends JTabbedPane {
 			}
     		
 			TableColumnModel tcm = mTable.getTableHeader().getColumnModel();
-			Object[] selectedColumns = new Object[cols.length];
+			String[] selectedColumns = new String[cols.length];
 			for(int i = 0; i < selectedColumns.length; i++) {
-				selectedColumns[i] = tcm.getColumn(i).getHeaderValue();
+				selectedColumns[i] = (String)tcm.getColumn(i).getHeaderValue();
 			}
-			System.out.println(Arrays.toString(selectedColumns));
+			
     		return selectedColumns; 
     	}
 
@@ -1049,39 +974,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
     		return selectedRows; 
     	}
 
-    	/*public String[] getUniqueSelected() {
-    		
-    		int[] rows = mTable.getSelectedRows();
-    		int[] cols = mTable.getSelectedColumns();
-    		
-    		LinkedList<String> unique = new LinkedList<String>(); 
-    		Object last_added = null;
-    		for(int i = 0; i < rows.length; i++) {
-    			int r = rows[i];
-    			for(int j = 0; j < cols.length; j++) {
-    				int c = cols[j];
-    				int vr = mTable.convertRowIndexToModel(r);
-    				int vc = mTable.convertColumnIndexToModel(c);
-    				
-    				String cell;
-    				if(mTable.getModel().getValueAt(vr, vc) != null) {
-    					cell = mTable.getModel().getValueAt(vr, vc).toString();
-    				}else {
-    					break;
-    				}
-    				
-    				if(!cell.equals(last_added) && !unique.contains(cell)) {
-    					unique.add(cell);
-    					last_added = cell;
-    				}
-    					
-    			}
-    		}
-    		int len = unique.size();
-    		return unique.toArray(new String[len]);
-    		
-    	}*/
-    	
     	public boolean isEmpty() {
     		return !(mTable.getModel().getRowCount() > 0);
     	} 
@@ -1102,9 +994,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
     	
     	public class ButtonTabComponent extends JPanel {
 
-    	    /**
-			 * 
-			 */
 			private static final long serialVersionUID = -1607002728575939037L;
 
 			static private final String TAB_ICON_LABEL_NAME = "TAB_HEADER_LABEL";
@@ -1118,7 +1007,8 @@ public class DatabaseTabbedPane extends JTabbedPane {
     	    }
     	    
     	    public void enableLoadingIcon() {
-    	        ImageIcon loading = new ImageIcon("C:\\Users\\Richard\\Documents\\GitHub\\RONE\\icons\\ajax-loader.gif");
+    	    	String iconDirectory = FileManager.getIconDirectory();
+    	        ImageIcon loading = new ImageIcon(iconDirectory + "\\ajax-loader.gif");
     	        Image image = loading.getImage(); // transform it 
     	        Image newimg = image.getScaledInstance(15, 15,  java.awt.Image.SCALE_DEFAULT); // scale it the smooth way  
     	        loading = new ImageIcon(newimg);
@@ -1156,9 +1046,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
 
     	    private class TabButton extends JButton {
     	    	
-    	    	/**
-				 * 
-				 */
 				private static final long serialVersionUID = 5107206656315177278L;
 				Tab mTab; 
     	    	
@@ -1246,17 +1133,7 @@ public class DatabaseTabbedPane extends JTabbedPane {
             Tab t = (Tab) o; 
               
             // Compare the data members and return accordingly 
-
-	        
             if(this.hasDatabaseTable() && t.hasDatabaseTable()) {
-            	
-    	        System.out.println("----");
-    	        System.out.println(this.getDatabaseTable().getName());
-    	        System.out.println(t.getDatabaseTable().getName());
-    	        System.out.println(this.getDatabaseTable());
-    	        System.out.println(t.getDatabaseTable());
-    	        System.out.println("----");
-            	
             	return this.getDatabaseTable().equals(t.getDatabaseTable());
             }
             
@@ -1264,18 +1141,7 @@ public class DatabaseTabbedPane extends JTabbedPane {
             return false;
         } 
     
-    } 
-    
-    private String[] getSelectedColumns(String[] columns, int[] columnSelect) {
-		int len = columnSelect.length;
-		String[] selected = new String[len];
-		for(int i = 0; i < len; i++) {
-			int idx = columnSelect[i];
-			selected[i] = columns[idx];
-		}
-		return selected;
-	}
-    
+    }     
 	
     private String[] concatenate(String[] selectionA, String[] selectionB) {
 		
@@ -1312,11 +1178,10 @@ public class DatabaseTabbedPane extends JTabbedPane {
     	int[] bKey = tabB.getColumnSelect(keyB);
     	
     	
-    	
 		String safeTableName = makeSafeTabName(tableName);
 		String[] columnIdentifers = concatenate(selectA, selectB);
 		String[] safeColumnIdentifers = makeSafeColumnIdentifers(columnIdentifers);
-		
+	
 		Tab tabC = new Tab(safeTableName, safeColumnIdentifers);
 		tabC.setStatus(Tab.Status.WAITING);
 		
@@ -1332,20 +1197,27 @@ public class DatabaseTabbedPane extends JTabbedPane {
     }
     
     private class SearchOperation {
+
+    	private rone.plugins.Search mSearch;
+    	private Object[] mSearchRequests; 
+    	private Tab mResultsTab; 
     	
-    	Tab mResultsTab; 
-    	Search mSearch;
     	
-    	public SearchOperation(Tab resultsTab, Search search){
-    		this.mResultsTab = resultsTab;
+    	public SearchOperation(rone.plugins.Search search, Tab resultsTab){
     		this.mSearch = search; 
+    		this.mSearchRequests = search.getSelectionRequests(); 
+    		this.mResultsTab = resultsTab;
     	}
     	
     	public Tab getResultsTab() {
     		return this.mResultsTab;
     	}
     	
-    	public Search getSearch() {
+    	public Object[] getSearchRequests() {
+    		return mSearchRequests;
+    	}
+    	
+    	public rone.plugins.Search getSearch() {
     		return this.mSearch;
     	}
     } 
@@ -1430,7 +1302,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
 						mSearchQueue.notifyAll();
 					}
 					
-					
 				} catch(InterruptedException e) {  
 					//System.out.println("SearchThreadManager:"  + this.getName() + ": Interupted, Finishing = " + Boolean.toString(finishing()) + ".");
 				}
@@ -1485,43 +1356,31 @@ public class DatabaseTabbedPane extends JTabbedPane {
 		
 	};
 
-	
 	private class MasterThread extends Thread {
     	private int mThreadPoolSize = 5;
     	private int mWorkSize = 20;
-    	
     	private WorkerThread mThreadPool[];
     	
     	private Boolean mProcessSuccess;
     	private boolean mStopWorking;
     	private int mWorkHeadIndex;
-    	private Search mSearch;
     	
     	private SearchOperation mSearchOperation;
-    	private SearchInterface mSearchInterface;
-    	private String[] mSearchInterfaceRequests;
-    	
-    	private int mRequestsSearched;
+    	private rone.plugins.Search mSearch;
+    	private Object[] mSearchRequests;
     	
     	private Tab mResultsTab; 
-    	private Database.Table mResultsTable; 
     	
     	public MasterThread(SearchOperation searchOperation) {
     		mSearchOperation = searchOperation;
     		mSearch = searchOperation.getSearch();
-    		mSearchInterface = mSearch.getSearchInterface();
-    		mSearchInterfaceRequests = mSearch.getSearchInterfaceRequests();
+    		mSearchRequests = searchOperation.getSearchRequests();
     		mResultsTab = searchOperation.getResultsTab();
     		
-    		mThreadPoolSize = mSearchInterface.getThreadPoolSize();
-    		mWorkSize = mSearchInterface.getWorkSize();
+    		mThreadPoolSize = mSearch.getThreadPoolSize();
+    		mWorkSize = mSearch.getMaximumSearchSize();
     		
-    		mRequestsSearched = 0;
-    		
-    		mResultsTable = null;
-    		
-    		//System.out.println("MasterThread():" + this.getName());
-    		
+
     		setProcessSuccess(false);
     	}
     	
@@ -1529,31 +1388,37 @@ public class DatabaseTabbedPane extends JTabbedPane {
     		mStopWorking = true;
     	}
     	
-    	private int nextIndex(int i) {
-        	return ((i+mWorkSize > mSearchInterfaceRequests.length) ? mSearchInterfaceRequests.length : i+mWorkSize);
-        }
-    	
-    	public String[] getNextWork() {
-    		if(mWorkHeadIndex < mSearchInterfaceRequests.length) {
-    			int mNewWorkHead = nextIndex(mWorkHeadIndex);
-    			String[] slice = Arrays.copyOfRange(mSearchInterfaceRequests, mWorkHeadIndex, mNewWorkHead);
-    			mWorkHeadIndex = mNewWorkHead;
-    			return slice;
-    		}else{
-    			return new String[] {};
+    	private Object[] getRows(int begin, int end) {
+    		assert(begin <= end);
+    		int len = mSearchRequests.length;
+    		end = len > end ? end : len;
+    		int segment_len = end - begin;
+    		
+    		Object[] segment = new Object[segment_len];
+    		for(int i = begin; i < end; i++) {
+    			int j = i - begin;
+    			segment[j] = mSearchRequests[i];
     		}
+    		
+    		return segment;
+    	}
+    	
+    	public Object[] getNextWork() {
+    		int begin = mWorkHeadIndex;
+    		int end = mWorkHeadIndex + mWorkSize;
+    		Object[] requestedRows = getRows(begin, end);
+    		mWorkHeadIndex = mWorkHeadIndex + requestedRows.length;
+    		return requestedRows;
     	}
     	
     	private boolean hasResults(ArrayList<Object[]> results) {
     		return (results != null) && results.size() > 0;
     	}
     	
-    	private int totalCompletedWork(String[] work) {
-    		return work == null ? 0 : work.length; 
-    	}
+    	private int mErrorCounter = 1;
+    	private int MAX_ERROR_COUNTER = 3; 
     	
-    	
-    	public void processResults(String[] completeWork, ArrayList<Object[]> results) {
+    	public void processResults(ArrayList<Object[]> results) {
     		
     		if(!hasResults(results)) 
     			return;
@@ -1561,32 +1426,33 @@ public class DatabaseTabbedPane extends JTabbedPane {
     		try {
     			mResultsTab.insertRows(results);
 			} catch (SQLException e) {
-				MainWindow.showError(e);
+				if(mErrorCounter < MAX_ERROR_COUNTER) {
+					MainWindow.showError(e);
+					mErrorCounter++;
+				}
+				
 			}
     		
     		if(mResultsTab.isVisible()) {
     			mResultsTab.updateModel();
     		}
     		
-    		mRequestsSearched = mRequestsSearched + totalCompletedWork(completeWork); 
-    		
-    		
     	}
     	
-    	public boolean hasWork(String[] work) {
-    		return work.length > 0;
+    	public boolean hasWork(Object[] work) {
+    		return work != null ? work.length > 0 : false;
     	}
     	
     	private WorkerThread[] makeThreadPool(int size, int priority) {
     		WorkerThread[] threadPool = new WorkerThread[size];
     		for(int i = 0; i < mThreadPoolSize; i++) {
-    			threadPool[i] = new WorkerThread(mSearchInterface);
+    			threadPool[i] = new WorkerThread(mSearch);
     			threadPool[i].setPriority(priority);
     		}
     		return threadPool;
     	}
     	
-    	public void giveWork(String[] work) {
+    	public void giveWork(Object[] newSearchRequests) {
 			int i = 0;
 			boolean givenWork = false;
 			while(!givenWork) {
@@ -1597,18 +1463,20 @@ public class DatabaseTabbedPane extends JTabbedPane {
 					try {
 						mThreadPool[i].join();
 					} catch (InterruptedException e) {
-						MainWindow.showError(e);
+						if(mErrorCounter < MAX_ERROR_COUNTER) {
+							MainWindow.showError(e);
+							mErrorCounter++;
+						}
 					}
-					ArrayList<Object[]> results = mThreadPool[i].getResults();
-					String completeWork[] = mThreadPool[i].getWork();
+					ArrayList<Object[]> results = mThreadPool[i].getSearchResults();
 					
 					//TODO: check if i don't need a new worker thread
-					mThreadPool[i] = new WorkerThread(mSearchInterface);
-        			mThreadPool[i].setWork(work);
+					mThreadPool[i] = new WorkerThread(mSearch);
+        			mThreadPool[i].setSearchRequests(newSearchRequests);
         			mThreadPool[i].start();
         			
         			
-					processResults(completeWork, results);
+					processResults(results);
     				
     				givenWork = true;
     			}
@@ -1630,9 +1498,8 @@ public class DatabaseTabbedPane extends JTabbedPane {
 	    				}
 	    				
 	    				if(!hasToStopWorking() && !worker.hasGivenResults()) {
-	    					ArrayList<Object[]> results = worker.getResults();
-	    					String[] completeWork = worker.getWork();
-	    					processResults(completeWork, results);
+	    					ArrayList<Object[]> results = worker.getSearchResults();
+	    					processResults(results);
 	    				}
 	    				
 					} catch (InterruptedException e) {
@@ -1658,26 +1525,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
     	}
     	
     	public void setUp() {
-    		String tableName = mSearchInterface.getTitle();
-    		String[] columnIdentifiers = mSearchInterface.getColumnIdentifers();
-    		int[] primaryKeys = mSearchInterface.getPrimaryKeys();
-    		
-    		mResultsTable = null;
-			try {
-				mResultsTable = Database.getInstance().createTable(tableName, columnIdentifiers, primaryKeys);
-				
-			} catch (SQLException e) {
-				MainWindow.showError(e);
-			}
-			
-    		ActionListener actionListener = new ActionListener() {
-
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					stopProcess();
-				}
-    			
-    		};
     		mThreadPool = makeThreadPool(mThreadPoolSize, MAX_PRIORITY);
     	}
     	
@@ -1685,8 +1532,10 @@ public class DatabaseTabbedPane extends JTabbedPane {
     		
     		setUp();
     		
+    		mResultsTab.setStatus(Tab.Status.SEARCHING);
+    		
     		setProcessSuccess(false);
-    		String[] work = null;
+    		Object[] work = null;
     		while(hasWork(work = getNextWork())) {
     			if(hasToStopWorking()) {
     				break;
@@ -1708,26 +1557,24 @@ public class DatabaseTabbedPane extends JTabbedPane {
 	
     private class WorkerThread extends Thread 
 	{ 
-    	private ArrayList<Object[]> mResults;
-    	private String[] mSearchInterfaceRequests;
     	private boolean mHasGivenResults;
-    	private boolean mStopProcessing;
     	
-    	private SearchInterface mSearchInterface;
-    
-    	WorkerThread(SearchInterface searchInterface){
-    		//System.out.println("WorkerThread():" + this.getName());
-    		mSearchInterface = searchInterface;
-    		mResults = new ArrayList<Object[]>();
+    	private rone.plugins.Search mSearch;
+    	private Object[] mSearchRequests;
+    	private ArrayList<Object[]> mSearchResults;
+    	
+    	public WorkerThread(rone.plugins.Search search){
+    		mSearch = search;
+    		mSearchRequests = null;
     	}
     	
-    	public void setWork(String[] work) {
-    		this.mSearchInterfaceRequests = work;
+    	public void setSearchRequests(Object[] searchRequests) {
+    		mSearchRequests = searchRequests;
     	}
     	
-    	public ArrayList<Object[]> getResults(){
+    	public ArrayList<Object[]> getSearchResults(){
     		setHasGivenResults(true);
-    		return mResults;
+    		return mSearchResults;
     	}
 
     	public void setHasGivenResults(boolean set) {
@@ -1735,15 +1582,12 @@ public class DatabaseTabbedPane extends JTabbedPane {
     	}
     	
     	public void setResults(ArrayList<Object[]> results) {
-    		mResults = results;
+    		mSearchResults = results;
     	}
     	
 	    public void run() 
 	    {
-	    	//System.out.println("WorkerThread:run()" + this.getName());
-    		ArrayList<Object[]> results = mSearchInterface.query(mSearchInterfaceRequests);
-    		//System.out.println("WorkerThread:run()" + this.getName() +": query complete!");
-    		
+    		ArrayList<Object[]> results = mSearch.getSearchResults(mSearchRequests);
     		setResults(results);
     		setHasGivenResults(false);
 	    }
@@ -1751,10 +1595,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
 		public boolean hasGivenResults() {
 			return mHasGivenResults;
 		}
-
-		public String[] getWork() {
-			return this.mSearchInterfaceRequests;
-		} 
 	
 	} 
   

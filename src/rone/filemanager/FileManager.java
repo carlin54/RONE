@@ -2,6 +2,9 @@ package rone.filemanager;
 
 import org.pf4j.PluginWrapper;
 import org.pf4j.RuntimeMode;
+
+import rone.filemanager.Database.Table;
+
 import org.pf4j.Extension;
 import org.pf4j.Plugin;
 
@@ -105,105 +108,6 @@ public class FileManager {
 		return split[split.length-1];
 	}
 	
-	public static Table loadBioCompendiumFile(File file) throws IOException {
-		if (!file.exists()) return null;
-		
-		BufferedReader bufferReader = null;
-		try {
-			bufferReader = new BufferedReader(new FileReader(file));
-		} catch (FileNotFoundException e1) {
-			e1.printStackTrace();
-		}
-		String[] columns = {"KEGG Pathway ID","KEGG Pathway Name","Adjusted P-Value","Gene Name","KEGG Gene","Ensembl Gene"};
-		
-		ArrayList<String> identifiers = new ArrayList<String> ();
-		Collections.addAll(identifiers, columns);
-		
-		Table bioCompendiumResults = new Table(identifiers);
-	
-		String patternPathwayID = "<td rowspan=\\\"\\d+\"><font face=\\\"Arial\\\" size=\\\"2\\\" color=\\\"#000000\\\"><a href=\\\".*";
-		Pattern pPathwayID = Pattern.compile(patternPathwayID);
-		
-		String patternGeneName = "<td><font face=\\\"Arial\\\" size=\\\"2\\\" color=\\\"#000000\\\">[A-Z0-9]*<\\/font><\\/td>";
-		Pattern pGeneName = Pattern.compile(patternGeneName);
-			
-		String patternKEGGGene = "<td><font face=\\\"Arial\\\" size=\\\"2\\\" color=\\\"#000000\\\"><a class=biocompendium href=\\\".+?\\\">[0-9]*<\\/a><\\/font><\\/td>";
-		Pattern pKEGGGene = Pattern.compile(patternKEGGGene);
-		
-		String patternEnsemble = "<td><font face=\\\"Arial\\\" size=\\\"2\\\" color=\\\"#000000\\\"><a class=\\\"biocompendium\\\" href=\\\"http:\\/\\/www.ens.*?\">[A-Za-z0-9]*";
-		Pattern pEnsemble = Pattern.compile(patternEnsemble);
-		
-		String patternEnd = "</tr>";
-		
-		String line;
-		int pathways = 0;
-		int genes = 0;
-		while((line = bufferReader.readLine()) != null) {
-		
-			Matcher matcherPathwayID = pPathwayID.matcher(line);
-			
-			if(matcherPathwayID.find()) {
-				
-				pathways++;
-				
-				String pathwayId = parsePathwayID(line);
-				System.out.println("Pathway: " + pathwayId);
-				
-				line = bufferReader.readLine();
-				String pathwayName = parsePathwayName(line);
-				System.out.println("Pathway Name: " + pathwayName);
-				
-				line = bufferReader.readLine();
-				String adjustedPvalue = parseAdjustedPvalue(line);
-				System.out.println("Pathway Name: " + adjustedPvalue);
-				
-				boolean endPathwayFound = false;
-				
-				while(!endPathwayFound) {
-					while((line = bufferReader.readLine()) != null){
-						Matcher matcherGeneName = pGeneName.matcher(line);
-						
-						//System.out.println(line);
-						if(matcherGeneName.find()) {
-							genes++;
-							// System.out.println("Found Gene Name! " + genes);
-							String geneName = parseGeneName(line);
-							System.out.println("\t Gene Name -> " + geneName);
-							
-							line = bufferReader.readLine();
-							String KEGGGene = parseKEGGGene(line);
-							System.out.println("\t KEGG Gene Found -> " + KEGGGene);
-							
-							line = bufferReader.readLine();
-							String ensembl = parseEnsemble(line);
-							System.out.println("\t Ensemble -> " + ensembl);
-							
-							Object[] a = {pathwayId, pathwayName, adjustedPvalue, geneName, KEGGGene, ensembl};
-							
-							ArrayList<Object> row = new ArrayList<Object>(Arrays.asList(a));
-							
-							bioCompendiumResults.addRow(row);
-							
-						}else if(line.contentEquals("</tr>")) {
-							System.out.println("EndPathway -> " + line.length() + " - " + line);
-							endPathwayFound = true;
-							break;
-						}
-						
-					}
-					
-				}
-				
-				System.out.println("Genes: " + genes);
-				System.out.println("Pathways: " + pathways);
-				
-			}
-			
-		}
-		return bioCompendiumResults;
-		
-	}
-	
 	public static ArrayList<Object[]> loadStructuredFile(File file, String seperator, boolean skipHeader) throws IOException {
 		
 		if (!file.exists()) 
@@ -304,6 +208,12 @@ public class FileManager {
 	public static String getTemporaryDirectory() {
 		Path currentRelativePath = Paths.get("");
 		String location = currentRelativePath.toAbsolutePath().toString() + "\\temp";
+		return location;
+	}
+	
+	public static String getIconDirectory() {
+		Path currentRelativePath = Paths.get("");
+		String location = currentRelativePath.toAbsolutePath().toString() + "\\icons";
 		return location;
 	}
 	

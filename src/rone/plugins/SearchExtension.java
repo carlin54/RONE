@@ -1,21 +1,21 @@
 package rone.plugins;
 
-import java.util.ArrayList;
+import javax.swing.JMenu;
 
 import org.pf4j.ExtensionPoint;
 
-public interface SearchExtension extends ExtensionPoint {
+public abstract class SearchExtension implements ExtensionPoint {
 	
-	public String getTitle();
-
-	public String[] getColumnIdentifers();
-
-	public int getSearchSize();
-
-	public int getThreadPoolSize();
-
-	public int getSearchTimeoutDuration();
-
-	public ArrayList<Object[]> search(String[] columnIdentifers, ArrayList<Object[]> tableSelection);
+	private SearchCallback mSearchCallback;
+	
+	public abstract JMenu getMenu();
+	
+	final public void setSearchCallback(SearchCallback searchCallback) {
+		mSearchCallback = searchCallback;
+	}
+	
+	final public SearchCallback getCallback() {
+		return mSearchCallback;
+	}
 	
 }
