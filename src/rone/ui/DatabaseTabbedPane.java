@@ -69,12 +69,12 @@ public class DatabaseTabbedPane extends JTabbedPane {
 		
 	}
 	
+	@SuppressWarnings("deprecation")
 	protected void finalize ()
 	{  
 		mSearchThreadManager.end();
 		mJoinOperationThreadManager.end();
 
-		
 		try {
 			mSearchThreadManager.join();
 		} catch (InterruptedException e) {
@@ -109,7 +109,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
 	}
 	
 	public void removeTab(Tab removeTab) {
-		System.out.println("DatabaseTabbedPane:RemoveTab: " + removeTab.mName);
 		mJoinOperationThreadManager.removeTab(removeTab);
 		mSearchThreadManager.removeTab(removeTab);
 		remove(removeTab);
@@ -202,7 +201,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
 	
     private class JoinOperation
     {
-		private String mTableName;
 		
 		private Tab mTabC;
 		
@@ -214,52 +212,58 @@ public class DatabaseTabbedPane extends JTabbedPane {
 			this.mTabC = tabC;
 		}
 		
-		public String getTableName() {
-			return mTableName;
-		}
-
-		private void setTableName(String mTableName) {
-			this.mTableName = mTableName;
-		}
 		private Tab getTabA() {
 			return mTabA;
 		}
+		
 		private void setTabA(Tab mTabA) {
 			this.mTabA = mTabA;
 		}
+		
 		private int[] getSelectA() {
 			return mSelectA;
 		}
+		
 		private void setSelectA(int[] mTabASelect) {
 			this.mSelectA = mTabASelect;
 		}
+		
 		private int[] getKeyA() {
 			return mKeyA;
 		}
+		
 		private void setKeyA(int[] mTabAJoin) {
 			this.mKeyA = mTabAJoin;
 		}
+		
 		private Tab getTabB() {
 			return mTabB;
 		}
+		
 		private void setTabB(Tab mTabB) {
 			this.mTabB = mTabB;
 		}
+		
 		private int[] getSelectB() {
 			return mSelectB;
 		}
+		
 		private void setSelectB(int[] mTabBSelect) {
 			this.mSelectB = mTabBSelect;
 		}
+		
 		private int[] getKeyB() {
 			return mKeyB;
 		}
+		
 		private void setKeyB(int[] mTabBJoin) {
 			this.mKeyB = mTabBJoin;
 		}
+		
 		private void setJoinType(Database.Join.Type joinType) {
 			mJoinType = joinType;
 		}
+		
 		private Database.Join.Type getJoinType() {
 			return mJoinType;
 		}
@@ -329,12 +333,10 @@ public class DatabaseTabbedPane extends JTabbedPane {
 			
 		private void executeJoinOperations()
 		{
-			for(int i = 0; i < mJoinOperations.size(); i++) {
-				JoinOperation joinOperation = mJoinOperations.get(i);
+			for(JoinOperation joinOperation : mJoinOperations) {
 				Tab tabA = joinOperation.getTabA();
 				Tab tabB = joinOperation.getTabB();
 				if(tabA.hasDataAvaliable() && tabB.hasDataAvaliable()) {
-					System.out.println("hasDataAvaliable()!");
 					Tab tabC = joinOperation.getTabC();	
 					
 					Database.Table aTable = tabA.getDatabaseTable();
@@ -356,26 +358,15 @@ public class DatabaseTabbedPane extends JTabbedPane {
 					
 					tabC.setTable(databaseTable);
 					tabC.setStatus(Tab.Status.AVALIABLE);
-					System.out.println("settingTable!");
+					
+					mJoinOperations.remove(joinOperation);
 				}
 				
 			}
 			
 		}
 		
-		private int indexOf(Tab findTab) {
-			for(int i = 0; i < mJoinOperations.size(); i++) {
-				JoinOperation check = mJoinOperations.get(i);
-				Tab checkTab = check.getTabC();
-				if(checkTab.equals(findTab)) {
-					return i;
-				}
-			}
-			return -1;
-		}
-		
 		private void removeTab(Tab removeTab) {
-			System.out.println("JoinOperationThreadManager:removeTab()" + removeTab.mName);
 			for(int i = 0; i < mJoinOperations.size(); i++) {
 				JoinOperation joinOperation = mJoinOperations.get(i);
 				Tab a = joinOperation.getTabA(); // depends
@@ -384,14 +375,12 @@ public class DatabaseTabbedPane extends JTabbedPane {
 				
 				// produces
 				if(a.equals(removeTab) || b.equals(removeTab)) {
-					System.out.println("JoinOperationThreadManager:removeTab() -> produces " + a.getName() + ", " + b.getName());
 					mJoinOperations.remove(joinOperation);
 					DatabaseTabbedPane.this.removeTab(c);
 				}
 				
 				// is product
 				if(c.equals(removeTab)){
-					System.out.println("JoinOperationThreadManager:removeTab() -> is product" + c.getName());
 					mJoinOperations.remove(joinOperation);
 					DatabaseTabbedPane.this.removeTab(c);
 				}
@@ -407,13 +396,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
 					mWakeLock.wait();
 				}
 				mWake = false; 
-				mWakeLock.notifyAll();
-			}
-		}
-		
-		public void wake() {
-			synchronized (mWakeLock) {
-				mWake = true; 
 				mWakeLock.notifyAll();
 			}
 		}
@@ -495,24 +477,17 @@ public class DatabaseTabbedPane extends JTabbedPane {
     		return mDatabaseTable != null;
     	}
     	
-    	private void setDatabaseTable(Database.Table databaseTable) {
-    		mDatabaseTable = databaseTable;
-    		mDatabaseChanged = true;
-    		updateModel();
-    	}
-    	
     	public boolean hasDataAvaliable() { 
     		return mStatus.equals(Status.AVALIABLE) || mStatus.equals(Status.SEARCH_COMPLETE);
     	}
     	
     	public void insertRows(ArrayList<Object[]> rows) throws SQLException {
-    		System.out.println("insertRows():" + rows.get(0).length + ":" + this.getColumnIdentifers().length);
     		mDatabaseTable.insertRows(rows);
     		mDatabaseChanged = true;
-    		// updateModel();
     	}
     	
-    	public ArrayList<Object[]> getRows() {
+    	@SuppressWarnings("unchecked")
+		public ArrayList<Object[]> getRows() {
     		return (ArrayList<Object[]>) mLoadedTable.clone();
     	}
     	
@@ -557,38 +532,21 @@ public class DatabaseTabbedPane extends JTabbedPane {
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-		        int row = mTable.rowAtPoint(e.getPoint());
-		        int col = mTable.columnAtPoint(e.getPoint());
-		        System.out.println("mTable.addMouseListener");
-		        //System.out.println("mTable.setRowSelectionAllowed(true);");
-		        	//mTable.clearSelection();
 	    	    mTable.setRowSelectionAllowed(true);
 	    		mTable.setColumnSelectionAllowed(true);
 			}
 
 			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+			public void mouseClicked(MouseEvent arg0) {}
 
 			@Override
-			public void mouseEntered(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+			public void mouseEntered(MouseEvent arg0) {}
 
 			@Override
-			public void mouseExited(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+			public void mouseExited(MouseEvent arg0) {}
 
 			@Override
-			public void mouseReleased(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+			public void mouseReleased(MouseEvent arg0) {}
 
 		}
     		
@@ -647,48 +605,13 @@ public class DatabaseTabbedPane extends JTabbedPane {
 				mTable.repaint();
     		}
     		
-    		private boolean isSortingColumn(int columnIndex) {
-    			for(int i = 0; i < mRowSorterKeys.size(); i++) {
-    				if(mRowSorterKeys.get(i).getColumn() == i) {
-    					return true;
-    				}
-    			}
-    			return false;
-    		}
-    		
     		private String getMenuItemText(TableColumn tableColumn, RowSorter.SortKey sortKey) {
     			String headerValue = tableColumn.getHeaderValue().toString();
     			String arrow = ((sortKey.getSortOrder().equals(SortOrder.DESCENDING)) ? "↓" : "↑");
 				return headerValue + " (" + arrow + ")";
     		}
     		
-    		private void makeUnsortable(MouseEvent e) {
-    			JTableHeader h = (JTableHeader)e.getSource();
-                int i = h.columnAtPoint(e.getPoint());
-                if (i < 0) {
-                    return ;
-                }
-                TableRowSorter<TableModel> sorter = new TableRowSorter<>(mTable.getModel());
-                
-               
-    			for(int j = 0; j < h.getColumnModel().getColumnCount(); j++) {
-    				
-    			}
-    			
-    		}
-    		
     		public void show(MouseEvent e) {
-    			// ---Empty---
-        		// Sort by ()
-        		
-        		// ---Not Empty & New ---
-        		// Sort by (Old)
-        		// Column Name (Arrow)
-        		// Clear
-        		
-        		// ---Not Empty & Not New ---
-        		// Sort by ()
-        		//
     			
     			JTableHeader h = (JTableHeader)e.getSource();
                 int i = h.columnAtPoint(e.getPoint());
@@ -735,7 +658,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
     			}
     			
     			this.setVisible(true);
-    			System.out.println(Boolean.toString(e.isPopupTrigger()));
     			show(e.getComponent(), e.getX(), e.getY());
     		}
     		
@@ -793,7 +715,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
     		mTable.setAutoCreateRowSorter(true);
     		mTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     		mTable.getTableHeader().addMouseListener(mTableMouseListener);
-    		//mTable.getTableHeader().setEnabled(false);
     		mTable.addMouseListener(new TableHeaderMouseListener());
     		
     		getViewport().add(mTable);
@@ -864,15 +785,12 @@ public class DatabaseTabbedPane extends JTabbedPane {
                 if(isSelectingColumns()) {
                 	mTable.setColumnSelectionAllowed(true);
     				mTable.setRowSelectionAllowed(false);
-    				//mTable.getTableHeader().setReorderingAllowed(false);
-                	// int[] selectedCols = mTable.getSelectedColumns();
     				
                 	if(e.isControlDown()) {
                 		int[] selectedColumns = mTable.getSelectedColumns();
                 		boolean containsColumn = IntStream.of(selectedColumns).anyMatch(x -> x == i);
                 		
                 		if(containsColumn) {
-                			System.out.println("Contains Column!");
                 			mTable.clearSelection();
                 			
                 			int[] columnsToSelect = new int[selectedColumns.length-1];
@@ -903,39 +821,24 @@ public class DatabaseTabbedPane extends JTabbedPane {
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				System.out.println("mousePressed(MouseEvent e)");
 				if(SwingUtilities.isLeftMouseButton(e)) {
-            		System.out.println("mouseClicked(MouseEvent e):Button 1");
             		selectColumn(e);
             	}else if(SwingUtilities.isRightMouseButton(e)) {
-            		System.out.println("mouseClicked(MouseEvent e):Button 3");
             		mTableSortPopupMenu.show(e);        
             	}
 			}
 
 			@Override
-			public void mouseClicked(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
+			public void mouseClicked(MouseEvent e) {}
 
 			@Override
-			public void mouseReleased(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
+			public void mouseReleased(MouseEvent e) {}
 
 			@Override
-			public void mouseEntered(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
+			public void mouseEntered(MouseEvent e) {}
 
 			@Override
-			public void mouseExited(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
+			public void mouseExited(MouseEvent e) {}
 
             
         }
@@ -971,10 +874,19 @@ public class DatabaseTabbedPane extends JTabbedPane {
 			for (int i = 0; i < cols.length; i++) {
 				cols[i] = mTable.convertColumnIndexToModel(cols[i]);
 			}
-			int[] rows = mTable.getSelectedRows();
-			for (int i = 0; i < rows.length; i++) {
-				rows[i] = mTable.convertRowIndexToModel(rows[i]);
-			}
+			int[] rows;
+			if(mTable.getRowSelectionAllowed()) {
+				rows = mTable.getSelectedRows();
+    			for (int i = 0; i < rows.length; i++) {
+    				rows[i] = mTable.convertRowIndexToModel(rows[i]);
+    			}
+    		} else {
+    			int numRows = mTable.getRowCount();
+    			rows = new int[numRows];
+    			for(int i = 0; i < numRows; i++) {
+    				rows[i] = mTable.convertRowIndexToModel(i);
+    			}
+    		}
     		
 			ArrayList<Object[]> selectedRows = new ArrayList<Object[]>();
 			for(int i = 0; i < rows.length; i++) {
@@ -985,7 +897,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
 					Object cell = mLoadedTable.get(rowIdx)[colIdx];
 					row[j] = cell;
 				}
-				System.out.println(Arrays.toString(row));
 				selectedRows.add(row);
 			}
     		return selectedRows; 
@@ -1012,8 +923,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
     	public class ButtonTabComponent extends JPanel {
 
 			private static final long serialVersionUID = -1607002728575939037L;
-
-			static private final String TAB_ICON_LABEL_NAME = "TAB_HEADER_LABEL";
     	    
     	    Tab mTab;
     	    JLabel mLabel;
@@ -1037,7 +946,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
     	    }
     	    
     	    public ButtonTabComponent(Tab tab) {
-    	        //unset default FlowLayout' gaps
     	        super(new FlowLayout(FlowLayout.LEFT, 0, 0));
 
     	        mTab = tab;
@@ -1047,24 +955,19 @@ public class DatabaseTabbedPane extends JTabbedPane {
     	        mLabel = new JLabel(mTab.getName());
     	        
     	        add(mLabel);
-    	        //add more space between the label and the button
     	        mLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
     	        
     	        
     	        //tab button
     	        mTabButton = new TabButton(mTab);
-    	        //button.addActionListener(actionListenerTabClose);
     	        add(mTabButton);
-    	        //add more space to the top of the component
     	        setBorder(BorderFactory.createEmptyBorder(2, 0, 0, 0));
-    	        
     	        
     	    }
 
     	    private class TabButton extends JButton {
     	    	
 				private static final long serialVersionUID = 5107206656315177278L;
-				Tab mTab; 
     	    	
     	        public TabButton(Tab tab) {
     	        	mTab = tab;
@@ -1252,8 +1155,15 @@ public class DatabaseTabbedPane extends JTabbedPane {
 			mActiveQueue = new CopyOnWriteArrayList<MasterThread>();
 		}
 		
+		@SuppressWarnings("deprecation")
 		public void removeTab(Tab removeTab) {
-			System.out.println("SearchThreadManager:RemoveTab: " + removeTab.mName);
+			
+			try {
+				joinCompleteSearches();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			
 			for(SearchOperation searchOperation : mSearchQueue) {
 				Tab searchOperationTab = searchOperation.mResultsTab;
 				boolean found = searchOperation.mResultsTab.equals(removeTab);
@@ -1270,15 +1180,13 @@ public class DatabaseTabbedPane extends JTabbedPane {
 				
 				if(found) {
 					masterThread.stopProcess();
-					System.out.println("SearchThreadManager:RemoveTab:found:" + removeTab.mName);
 					try {
 						masterThread.join();
 					} catch (InterruptedException e) {
 						masterThread.stop();
 						MainWindow.showError(e);
 					}
-					mActiveQueue.remove(masterThread);
-					DatabaseTabbedPane.this.removeTab(masterThreadTab);
+					
 				}
 			}
 			
@@ -1302,14 +1210,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
 		
 		private boolean hasInActiveSearches() 	{ 
 			return mSearchQueue.size() > 0;
-		}
-		
-		private boolean hasActiveSearches() 	{ 
-			return mActiveQueue.size() > 0;
-		}
-		
-		private boolean hasSearches() {
-			return hasInActiveSearches() || hasActiveSearches();
 		}
 		
 		public void startInActiveSearches() throws InterruptedException {
@@ -1340,19 +1240,16 @@ public class DatabaseTabbedPane extends JTabbedPane {
 				try {
 					synchronized (this.mSearchQueue) {
 						while(mSearchQueue.isEmpty()) {
-							//System.out.println("Waiting for search query!");
 							mSearchQueue.wait();
 						}
 						
-						//while(hasSearches()) {
-							joinCompleteSearches();
-							startInActiveSearches();
-						//}
+						joinCompleteSearches();
+						startInActiveSearches();
 						mSearchQueue.notifyAll();
 					}
 					
 				} catch(InterruptedException e) {  
-					//System.out.println("SearchThreadManager:"  + this.getName() + ": Interupted, Finishing = " + Boolean.toString(finishing()) + ".");
+					e.printStackTrace();
 				}
 			}
 			
@@ -1371,7 +1268,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
 
 			endThreads();
 			
-			//System.out.println("SearchThreadManager:cleaning up!");
 			synchronized(mSearchQueue) {
 				while(!mActiveQueue.isEmpty()) {
 					MasterThread mt = mActiveQueue.remove(0);
@@ -1386,22 +1282,17 @@ public class DatabaseTabbedPane extends JTabbedPane {
 		}
 		
 		private void joinCompleteSearches() throws InterruptedException {
-			//while(hasActiveSearches()) {
-				////System.out.println("SearchThreadManager: Trying to join threads!" + Boolean.toString(hasInActiveSearches()));
-				for(int i = 0; i < mActiveQueue.size(); ) {
+			for(int i = 0; i < mActiveQueue.size(); ) {
 					MasterThread mt = mActiveQueue.get(i);
 					if(threadEnded(mt)) {
 						mt.join();
 						mActiveQueue.remove(i);
-						//System.out.println("SearchThreadManager: Successfully joined thread!" + mt.getId());
 					} else {
 						i++;
 					}
 					//TODO: Fix this later, should be no thread.sleep - wait for array to update
 				}
-				//System.out.println("SearchThreadManager:joinCompleteSearches(): done!");
 			}
-			//}
 		
 	};
 
@@ -1414,14 +1305,12 @@ public class DatabaseTabbedPane extends JTabbedPane {
     	private boolean mStopWorking;
     	private int mWorkHeadIndex;
     	
-    	private SearchOperation mSearchOperation;
     	private rone.plugins.Search mSearch;
     	private Object[] mSearchRequests;
     	
     	private Tab mResultsTab; 
     	
     	public MasterThread(SearchOperation searchOperation) {
-    		mSearchOperation = searchOperation;
     		mSearch = searchOperation.getSearch();
     		mSearchRequests = searchOperation.getSearchRequests();
     		mResultsTab = searchOperation.getResultsTab();
@@ -1524,7 +1413,6 @@ public class DatabaseTabbedPane extends JTabbedPane {
         			mThreadPool[i].setSearchRequests(newSearchRequests);
         			mThreadPool[i].start();
         			
-        			
 					processResults(results);
     				
     				givenWork = true;
@@ -1595,7 +1483,7 @@ public class DatabaseTabbedPane extends JTabbedPane {
     		cleanUp();
     		
     		if(!hasToStopWorking()) {
-    			// mResultsTab.setStatus(Tab.Status.SEARCH_COMPLETE);
+    			mResultsTab.setStatus(Tab.Status.SEARCH_COMPLETE);
     			mResultsTab.updateModel();
     			setProcessSuccess(true);
     		}

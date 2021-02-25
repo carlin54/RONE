@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="plugin/Fibonacci.java|plugin/FourtyTwo.java|plugin/PlusOne.java|plugin/Square.java|rone/plugin/TargetMineSearchPlugin.java|rone/plugins/TargetMineSearch.java|rone/plugins/TargetMineSearchExtension.java|rone/plugins/ReactomeSearchPlugin.java|rone/plugins/TargetMineSearchPlugin.java|rone/plugins/PercellomeSearchPlugin.java" kind="src" path="src"/>
+	<classpathentry excluding="plugin/Fibonacci.java|plugin/FourtyTwo.java|plugin/PlusOne.java|plugin/Square.java|rone/plugin/TargetMineSearchPlugin.java|rone/plugins/TargetMineSearch.java|rone/plugins/TargetMineSearchExtension.java|rone/plugins/ReactomeSearchPlugin.java|rone/plugins/PercellomeSearchPlugin.java|rone/plugins/TargetMineSearchPlugin.java" kind="src" path="src"/>
 	<classpathentry kind="lib" path="lib/antlr-2.7.6-caching.jar"/>
 	<classpathentry kind="lib" path="lib/commons-codec-1.9-sources.jar"/>
 	<classpathentry kind="lib" path="lib/commons-codec-1.9.jar"/>
@@ -8,9 +8,6 @@
 	<classpathentry kind="lib" path="lib/commons-io-1.2.jar"/>
 	<classpathentry kind="lib" path="lib/commons-lang-2.6.jar"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
-	<classpathentry kind="lib" path="lib/intermine-client.jar"/>
-	<classpathentry kind="lib" path="lib/intermine-model.jar"/>
-	<classpathentry kind="lib" path="lib/intermine-pathquery.jar"/>
 	<classpathentry kind="lib" path="lib/json20110106.jar"/>
 	<classpathentry kind="lib" path="lib/log4j.jar"/>
 	<classpathentry kind="lib" path="lib/stax-api-1.0.jar"/>
@@ -57,8 +54,6 @@
 	<classpathentry kind="lib" path="lib/jgoodies-forms-1.8.0-sources.jar"/>
 	<classpathentry kind="lib" path="lib/miglayout15-swing.jar"/>
 	<classpathentry kind="lib" path="lib/pf4j-3.7.0-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/pf4j-3.7.0-SNAPSHOT-javadoc.jar"/>
-	<classpathentry kind="lib" path="lib/pf4j-3.7.0-SNAPSHOT-sources.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-api-1.7.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

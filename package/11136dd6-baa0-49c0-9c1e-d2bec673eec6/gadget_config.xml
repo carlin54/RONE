@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Gadget>
+    <UUID>11136dd6-baa0-49c0-9c1e-d2bec673eec6</UUID><!-- The unique ID of the gadget -->
+    <Name>RONE</Name><!-- The name of the gadget as it appears on the Dashboard -->
+    <LaunchCommand>cmd /c start javaw.exe -jar "RONE1.0v.jar"</LaunchCommand> <!-- The default launch command -->
+    <LaunchCommandWin>cmd /c start javaw.exe -jar "RONE1.0v.jar"</LaunchCommandWin> <!-- Launch command for Windows -->
+    <LaunchCommandMac>open "RONE-1.2.0v.jar"</LaunchCommandMac> <!-- Launch command for Mac -->
+    <LaunchCommandLinux>java -jar "RONE-1.2.0v.jar"</LaunchCommandLinux> <!-- Launch command for Linux-->
+     <WorkingDirectory>gadgets/11136dd6-baa0-49c0-9c1e-d2bec673eec6</WorkingDirectory><!-- Working directory for this Gadget-->
+    <IconPaths>
+        <Icon32Path>icons/roneicon.png</Icon32Path><!-- Path for the icon that will appear on the Dashboard-->
+    </IconPaths>
+    <Snapshots> <!-- Paths for the screenshots that will appear on the Dashboard -->
+        <SnapshotPath>snapshots/Screenshot_1.png</SnapshotPath>
+		<SnapshotPath>snapshots/Screenshot_2.png</SnapshotPath>
+		<SnapshotPath>snapshots/Screenshot_3.png</SnapshotPath>
+		<SnapshotPath>snapshots/Screenshot_4.png</SnapshotPath>
+		<SnapshotPath>snapshots/Screenshot_5.png</SnapshotPath>
+    </Snapshots>
+    <Categories> <!-- The categories this gadget appears on. Will appear on the dashboard -->
+        <Category>Database</Category>
+		<Category>Pathways</Category>
+    </Categories>
+    <Provider>Sony CSL</Provider> <!-- Name of the provider of this gadget.-->
+    <Description>RONE is a tool used to compile pathway data about genes from Reactome, TargetMine and Bio-Compendium.</Description> <!-- A brief description for this gadget. Will appear on Dashboard -->
+    <LoadableKeys><!-- Configuration for the Garuda discoverability-->
+		<InputFileFormat><!-- Determines which files are accepted by this gadget-->
+            <FileExtension>txt</FileExtension><!-- The extension of the incoming file-->
+            <FileFormat>txt</FileFormat><!-- The file format of the incoming file-->
+        </InputFileFormat>    
+		<InputFileFormat>    
+			<FileExtension>txt</FileExtension>
+            <FileFormat>genelist</FileFormat>
+        </InputFileFormat>    
+		<InputFileFormat>    
+			<FileExtension>txt</FileExtension>
+            <FileFormat>ensemble</FileFormat>
+        </InputFileFormat> 
+		<InputFileFormat>   		
+			<FileExtension>csv</FileExtension>
+            <FileFormat>csv</FileFormat>
+        </InputFileFormat>    
+		<InputFileFormat>    
+			<FileExtension>csv</FileExtension>
+            <FileFormat>genelist</FileFormat>
+        </InputFileFormat>    
+		<InputFileFormat>    
+			<FileExtension>csv</FileExtension>
+            <FileFormat>ensemble</FileFormat>
+        </InputFileFormat>
+		<OutputFileFormat>
+			<FileExtension>txt</FileExtension>
+			<FileFormat>ensemble</FileFormat>
+		</OutputFileFormat>		
+		<OutputFileFormat><!-- Determines which files this Gadget can send to others-->
+			<FileExtension>txt</FileExtension>
+			<FileFormat>genelist</FileFormat>
+		</OutputFileFormat>	
+    </LoadableKeys>
+    <LaunchEnv><!-- The launch condintion of the gadget. Please do not edit.-->
+        <Id>f22aa6a2-beff-4487-b838-03b8275a4361</Id>
+    </LaunchEnv>
+</Gadget>

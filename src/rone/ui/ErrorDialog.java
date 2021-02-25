@@ -1,9 +1,7 @@
 package rone.ui;
 
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
@@ -15,22 +13,15 @@ import javax.swing.JButton;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.JPanel;
-import java.awt.Panel;
-import java.awt.TextArea;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.MatteBorder;
 import java.awt.Color;
 import java.awt.Dimension;
 
-import javax.swing.border.LineBorder;
 import java.awt.GridLayout;
 import java.awt.Font;
-import javax.swing.border.TitledBorder;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 public class ErrorDialog {
-	private JDialog dialog;  
 	
 	public static String stackTraceToString(StackTraceElement[] stackTraceElements) {
 		String stackTraceAsString = new String();
@@ -41,6 +32,7 @@ public class ErrorDialog {
 		return stackTraceAsString;
 	}
 	
+	@SuppressWarnings("static-access")
 	ErrorDialog(Exception e){
 		
 		String stackTraceToString = stackTraceToString(e.getStackTrace()); 

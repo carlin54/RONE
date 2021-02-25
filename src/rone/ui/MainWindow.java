@@ -1,6 +1,5 @@
 package rone.ui;
 
-
 import java.awt.Component;
 import java.awt.EventQueue;
 
@@ -12,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -57,6 +55,7 @@ public class MainWindow {
 	private final ActionFileExportToGarudaStartDiscovery actionExportGarudaToGenelistCSV = new ActionFileExportToGarudaStartDiscovery("as Ensemble (txt)", FileContence.ENSEMBLE, FileExtension.TXT);
 	private final ActionFileExportToGarudaStartDiscovery actionExportGarudaToEnsembleCSV = new ActionFileExportToGarudaStartDiscovery("as Ensemble (csv)", FileContence.ENSEMBLE, FileExtension.CSV);
 	private final ActionTableJoin actionJoinTable = new ActionTableJoin();
+	private final ActionClose actionClose = new ActionClose();
 	private final ActionFileExportToTable actionFileExportToTable = new ActionFileExportToTable();
 	
 	private JFrame mMainWindowJFrame;
@@ -98,11 +97,9 @@ public class MainWindow {
 		TXT
 	}
 	
-	
 	public DatabaseTabbedPane getTabbedPane() {
 		Component[] components = this.mMainWindowJFrame.getContentPane().getComponents();
 		for(Component component : components) {
-			//System.out.println(component.getClass().getName());
 			if(component.getName() == TABBED_PANE_NAME) {
 				return (DatabaseTabbedPane) component;
 			}
@@ -114,9 +111,18 @@ public class MainWindow {
 		return this.mMainWindowJFrame;
 	}
 	
-
 	private void initialize() {
-		mMainWindowJFrame = new JFrame();
+		mMainWindowJFrame = new JFrame() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void dispose() {
+				if(mTableJoinDialog != null) {
+					MainWindow.this.mTableJoinDialog.dispose();	
+				}
+				
+			}
+		};
 		mDatabaseTabbedPane = new DatabaseTabbedPane(JTabbedPane.TOP);
 		mDatabaseTabbedPane.setName("mDatabaseTabbedPane");
 		
@@ -181,6 +187,7 @@ public class MainWindow {
 			}
 			{
 				mntmClose = new JMenuItem("Close");
+				mntmClose.addActionListener(actionClose);
 				mnFile.add(mntmClose);
 			}
 		}
@@ -198,14 +205,8 @@ public class MainWindow {
 		JPopupMenu popupMenu = new JPopupMenu("Discover");
 		popupMenu.add(mntmNewMenuItem);
 		
-		Properties prop = FileManager.loadProperties();
-    	prop.put("Garuda_Reactome gadget", "[]");
-    	prop.put("Garuda_GeneMapper", "[]");
-    	prop.put("Garuda_Reactome", "[]");
-		FileManager.storeProperties(prop);
     	reloadPlugins();
 		connectToGaruda();
-		
 		
 	}
 	
@@ -237,12 +238,9 @@ public class MainWindow {
 		for (int i = 0; i < find.length; i++) { 
 			Pattern pattern = Pattern.compile(find[i], Pattern.DOTALL | Pattern.MULTILINE);
 			Matcher m = pattern.matcher(description);
-			//System.out.println("----------");
 			if (m.find()) {
-				//System.out.println(m.group(0));
 				found[i] = m.group(0);
 			} else {
-				//System.out.println("None");
 				found[i] = null;
 			}
 		}
@@ -280,7 +278,8 @@ public class MainWindow {
     public class MainWindowSearchCallback implements SearchCallback {
     	
     	private DatabaseTabbedPane mDatabaseTabbedPane;
-    	private SearchExtension mSearchExtension;
+    	@SuppressWarnings("unused")
+		private SearchExtension mSearchExtension;
     	
     	MainWindowSearchCallback(DatabaseTabbedPane databaseTabbedPane, SearchExtension searchExtension){
     		mDatabaseTabbedPane = databaseTabbedPane;
@@ -400,7 +399,7 @@ public class MainWindow {
 					loadTable(file, data);
 					break;
 					
-				case "Tab":
+				case "Tab Delimited Text":
 					data = FileManager.loadStructuredFile(file, "\t", false);
 					loadTable(file, data);
 					break;
@@ -595,6 +594,22 @@ public class MainWindow {
 			}
 		}
 	
+	}
+	
+	private class ActionClose extends AbstractAction{
+		
+		private static final long serialVersionUID = -895270804624295608L;
+
+		public ActionClose() {
+			putValue(NAME, "Close");
+		}
+		
+		public void actionPerformed(ActionEvent e) {
+			MainWindow.this.mMainWindowJFrame.dispose();
+			
+			System.exit(0);
+		}
+		
 	}
 	
 	private class ActionFileExportToTable extends AbstractAction {

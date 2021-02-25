@@ -149,7 +149,6 @@ public class FileManager {
 		
 		while((line = bufferReader.readLine()) != null) {
 			String[] parsedLine = parseCSVLine(line);
-			System.out.println(Arrays.toString(parsedLine));
 			data.add(parsedLine);
 		}
 		
@@ -203,7 +202,16 @@ public class FileManager {
 		return currentRelativePath.toAbsolutePath().toString() + "\\config.txt";
 	}
 	
-	public static Properties loadProperties() {
+	private static Properties SINGLETON_PROPERTIES = null;
+	
+	public final static Properties getProperties(){
+		if(SINGLETON_PROPERTIES == null) {
+			SINGLETON_PROPERTIES = loadProperties();
+		}
+		return SINGLETON_PROPERTIES;
+	}
+	
+	private static Properties loadProperties() {
 		String location = getConfigFileLocation();
 		File configFile = new File(location);
 
@@ -221,6 +229,7 @@ public class FileManager {
 		return props;
 		
 	}
+	
 	public static void storeProperties(Properties properties) {
 		File configFile = new File(getConfigFileLocation());
 		FileWriter writer;

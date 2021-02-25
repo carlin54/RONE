@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -127,21 +128,25 @@ public class GarudaHandler {
 			mPipelinePlugin.sendPipelineFailedToGadgetResponse(pipelineResponseCode);
 	}
 	
-	private String[] getColumnHeaders(File file, String senderName) {
-		String[] columnHeaders = null;
-		switch(senderName) {
-		case "GeneMapper": 
-			
-			break;
-			
-		case "Reactome gadget": 
-			
-			break;
-			
-		}
-		
-		return columnHeaders;
+	private boolean isNull(Object o){
+		return o == null;
 	}
+	
+	private String[] getColumnHeaders(String columnHeaders, String seperator) {
+		int len = columnHeaders.length();
+		columnHeaders.subSequence(1, len-2);
+		return columnHeaders.split(",");
+	}
+	
+	private boolean hasProperties(String senderName) {
+		Properties properties = FileManager.getProperties();
+		String propColumnHeaders = (String)properties.get("garuda." + senderName + ".column_headers");
+		String propSeperator = (String)properties.get("garuda." + senderName + ".seperator");
+		String propSkipHeader = (String)properties.get("garuda." + senderName + ".skip_header");
+		return !isNull(propColumnHeaders) && !isNull(propSeperator) && !isNull(propSkipHeader);
+	}
+	
+	
 	
 	private void initGarudaListeners () {
 				
@@ -160,69 +165,87 @@ public class GarudaHandler {
 				if(!file.exists())
 					return;
 				
+				boolean hasProperties = hasProperties(senderName);
 				
-				// TODO Auto-generated method stub
-				System.out.print("loadDataRequestReceivedAsFile!");
+				if(hasProperties) {
+					Object[] options = {"Continue",
+		                    			"Cancel"};
+					
+					int n = JOptionPane.showOptionDialog(null,
+							"File Name: " + fileName + "\n" + 
+							"File Format: " + fileFormat + "\n" + 
+							"Sender Name: " + senderName + "\n" + 
+							"Sender ID: " + senderId + "\n",
+							
+					    "Garuda Import",
+					    JOptionPane.YES_NO_CANCEL_OPTION,
+					    JOptionPane.QUESTION_MESSAGE,
+					    null,
+					    options,
+					    options[0]);
+					
+					if(n == 1)
+						return;
+				
+				}
 				
 				String tableName = senderName + " (" + fileFormat + ")"; 
-				
-				
+				Properties properties = FileManager.getProperties();
+				String propColumnHeaders = (String)properties.get("garuda." + senderName + ".column_headers");
+				String propSeperator = (String)properties.get("garuda." + senderName + ".seperator");
+				String propSkipHeader = (String)properties.get("garuda." + senderName + ".skip_header");
 				
 				ArrayList<Object[]> loadedFile = null; 
 				String[] columnHeaders = null;
 				try {
-					switch(senderName) {
-					
-					case "Reactome gadget":
-						columnHeaders = new String[]{"Pathway", "Species", "Coverage %", "pval", "FDR"};
-						loadedFile = FileManager.loadStructuredFile(file, ",", true);
-						break;
-					
-					case "GeneMapper":
-						columnHeaders = new String[]{"Gene", "NM", "TF", "Region", "Strand", "MA Score", "PSSM Score", "ID", "Motif", "Consensus", "Similarity", "Pareto"};
-						loadedFile = FileManager.loadStructuredFile(file, ",", true);
-						break;
+					if(hasProperties) {
+						columnHeaders = getColumnHeaders(propColumnHeaders, propSeperator);
+						boolean skipHeader = Boolean.getBoolean(propSkipHeader);
+						loadedFile = FileManager.loadStructuredFile(file, propSeperator, skipHeader);
+					} else {
+						String path = file.getAbsolutePath();
+						String extension = FilenameUtils.getExtension(path);
 						
-					default:
-						
-							String path = file.getAbsolutePath();
-							String extension = FilenameUtils.getExtension(path);
+						switch(extension) {
+							case "csv": 
+								columnHeaders = null;
+								loadedFile = FileManager.loadCSV(file,  false);
+								break; 
 							
-							switch(extension) {
-								case "csv": 
-									columnHeaders = null;
-									loadedFile = FileManager.loadCSV(file,  false);
-									break; 
-								
-								case "txt": 
-									columnHeaders = new String[1];
-									columnHeaders[0] = fileFormat;
-									loadedFile = FileManager.loadTextFile(file, true);
-									break; 
-								
-								default:
-									columnHeaders = new String[1];
-									columnHeaders[0] = senderName;
-									loadedFile = FileManager.loadTextFile(file, true);
-									break; 
-							}
-					}
+							case "txt": 
+								columnHeaders = new String[1];
+								columnHeaders[0] = fileFormat;
+								loadedFile = FileManager.loadTextFile(file, true);
+								break; 
+							
+							default:
+								columnHeaders = new String[1];
+								columnHeaders[0] = senderName;
+								loadedFile = FileManager.loadTextFile(file, true);
+								break; 
+						}
 					
-					mMainWindow.getTabbedPane().addTab(tableName, columnHeaders, null, loadedFile);
+					}
 				
-				} catch (IOException | SQLException e) {
+					if(isNull(loadedFile) || isNull(columnHeaders)) {
+						JOptionPane.showMessageDialog(mParentFrame, "Failed to accept import data from the Garuda Platform.", "Import Error", JOptionPane.ERROR_MESSAGE);
+					} else {
+						mMainWindow.getTabbedPane().addTab(tableName, columnHeaders, null, loadedFile);
+					}
+				
+				} catch (SQLException e) {
+					MainWindow.showError(e);
+				} catch (IOException e) {
 					MainWindow.showError(e);
 				}
-				
-				
+			
 				
 			}
 
 			@Override
 			public void loadDataRequestReceivedAsStream(byte[] receivedData, String senderId, String senderName,
 					String originDeviceId, String currentDeviceId, String fileName, String fileFormat) {
-				// TODO Auto-generated method stub
-				System.out.print("loadDataRequestReceivedAsStream!");
+
 			}
 		});
 		
@@ -231,12 +254,12 @@ public class GarudaHandler {
 			@Override
 			public void gadgetActivationFailed(GarudaResponseCode response) {
 				JOptionPane.showMessageDialog(mParentFrame, "Activation Failed " + response.toString(), "Garuda Error", JOptionPane.ERROR_MESSAGE);
-				
+
 			}
 			
 			@Override
 			public void gadgetActivated() {
-				// JOptionPane.showMessageDialog(parentFrame, "Connected to Garuda ", "Garuda connection", JOptionPane.INFORMATION_MESSAGE);
+				//JOptionPane.showMessageDialog(mParentFrame, "Connected to Garuda ", "Garuda connection", JOptionPane.INFORMATION_MESSAGE);
 			}
 		}) ;
 		

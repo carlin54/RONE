@@ -1,0 +1,8 @@
+#RONE Application Properties
+#Wed Feb 24 11:19:05 AEST 2021
+Garuda.GeneMapper.seperator=,
+Garuda.Reactome\ gadget.seperator=,
+Garuda.GeneMapper.column_headers=[Gene, NM, TF, Region, Strand, MA Score, PSSM Score, ID, Motif, Similarity, Pareto]
+Garuda.Reactome\ gadget.column_headers=[Name, Species, Disease Association, Inferred Association, Pathways]
+Garuda.Reactome\ gadget.skip_header=true
+Garuda.GeneMapper.skip_header=true

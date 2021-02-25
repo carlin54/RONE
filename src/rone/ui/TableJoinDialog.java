@@ -25,8 +25,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -52,6 +50,8 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.SwingConstants;
 
 public class TableJoinDialog extends JFrame  {
+	private static final long serialVersionUID = -1942939829003257445L;
+
 	private DatabaseTabbedPane mDatabaseTabbedPane; 
 	
 	private JPanel panel;
@@ -89,6 +89,7 @@ public class TableJoinDialog extends JFrame  {
 	private JComboBox comboBoxJoinOperationTableB;
 	
 	
+	@SuppressWarnings("serial")
 	private static final HashMap<String, Database.Join.Type> JOIN_TO_SQL = new HashMap<String, Database.Join.Type>(){
 		{
 			put("LEFT INCLUSIVE", Join.Type.LEFT_INCLUSIVE);
@@ -493,33 +494,27 @@ public class TableJoinDialog extends JFrame  {
 		
 		private DefaultComboBoxModel generateModel(JComboBox exclude) {
 			DefaultComboBoxModel generatedModel = new DefaultComboBoxModel();
-			System.out.println("generateModel()");
 			
 			ArrayList<String> tableNames = getTableIdentifiers();
 			
 			boolean skipExclude = shouldSkipExclude(exclude);
 			if(skipExclude) {
-				System.out.println("Not Excluding!");
 				for(int i = 0; i < tableNames.size(); i++) {
 					String possibleChoice = tableNames.get(i);
-					System.out.println("Adding: " + possibleChoice);
 					generatedModel.addElement(new String(possibleChoice));
 				}
 
 			} else {
 				boolean shouldExclude;
 				String excludeString = exclude.getSelectedItem().toString();
-				System.out.println("Excluding: " + excludeString);
 				for(int i = 0; i < tableNames.size(); i++) {
 					String possibleChoice = tableNames.get(i);
 					shouldExclude = possibleChoice.equals(excludeString);
 					if(!shouldExclude) {
-						System.out.println("Adding: " + possibleChoice);
 						generatedModel.addElement(new String(possibleChoice));
 					}
 				}
 			}
-			System.out.println("generated model size: " + generatedModel.getSize());
 			return generatedModel;
 		}
 		
@@ -528,25 +523,13 @@ public class TableJoinDialog extends JFrame  {
 		}
 		
 		public void processChoice(JComboBox choiceUpdate, JComboBox choiceExclude) {
-			System.out.println("processChoice()");
-			System.out.println("choiceUpdate (at the beginning): " + choiceUpdate.getItemCount());
-			System.out.println("choiceExclude (at the beginning): " + choiceExclude.getItemCount());
 			DefaultComboBoxModel updateModel = generateModel(choiceExclude);
-			System.out.println("updateModel Size: " + updateModel.getSize());
 			boolean hadSelection = hasSelection(choiceUpdate);
-			System.out.println("updateModel Size (after hadSelection): " + updateModel.getSize());
 			Object selectedItem =  choiceUpdate.getSelectedItem();
-			choiceUpdate.setModel(updateModel);
-			System.out.println("choiceUpdate (after setModel): " + updateModel.getSize() + " - " + Boolean.toString(hadSelection));
 			choiceUpdate.setSelectedIndex(-1);
 			if(hadSelection) {
-				System.out.println("Selected item: " + selectedItem.toString());
 				choiceUpdate.setSelectedItem(selectedItem);
-			} else {
-				//choiceUpdate.setSelectedIndex(-1);
 			}
-			System.out.println("choiceUpdate (after setSelectedItem): " + choiceUpdate.getItemCount());
-			System.out.println("choiceExclude (after setSelectedItem): " + choiceExclude.getItemCount());
 		}
 		
 		
@@ -572,8 +555,6 @@ public class TableJoinDialog extends JFrame  {
 		public JButton mIncludeAllButton;
 		public JButton mExcludeAllButton;
 		
-		
-		
 		public ChoiceTableSelectListener(JComboBox comboBoxToListenTo, 
 										 JComboBox comboBoxToListenToModify,
 										 JList includeColumn, 
@@ -590,9 +571,9 @@ public class TableJoinDialog extends JFrame  {
 			mExcludeAllButton = excludeAllButton;
 		}
 		
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public void itemStateChanged(ItemEvent e) {
-			System.out.println("ItemStateChange!");
         	choiceTableSelectA.getSelectedItem();
             if(e.getStateChange() == ItemEvent.SELECTED){
                 String selected = (String) e.getItem();
@@ -617,12 +598,6 @@ public class TableJoinDialog extends JFrame  {
         		
             }
             
-            if(e.getStateChange() == ItemEvent.DESELECTED){
-            	/*String deselected = (String) e.getItem(); 
-            	ComboBoxModel newModifyModel = mComboBoxToListenToModify.getModel();
-            	mComboBoxToListenToModify.addItem(deselected);*/
-            }
-            
             updateTxtNewTableName();
             
 		}
@@ -641,7 +616,6 @@ public class TableJoinDialog extends JFrame  {
 
 		@Override
 		public void mouseClicked(MouseEvent arg0) {
-			System.out.println("mouseClicked!");
 			boolean enableBtn = !mList.isSelectionEmpty();
 			mButton.setEnabled(enableBtn);
 		}
@@ -657,14 +631,12 @@ public class TableJoinDialog extends JFrame  {
 
 		@Override
 		public void mousePressed(MouseEvent arg0) {
-			System.out.println("mouseClicked!");
 			boolean enableBtn = !mList.isSelectionEmpty();
 			mButton.setEnabled(enableBtn);
 		}
 
 		@Override
 		public void mouseReleased(MouseEvent arg0) {
-			System.out.println("mouseClicked!");
 			boolean enableBtn = !mList.isSelectionEmpty();
 			mButton.setEnabled(enableBtn);
 			
@@ -967,13 +939,8 @@ public class TableJoinDialog extends JFrame  {
 		}
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
-			
-			if(!hasSelection()) {
-				System.out.println("Doesn't hava a selection!");
-			}
 				
 			if(!hasTableModel()) {
-				System.out.println("Doesn't hava a table model!");	
 				DefaultTableModel dtm = new DefaultTableModel(new Object[0][0], getColumnNames());
 				tableJoinConstraints.setModel(dtm);
 			}
@@ -1230,7 +1197,6 @@ public class TableJoinDialog extends JFrame  {
 	private class ConstraintTableContainerListener implements ContainerListener {
 		
 		public void update() {
-			System.out.println("Update Called!");
 			if(tableJoinConstraints.getRowCount() > 0) {
 				tableJoinConstraints.setEnabled(true);
 				btnJoinTable.setEnabled(false);
@@ -1246,13 +1212,11 @@ public class TableJoinDialog extends JFrame  {
 		@Override
 		public void componentAdded(ContainerEvent e) {
 			update();
-			System.out.println("componentAdded()");
 		}
 
 		@Override
 		public void componentRemoved(ContainerEvent e) {
 			update();
-			System.out.println("componentRemoved()");
 		}
 	}
 
@@ -1282,8 +1246,6 @@ public class TableJoinDialog extends JFrame  {
 						newRow[iCol] = newRow;
 					}
 					newTableModel.addRow(newRow);
-				} else {
-					System.out.println("Skipping row!");
 				}
 			}
 			tableJoinConstraints.setModel(newTableModel);

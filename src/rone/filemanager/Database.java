@@ -3,46 +3,32 @@ package rone.filemanager;
 import java.net.InetAddress;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.JDBCType;
 import java.sql.PreparedStatement;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Queue;
 import java.util.Stack;
 
 import org.apache.derby.drda.NetworkServerControl;
-import org.apache.derby.iapi.sql.ResultSet;
-
-import rone.ui.DatabaseTabbedPane.Tab;
-
 
 public class Database {
 	
 	private static Database single_instance = null;
 	
-	private static boolean instanceLocked = false;
-	
 	private static Object mutex = new Object();
 	
 	private Database() throws Exception {
-		//System.out.println("Database()");
 		this.mDatabaseName = "Singleton"; 
 		this.mServer = new NetworkServerControl(InetAddress.getByName("localhost"), SERVER_PORT);
-		
-		//System.out.println("Created server on port " + SERVER_PORT);
-	
 		this.mServer.start(null);
 	
 	
 		String connectionString = "jdbc:derby:memory:" + mDatabaseName + ";create=true;";
 		this.mConnection = DriverManager.getConnection(connectionString);
-		//System.out.println("Server started");
 		
 		this.mTableNames = new ArrayList<String>();
 	}
@@ -59,7 +45,6 @@ public class Database {
 					try {
 						single_instance = result = new Database();
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -67,9 +52,7 @@ public class Database {
 		}
 		return result;
 		
-		
 	}
-	
 	
 	private static Integer SERVER_PORT = 1528;
 	private NetworkServerControl mServer;
@@ -87,12 +70,7 @@ public class Database {
 	
 	private String mDatabaseName;
 	
-	//TODO: make safe table names
 	ArrayList<String> mTableNames;
-	
-	private void addTable(String tableName) {
-		mTableNames.add(tableName);
-	}
 	
 	private void removeTable(String tableName) {
         Iterator itr = mTableNames.iterator(); 
@@ -124,29 +102,16 @@ public class Database {
 		@Override
 	    public boolean equals(Object o) { 
 	  
-	        // If the object is compared with itself then return true   
 	        if (o == this) { 
 	            return true; 
 	        } 
 	        
-	        /* Check if o is an instance of Complex or not 
-	          "null instanceof [type]" also returns false */
 	        if (!(o instanceof Table)) { 
 	            return false; 
 	        } 
 	          
-	        // typecast o to Complex so that we can compare data members  
 	        Table t = (Table) o; 
 	          
-	        // Compare the data members and return accordingly 
-	        
-	        System.out.println("---");
-	        System.out.println(this.getDatabase().toString());
-	        System.out.println(t.getDatabase().toString());
-	        System.out.println(this.getName());
-	        System.out.println(t.getName());
-	        System.out.println("---");
-	        
 	        return this.getDatabase().equals(t.getDatabase())
 	        	&& this.getName().equals(t.getName());
 	    } 
@@ -177,16 +142,11 @@ public class Database {
 		
 		public synchronized ArrayList<Object[]> getTable() throws SQLException {
 			String query = generateGetTableQuery();
-			//System.out.println("----generated sql query----");
-			//System.out.println(query);
-			//System.out.println("----generated sql query----");
 			
 			java.sql.Statement statement = getConnection().createStatement();
 			java.sql.ResultSet resultSet = statement.executeQuery(query);
 			
-			//System.out.println("----query results----");
 			ArrayList<Object[]> queryResults = getResults(resultSet);
-			//System.out.println("----query results----");
 			return queryResults;
 		}
 		
@@ -233,6 +193,7 @@ public class Database {
 		}
 		
 		
+		@SuppressWarnings("static-access")
 		public synchronized int[] insertRows(ArrayList<Object[]> rows) throws SQLException {
 			
 			String code = generateInsertRowQuery();
@@ -241,7 +202,6 @@ public class Database {
 			try (PreparedStatement ps = Database.getInstance().getConnection().prepareStatement(code)) {
 	        	
 	        	for(Object[] row : rows) {
-	        		//System.out.println(Arrays.toString(row));
 		            for(int i = 1; i <= row.length; i++) {
 		                Object cell = row[i-1];
 		                if(cell == null) {
@@ -255,12 +215,7 @@ public class Database {
 	        	}
 	            success = ps.executeBatch();
 	        }
-			//System.out.println("----inserting data into " + mTabelName + " ----");
-			
-			//System.out.println("----successful insertion----");
-			//System.out.println(Arrays.toString(success));
 			setExistsInDatabase(true);
-			//System.out.println("----successful insertion----");
 	        return success;
 		}
 
@@ -270,10 +225,6 @@ public class Database {
 	
 	private boolean hasPrimaryKeys(int[] primaryKeys) {
 		return primaryKeys != null && primaryKeys.length > 0;
-	}
-	
-	private boolean hasColumnIdentifiers(String[] columnNames) {
-		return columnNames != null && columnNames.length > 0;
 	}
 	
 	public String makeNameSafe(String str) {
@@ -340,20 +291,14 @@ public class Database {
 						Integer k = similarIndicies.remove();
 						uniqueColumnIdentifiers[k] = new String(uniqueColumn + "_" + j.toString());
 						skipIndicies.add(k);
-						System.out.println("Changed - " + uniqueColumnIdentifiers[k]);
 						j = j + 1;
 					}
 				}
 				similarIndicies.clear();
 			}
-			if(isUnique) {
-				System.out.println("Success, columns are unique!");
-			}
 	
 		}
 		
-		System.out.println("Started with: " + Arrays.toString(columnNames)); 
-		System.out.println("Finished with: " + Arrays.toString(uniqueColumnIdentifiers)); 
 		return uniqueColumnIdentifiers;
 	}
 	
@@ -362,7 +307,6 @@ public class Database {
 		String[] columnNamesSQL = new String[columnNames.length];
 		for(int i = 0; i < columnNames.length; i++) {
 			columnNamesSQL[i] = makeNameSafe(columnNames[i]);
-			//System.out.println(columnNames[i] + ":" + columnNamesSQL[i]);
 		}
 		
 		columnNamesSQL = makeColumnIdentifiersUnique(columnNamesSQL);
@@ -386,8 +330,6 @@ public class Database {
 	}
 	
 	public String generateCreateTableSQL(String tableName, String[] columnNames, int[] primaryKeys) {
-		// assert the column identifiers are the same as the safe ones
-		// assert(java.util.Arrays.equals(columnNames, makeColumnIdentifersSafe(columnNames)));
 		//TODO: make it accept all sorts of Objects
 		assert(columnNames.length > 0);
 		int finalColumnIdx = columnNames.length-1;
@@ -395,12 +337,6 @@ public class Database {
 		
 		// columns
 		String query = "";
-		/*String type = query.getClass().getName();
-		
-    	query += 	  "CREATE TYPE """
-    			 		+ "EXTERNAL NAME '" + type + "'"
-    			 		+ "LANGUAGE JAVA";*/
-		
     	
 		query = "CREATE TABLE " + tableName + "(\r\n";
 		for(i = 0; i < columnNames.length-1; i++) {
@@ -432,38 +368,23 @@ public class Database {
 		return len > 2 ? str.charAt(0) == CHAR_QUOTATION && str.charAt(len-1) == CHAR_QUOTATION : false;
 	}
 	
+	@SuppressWarnings("static-access")
 	public Table createTable(String tableName, String[] columnNames, int[] primaryKeys) throws SQLException {
-		// generate query
-		//assert(hasColumnIdentifiers(columnNames));
-		System.out.println("CreatingTable!");
-		//TODO: implement this
+
 		String safeTableName = makeTableNameSafe(tableName);
-		System.out.println("makeSafeTableName!");
 		
 		String[] safeColumnIdentifiers = makeColumnIdentifiersSafe(columnNames);
-		System.out.println("makeColumnIdentifersSafe!");
-		//System.out.println(safeColumnIdentifiers.toString());
 		
-		System.out.println("Building Code!");
 		String code = generateCreateTableSQL(safeTableName, safeColumnIdentifiers, primaryKeys);
 		
-		System.out.println("----generated sql----");
-		System.out.println(code);
-		System.out.println("----generated sql----");
-		
-		System.out.println("Creating database!");
 		Database.Table create = new Database.Table(this, safeTableName, safeColumnIdentifiers);
 		
-		
 		java.sql.Statement statement = this.getConnection().createStatement();
-		System.out.println("create command database!");
 		boolean success = statement.execute(code);
-		//System.out.println("Query success: " + Boolean.toString(success));
 		statement.close();
 		
 		this.mTableNames.add(safeTableName);
 		create.setExistsInDatabase(true);
-		System.out.println("create success!");
 		return create;
 	}
 	
@@ -475,9 +396,6 @@ public class Database {
 	public void removeTable(Table removeTable) throws SQLException {
 		if(removeTable.existsInDatabase()) {
 			String query = generateDeleteTableQuery(removeTable.getName());
-			//System.out.println("----generated sql----");
-			//System.out.println(query);
-			//System.out.println("----generated sql----");
 			
 			Statement statement = getConnection().createStatement();
 			statement.executeUpdate(query);
@@ -704,19 +622,20 @@ public class Database {
 		String aTableName = join.getTableA().getName();
 		int[] aSelect = join.getSelectA();
 		int[] aKey = join.getKeyA();
+		
 		Database.Table bTable = join.getTableB();
 		String bTableName = join.getTableB().getName();
 		int[] bSelect = join.getSelectB();
 		int[] bKey = join.getKeyB();
 		
-		Join.Type joinType = join.getJoinType();
 		
 		String query = generateSelectSQL(aTable, aSelect, bTable, bSelect) 	+ " \r\n" 
 					  + "FROM " + aTableName								+ " \r\n"
 					  + joinToString(join) + " JOIN " + bTableName 			+ " \r\n"
 					  + generateOnSQL(aTable, aKey, bTable, bKey) 	+ " \r\n"
 					  + generateWhereSQL(join) + " \r\n";
-		 
+		
+		
 		return query;
 	}
 	
@@ -724,38 +643,31 @@ public class Database {
 		ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
 		int rowCount = resultSet.getFetchSize();
 		int columnCount = resultSetMetaData.getColumnCount();
-		System.out.println("rowCount : " + rowCount + "\t colCount : " + columnCount);
 		
 		String[] columnNames = new String[columnCount];
 		for(int i = 1; i <= columnCount; i++) {
 			String columnName = resultSetMetaData.getColumnName(i);
-			System.out.println(columnName);
 			columnNames[i-1] = columnName;
 		}
 		return columnNames; 
 	}
 	
-	static ArrayList<Object[]> getResults(java.sql.ResultSet resultSet) throws SQLException{
+	static ArrayList<Object[]> getResults(java.sql.ResultSet resultSet) throws SQLException {
 		ResultSetMetaData rsmd = resultSet.getMetaData();
 		
 		int columnCount = rsmd.getColumnCount();
 
-		//System.out.println("----query results----");
 		ArrayList<Object[]> queryResults = new ArrayList<Object[]>();
 		while (resultSet.next()) {
 			Object[] row = new Object[columnCount]; 
 		    for (int i = 0; i < columnCount; i++) {
-		    	//if (i > 0) System.out.print(",  ");
 		        //TODO: fix get object
 		        Object columnValue = resultSet.getString(i+1);
 		        row[i] = columnValue;
-		        //System.out.print(columnValue);
 		    }
 		    queryResults.add(row);
-		    //System.out.println("");
 		}
 		resultSet.close();
-		//System.out.println("----query results----");
 		return queryResults;
 	}
 	
@@ -781,10 +693,6 @@ public class Database {
 	
 	public java.sql.ResultSet join(Join join) throws SQLException {
 		String query = generateJoinQuery(join);
-		System.out.println("----generated sql query----");
-		//query = "SELECT * FROM " + join.getTableA().getName();
-		System.out.println(query);
-		System.out.println("----generated sql query----");
 		java.sql.Statement statement = getConnection().createStatement();
 		return statement.executeQuery(query); 
 	}
@@ -799,18 +707,9 @@ public class Database {
 	
 	public void finalize() throws Throwable {
 		String query = generateDeleteTablesQuery();
-		//System.out.println("----generated sql----");
-		//System.out.println(query);
-		//System.out.println("----generated sql----");
-		
-		
 		Statement statement = getConnection().createStatement();
 		statement.executeUpdate(query);
 		statement.close();
-		//System.out.println("Database " + mDatabaseName + " deleted successfully...");
-		
-		//System.out.println("Object is destroyed by the Garbage Collector");
-		//System.out.println("Disconnecting");
         String shutdownConnectionString = mDatabaseName + ";shutdown=true";
         DriverManager.getConnection(shutdownConnectionString);
         single_instance = null;

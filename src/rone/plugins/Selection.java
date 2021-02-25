@@ -26,7 +26,6 @@ public class Selection {
 			Object[] row = mSelected.get(i);
 			for(int j = 0; j < row.length; j++) {
 				String cell = row[j].toString();
-				System.out.println("Cell: " + cell);
 				cellsAsString.add(cell);
 			}
 		}
