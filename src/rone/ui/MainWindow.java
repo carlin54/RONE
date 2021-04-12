@@ -494,7 +494,7 @@ public class MainWindow {
 				Object[] possibilities = {"CSV", "Tab Delimited Text"};
 				String content = (String)JOptionPane.showInputDialog(
 				                    mMainWindowJFrame,
-				                    "Complete the sentence:\n",
+				                    "",
 				                    "File Type",
 				                    JOptionPane.PLAIN_MESSAGE,
 				                    null,
@@ -589,6 +589,7 @@ public class MainWindow {
 				mTableJoinDialog = new TableJoinDialog(mDatabaseTabbedPane);
 			}
 			if(!mTableJoinDialog.isVisible()) {
+				mTableJoinDialog.clearForm();
 				mTableJoinDialog.setVisible(true);
 				mTableJoinDialog.toFront();
 			}
