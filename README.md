@@ -84,13 +84,13 @@ Table of Contence<br>
 	<ol>
 			<li>
 				To export data from a table to a file. <b> Select</b> the cells that you would like to export. If no cells are selected, the <i>whole table</i> will be used at the selection.  <br>
-				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images//home/richard/Desktop/PDF/6.png" border="1px solid red"/>
+				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/6.png" border="1px solid red"/>
 				<br>
 				<br>
 			</li>
 			<li>
 				Select <b> File</b> > <b> Export</b> > <b> to File</b> <br>
-				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images//home/richard/Desktop/PDF/7.png" border="1px solid red"/>
+				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/7.png" border="1px solid red"/>
 				<br>
 				<br>
 			</li>
@@ -106,7 +106,7 @@ Table of Contence<br>
 						Click <b> Save</b>. 
 					</li>
 				</ol>
-				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images//home/richard/Desktop/PDF/12.png" border="1px solid red"/>
+				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/12.png" border="1px solid red"/>
 				<br>
 				<br>
 			</li>
@@ -119,7 +119,7 @@ Table of Contence<br>
 	 </summary>
 	 <ol>
 	 	<li>
-			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images//home/richard/Desktop/PDF/6.png" border="1px solid red"/>
+			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/6.png" border="1px solid red"/>
 			<br>
 			<br>
 		</li>
@@ -133,14 +133,14 @@ Table of Contence<br>
 	 	<ol>
 	 		<li>
 				To export data from a table to a file. <b> Select</b> the cells that you would like to export. If no cells are selected, the <i>whole table</i> will be as the selection. <br> 
-				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images//home/richard/Desktop/PDF/6.png" border="1px solid red"/>
+				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/6.png" border="1px solid red"/>
 				<br>
 				<br>
 		 	</li>
 		
 			<li>
 				To import import a file, select <b> File</b> > <b> Export</b> > <b> to File</b> <br>
-				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images//home/richard/Desktop/PDF/15.png" border="1px solid red"/>
+				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/15.png" border="1px solid red"/>
 				<br>
 				<br>
 			</li>
@@ -154,14 +154,14 @@ Table of Contence<br>
 						Press <b> OK</b>. <br>
 					</li>
 				</ol>
-					<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images//home/richard/Desktop/PDF/13.png" border="1px solid red"/>
+					<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/13.png" border="1px solid red"/>
 					<br>
 					<br>
 			</li>
 			
 			<li> 
 				The selected data will be presented in the new tab. <br> 
-				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images//home/richard/Desktop/PDF/14.png" border="1px solid red"/>
+				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/14.png" border="1px solid red"/>
 				<br>
 				<br>
 			</li>
@@ -181,33 +181,33 @@ Table of Contence<br>
 		
 		<li>
 			<b> Right-click</b> the column header for the column that you would like to sort. <br>
-			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images//home/richard/Desktop/PDF/8.png" border="1px solid red"/>
+			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/8.png" border="1px solid red"/>
 			<br>
 			<br>
 		</li>
 		<ol>
 			<li>
 				<b>Left-click</b> the name of the <b> Sort by <i>column header</i></b> from the pop-up menu that appears. By default, the column will sort in ascending order. <br>
-				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images//home/richard/Desktop/PDF/9.png" border="1px solid red"/>
+				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/9.png" border="1px solid red"/>
 				<br>
 				<br>
 			</li>
 			<li>
 				If you would like to sort the column in descending order. Then <b>Right-click</b> the column header from step 1. Next, <b>Left-click</b> the name of the column header from the pop-up menu that appears. You will notice next to the column header, either (↑) or (↓) denotes if the column is currently sorted in ascending or descending order.  <br>
-				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images//home/richard/Desktop/PDF/10.png" border="1px solid red"/>
+				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/10.png" border="1px solid red"/>
 				<br>
 				<br>
 			</li>
 		</ol>
 		<li>
 			After sorting by column <i>A</i>, you can sort column <i>B</i>, then <i>C</i>, <i>D</i>, and so on. This is accomplished by <b> Right-clicking</b> the column you next want to sort by. Then <b> Left-click</b> the name of the <b> Order by <i>column header</i></b> from the pop-up menu that appears. You will notice next to the column header, either (↑) or (↓) denotes if the column is currently being sorted in ascending or descending order.  <br>
-			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images//home/richard/Desktop/PDF/11.png" border="1px solid red"/>
+			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/11.png" border="1px solid red"/>
 			<br>
 			<br>
 		</li>
 		<li>
 			If you no longer wish to have the rows ordered with the current sort by, order by filter, you can clear it. This is accomplished by <b> Right-clicking</b> a column header and selecting <b> Clear</b> from the pop-up menu. <br> 
-			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images//home/richard/Desktop/PDF/27.png" border="1px solid red"/>
+			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/27.png" border="1px solid red"/>
 			<br>
 			<br>
 		</li>
@@ -233,7 +233,7 @@ Table of Contence<br>
 		<summary>
 			Venn Diagrams
 		</summary>
-			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images//home/richard/Desktop/PDF/26.png" border="1px solid red"/><br>
+			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/26.png" border="1px solid red"/><br>
 			<br>
 	</details></small>
 		 <small><details>
@@ -255,7 +255,7 @@ Table of Contence<br>
 	<br>
 	
 	 		To be able to join two tables together, you will need at least two tables. The tables will ideally contain two columns of the same values. For instance, bellow you see in the <i>SHOE.csv</i> table, there is a column called <i>Gene</i>, and in the table <i>GeneSymbols.txt.csv</i>, there is a column called <i>Gene</i>. The joint will be performed on the same column.<br> 
-			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images//home/richard/Desktop/PDF/16.png" border="1px solid red"/>
+			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/16.png" border="1px solid red"/>
 			<br>
 			<br>
 			
@@ -263,29 +263,29 @@ Table of Contence<br>
 		
 		<li> 
 			To join two tables together, select <b>Table</b> > <b> Join Table</b>.<br>
-			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images//home/richard/Desktop/PDF/17.png" border="1px solid red"/>
+			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/17.png" border="1px solid red"/>
 			<br>
 			<br>
 		</li>
 		
 		<li> 
 			A new window called Join Table will appear. Using the combo-boxes <i>Table A</i>, and <i>Table B</i> in <i>Table Select section</i>, select the tables you would like to join.<br> 
-			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images//home/richard/Desktop/PDF/18.png" border="1px solid red"/>
+			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/18.png" border="1px solid red"/>
 			<br>
 			<br>
 		</li>
 		
 		<li> 
 			Now, you will see that it added the columns of the selected tables into the list on the left in <i>Table A section</i>, and <i>Table B section</i>. The list boxes on the right of <i>Table A section</i>, and <i>Table B section</i> denote columns included to the resulting tab. Each section is an exclude and include list (left and right). You can move columns between the include and exclude columns using the buttons:  <b>>></b>, <b><<</b>,  <b>Add All</b>,  <b>Remove All</b>.<br>
-			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images//home/richard/Desktop/PDF/19.png" border="1px solid red"/>
-			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images//home/richard/Desktop/PDF/20.png" border="1px solid red"/>
+			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/19.png" border="1px solid red"/>
+			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/20.png" border="1px solid red"/>
 			<br>
 			<br>
 		</li>
 		
 		<li> 
 			From the two combo-boxes at the top of the <i>Join Operation section</i>, select the columns from the tables you would like to constrain. Then, from the combo-box in the bottom-right corner of the <i> Join Operation</i> section, select the type of joint you would like to perform.<br>
-			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images//home/richard/Desktop/PDF/22.png" border="1px solid red"/>
+			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/22.png" border="1px solid red"/>
 			<br>
 			<br>
 		</li>
@@ -294,7 +294,7 @@ Table of Contence<br>
 			<ol>
 				<li> 
 					Click <b>Add Constraint (=)</b>. You will see the constraint appear in the table. You can add several constraints by simply changing the selected columns, and then clicking <b>Add Constraint (=)</b> again.<br> 
-					<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images//home/richard/Desktop/PDF/23.png" border="1px solid red"/>
+					<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/23.png" border="1px solid red"/>
 					<br>
 					<br>
 				</li>
@@ -306,12 +306,12 @@ Table of Contence<br>
 		
 		<li> 
 			Finally, in the Name Table section, enter the name for the new table. Click <b>Join Table</b>.
-			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images//home/richard/Desktop/PDF/24.png" border="1px solid red"/>
+			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/24.png" border="1px solid red"/>
 		</li>
 		
 		<li> 
 			The resulting table can be seen the new tab. 
-			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images//home/richard/Desktop/PDF/25.png" border="1px solid red"/>
+			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/25.png" border="1px solid red"/>
 			
 					
 			 
@@ -327,7 +327,7 @@ Table of Contence<br>
 	 <p style="margin-left: 40px">
 	 <br>
 	When RONE begins, it trys to activate its plugins. If the plugin has been loaded successfully, it can be accessed from the plugin menu. <br>
-	 <img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images//home/richard/Desktop/PDF/5.10-goinoeprationcontraintsele.png" border="1px solid red"/>
+	 <img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/5.10-goinoeprationcontraintsele.png" border="1px solid red"/>
 	 <br>
 	 <br>
 	 <details>
