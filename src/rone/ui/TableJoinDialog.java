@@ -499,10 +499,10 @@ public class TableJoinDialog extends JFrame  {
 			
 			boolean skipExclude = shouldSkipExclude(exclude);
 			if(skipExclude) {
-				for(int i = 0; i < tableNames.size(); i++) {
-					String possibleChoice = tableNames.get(i);
-					generatedModel.addElement(new String(possibleChoice));
-				}
+			for(int i = 0; i < tableNames.size(); i++) {
+				String possibleChoice = tableNames.get(i);
+				generatedModel.addElement(new String(possibleChoice));
+			}
 
 			} else {
 				boolean shouldExclude;
@@ -526,9 +526,11 @@ public class TableJoinDialog extends JFrame  {
 			DefaultComboBoxModel updateModel = generateModel(choiceExclude);
 			boolean hadSelection = hasSelection(choiceUpdate);
 			Object selectedItem =  choiceUpdate.getSelectedItem();
-			choiceUpdate.setSelectedIndex(-1);
+			choiceUpdate.setModel(updateModel);
 			if(hadSelection) {
 				choiceUpdate.setSelectedItem(selectedItem);
+			}else {
+				choiceUpdate.setSelectedIndex(-1);
 			}
 		}
 		
@@ -1101,7 +1103,7 @@ public class TableJoinDialog extends JFrame  {
 		
 	}
 	
-	private void clearForm() {
+	public void clearForm() {
 		// Stage 1
 		choiceTableSelectA.setSelectedIndex(-1);
 		choiceTableSelectB.setSelectedIndex(-1);
