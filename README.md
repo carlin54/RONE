@@ -14,17 +14,13 @@ carlin.connell@gmail.com
 Licence<br>
 Table of Contence<br>
 ## Tables
- <!-------------------------------------------------------------------------------------------------------->
-
 <details>
-
 <summary>
 	How to import data from a file? 
 </summary>
 	<div style="margin-left: 40px">
 		<br>
 		RONE accepts two types of file formats, comma-separated value and tab-delimited text.<br>
-
 		<ol>
 			<li>
 				To import import a file, select <b>File</b> > <b>Import</b> > <b> from File</b> <br>
@@ -32,55 +28,48 @@ Table of Contence<br>
 				<br>
 				<br>
 			</li>
-			
 			<li>
-				Navigate to the file that you are intrested in importing. <b>Select</b> the file and then click <b>Open</b>. <br> 
+				Navigate to the file that you are interested in importing. <b>Select</b> the file and then click <b>Open</b>. <br> 
 				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/2.png" border="1px solid red"/><br>
 			</li>
-			
 			<li>
 				<b> Select</b> the format for the file that you are trying to load. <br>
 				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/3.png" border="1px solid red"/>
 				<br>
 				<br>
 			</li>
-			
 			<li>
 				Once the file format has been selected, press <b> OK</b>. <br>
 				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/4.png" border="1px solid red"/>
 				<br>
 				<br>
 			</li>
-			
 			<li>
 				Your data will be loaded from the file and presented to you in a new tab.  <br>
-				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/5.png" border="1px solid red"/>
+				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/5.png" border="1px solid red"/><br>
 				<br>
-				<br>
-			</li>
-		</ol>
+			</li></ol>
 	</div>
  </details>
- <!-------------------------------------------------------------------------------------------------------->
 <details>
 <summary>
 	How to import data from a Garuda Gadget?
 </summary>
  </details>
- 
- <!-------------------------------------------------------------------------------------------------------->
  <details>
  <summary>
 	How add/remove/edit import settings for other Garuda Gadgets?
 </summary>
+<div style="margin-left: 40px">
+</div>
  </details>
- <!-------------------------------------------------------------------------------------------------------->
-  <details>
+<details>
 	 <summary>
 	How to export data to a file?<br>
 	</summary>
+	<div style="margin-left: 40px">
 	<br>
-	RONE only supports exporting data to a comma-separated value file.<br>
+		RONE only supports exporting data to a comma-separated value file.<br>
 	<ol>
 			<li>
 				To export data from a table to a file. <b> Select</b> the cells that you would like to export. If no cells are selected, the <i>whole table</i> will be used at the selection.  <br>
@@ -111,12 +100,13 @@ Table of Contence<br>
 				<br>
 			</li>
 		</ol>
+        </div>
  </details>
-  <!-------------------------------------------------------------------------------------------------------->
 <details>
 	 <summary>
 		How to export data to another Garuda gadget?
 	 </summary>
+	<div style="margin-left: 30px">
 	 <ol>
 	 	<li>
 			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/6.png" border="1px solid red"/>
@@ -124,12 +114,13 @@ Table of Contence<br>
 			<br>
 		</li>
 	</ol>
+    </div>
  </details>
- 
  <details>
 	 <summary>
 		How to export data to a new table?<br>
 	 </summary>
+	<div style="margin-left: 40px">
 	 	<ol>
 	 		<li>
 				To export data from a table to a file. <b> Select</b> the cells that you would like to export. If no cells are selected, the <i>whole table</i> will be as the selection. <br> 
@@ -137,14 +128,12 @@ Table of Contence<br>
 				<br>
 				<br>
 		 	</li>
-		
 			<li>
 				To import import a file, select <b> File</b> > <b> Export</b> > <b> to File</b> <br>
 				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/15.png" border="1px solid red"/>
 				<br>
 				<br>
 			</li>
-			
 			<li>
 				<ol>
 					<li>
@@ -158,7 +147,6 @@ Table of Contence<br>
 					<br>
 					<br>
 			</li>
-			
 			<li> 
 				The selected data will be presented in the new tab. <br> 
 				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/14.png" border="1px solid red"/>
@@ -166,19 +154,19 @@ Table of Contence<br>
 				<br>
 			</li>
 		</ol>
-
+        </div>
  </details>
-
+ 
 ## Manipulating the table<br>
 <details>
 	<summary>
 		How to sort a table?<br>
 	 </summary>
+	 <div style="margin-left: 40px">
 		<br>
 		 Tables can be sorted by their columns in ascending and descending order. Further, order by operations can be employed as well; sorting by column <i>A</i>, then by column <i>B</i>. 
 		<br>
 	 <ol>
-		
 		<li>
 			<b> Right-click</b> the column header for the column that you would like to sort. <br>
 			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/8.png" border="1px solid red"/>
@@ -212,113 +200,104 @@ Table of Contence<br>
 			<br>
 		</li>
 	</ol>
-	 </details>
+	</div>
+</details>
  <details>
 	<summary>
 		How to join tables together?<br>
-	 </summary>
-	 <br>
-	RONE support the standard <a href="https://www.w3schools.com/sql/sql_join.asp">join operations</a> offered by SQL.<br>
-	<ul>
-		<li>Left Inclusive</li>
-		<li>Left Exclusive</li>
-		<li>Right Inclusive</li>
-		<li>Right Exclusive</li>
-		<li>Full Outer Inclusion</li>
-		<li>Full Outer Exclusion</li>
-		<li>Inner</li>
-	</ul>
-	
-	 <small><details>
-		<summary>
-			Venn Diagrams
-		</summary>
-			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/26.png" border="1px solid red"/><br>
-			<br>
-	</details></small>
-		 <small><details>
-		<summary>
-			<i>Note, RONE only supports "=" constraints.</i>
-		</summary>
-		<p>
-		
-		
+	</summary>
+	<div style="margin-left: 40px">
+		<br>
+		RONE support the standard <a href="https://www.w3schools.com/sql/sql_join.asp">join operations</a> offered by SQL.<br>
+		<ul>
+			<li>Left Inclusive</li>
+			<li>Left Exclusive</li>
+			<li>Right Inclusive</li>
+			<li>Right Exclusive</li>
+			<li>Full Outer Inclusion</li>
+			<li>Full Outer Exclusion</li>
+			<li>Inner</li>
+		</ul>
+		<small>
+		<details>
+			<summary>
+				Venn Diagrams
+			</summary>
+				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/26.png" border="1px solid red"/><br>
+				<br>
+			</details>
+		</small>
+		<small>
+			<details>
+			<summary>
+				<i>Note, RONE only supports "=" constraints.</i>
+			</summary>
+
 			```SQL
 			SELECT column name(s)
 			FROM table1
 			LEFT JOIN table2
 			ON table1.column_name = table2.column_name;
 			```
-		
-		</p>
-	</details></small>
-	<br>
-	
-	 		To be able to join two tables together, you will need at least two tables. The tables will ideally contain two columns of the same values. For instance, bellow you see in the <i>SHOE.csv</i> table, there is a column called <i>Gene</i>, and in the table <i>GeneSymbols.txt.csv</i>, there is a column called <i>Gene</i>. The joint will be performed on the same column.<br> 
-			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/16.png" border="1px solid red"/>
-			<br>
-			<br>
-			
-	<ol>
-		
-		<li> 
-			To join two tables together, select <b>Table</b> > <b> Join Table</b>.<br>
-			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/17.png" border="1px solid red"/>
-			<br>
-			<br>
-		</li>
-		
-		<li> 
-			A new window called Join Table will appear. Using the combo-boxes <i>Table A</i>, and <i>Table B</i> in <i>Table Select section</i>, select the tables you would like to join.<br> 
-			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/18.png" border="1px solid red"/>
-			<br>
-			<br>
-		</li>
-		
-		<li> 
-			Now, you will see that it added the columns of the selected tables into the list on the left in <i>Table A section</i>, and <i>Table B section</i>. The list boxes on the right of <i>Table A section</i>, and <i>Table B section</i> denote columns included to the resulting tab. Each section is an exclude and include list (left and right). You can move columns between the include and exclude columns using the buttons:  <b>>></b>, <b><<</b>,  <b>Add All</b>,  <b>Remove All</b>.<br>
-			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/19.png" border="1px solid red"/>
-			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/20.png" border="1px solid red"/>
-			<br>
-			<br>
-		</li>
-		
-		<li> 
-			From the two combo-boxes at the top of the <i>Join Operation section</i>, select the columns from the tables you would like to constrain. Then, from the combo-box in the bottom-right corner of the <i> Join Operation</i> section, select the type of joint you would like to perform.<br>
-			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/22.png" border="1px solid red"/>
-			<br>
-			<br>
-		</li>
-		
-		<li> 
-			<ol>
-				<li> 
-					Click <b>Add Constraint (=)</b>. You will see the constraint appear in the table. You can add several constraints by simply changing the selected columns, and then clicking <b>Add Constraint (=)</b> again.<br> 
-					<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/23.png" border="1px solid red"/>
-					<br>
-					<br>
-				</li>
-				<li> 
-					To remove constraints, select the constraint from the table in the Join Operations section. Click <b>Remove Selected</b>. 
-				</li>
-			</ol>
-		</li>
-		
-		<li> 
-			Finally, in the Name Table section, enter the name for the new table. Click <b>Join Table</b>.
-			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/24.png" border="1px solid red"/>
-		</li>
-		
-		<li> 
-			The resulting table can be seen the new tab. 
-			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/25.png" border="1px solid red"/>
-			
-					
-			 
-		</li>
-		
+
+			</details>
+		</small>
+		<br>
+		To be able to join two tables together, you will need at least two tables. The tables will ideally contain two columns of the same values. For instance, bellow you see in the <i>SHOE.csv</i> table, there is a column called <i>Gene</i>, and in the table <i>GeneSymbols.txt.csv</i>, there is a column called <i>Gene</i>. The joint will be performed on the same column.<br> 
+		<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/16.png" border="1px solid red"/>
+		<br>
+		<br>		
+		<ol>
+			<li> 
+				To join two tables together, select <b>Table</b> > <b> Join Table</b>.<br>
+				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/17.png" border="1px solid red"/>
+				<br>
+				<br>
+			</li>
+			<li> 
+				A new window called Join Table will appear. Using the combo-boxes <i>Table A</i>, and <i>Table B</i> in <i>Table Select section</i>, select the tables you would like to join.<br> 
+				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/18.png" border="1px solid red"/>
+				<br>
+				<br>
+			</li>
+			<li> 
+				Now, you will see that it added the columns of the selected tables into the list on the left in <i>Table A section</i>, and <i>Table B section</i>. The list boxes on the right of <i>Table A section</i>, and <i>Table B section</i> denote columns included to the resulting tab. Each section is an exclude and include list (left and right). You can move columns between the include and exclude columns using the buttons:  <b>>></b>, <b><<</b>,  <b>Add All</b>,  <b>Remove All</b>.<br>
+				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/19.png" border="1px solid red"/>
+				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/20.png" border="1px solid red"/>
+				<br>
+				<br>
+			</li>
+			<li> 
+				From the two combo-boxes at the top of the <i>Join Operation section</i>, select the columns from the tables you would like to constrain. Then, from the combo-box in the bottom-right corner of the <i> Join Operation</i> section, select the type of joint you would like to perform.<br>
+				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/22.png" border="1px solid red"/>
+				<br>
+				<br>
+			</li>
+			<li> 
+				<ol>
+					<li> 
+						Click <b>Add Constraint (=)</b>. You will see the constraint appear in the table. You can add several constraints by simply changing the selected columns, and then clicking <b>Add Constraint (=)</b> again.<br> 
+						<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/23.png" border="1px solid red"/>
+						<br>
+						<br>
+					</li>
+					<li> 
+						To remove constraints, select the constraint from the table in the Join Operations section. Click <b>Remove Selected</b>. 
+					</li>
+				</ol>
+			</li>
+			<li> 
+				Finally, in the Name Table section, enter the name for the new table. Click <b>Join Table</b>.
+				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/24.png" border="1px solid red"/>
+			</li>
+			<li> 
+				The resulting table can be seen the new tab. 
+				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/25.png" border="1px solid red"/> 
+			</li>
+		</ol>
+	</div>
  </details>
- 
+  
 ## Plugins<br>
 <details>
 	<summary>
@@ -349,7 +328,6 @@ Table of Contence<br>
 				</tr>
 			</table>
 		 </details>
-		 
 		 <details>
 			 <summary>
 				Reactome
@@ -365,7 +343,6 @@ Table of Contence<br>
 				</tr>
 			</table>
 		 </details>
-		 
 		 <details>
 		  	<summary>
 				Percellome
@@ -384,23 +361,18 @@ Table of Contence<br>
 					<td>Probe ID (Affy ID), Gene Symbol, Biological Function, Cellular Function, Molecular Function</td>
 				</tr>
 			</table>
-		 </details>
- 	 </details>
- 	 </p>
- </details>
- 
- <details>
+		 	</details>
+ 		 </details>
+	</details>
+<details>
 <summary>
-How to create plugins?<br>
- </summary>
-
- </details>
- 
-  <details>
+	How to create plugins?<br>
+</summary>
+</details>
+<details>
 <summary>
- How to install plugins?<br>
- </summary>
-
- </details>
+ 	How to install plugins?<br>
+</summary>
+</details>
  
-
+# New Document
