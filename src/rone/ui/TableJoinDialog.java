@@ -357,7 +357,13 @@ public class TableJoinDialog extends JFrame  {
 		gbc_btnJoinOperationAddConstraint.gridy = 0;
 		panelJoinOperation.add(btnJoinOperationAddConstraint, gbc_btnJoinOperationAddConstraint);
 		
-		tableJoinConstraints = new JTable();
+		tableJoinConstraints = new JTable() {
+	        private static final long serialVersionUID = 1L;
+
+	        public boolean isCellEditable(int row, int column) {                
+	                return false;               
+	        };
+	    };
 		tableJoinConstraints.setBorder(new LineBorder(Color.DARK_GRAY));
 		GridBagConstraints gbc_tableJoinConstraints = new GridBagConstraints();
 		gbc_tableJoinConstraints.gridheight = 4;
@@ -1128,7 +1134,6 @@ public class TableJoinDialog extends JFrame  {
 		choiceJoinOperationJoinType.setSelectedIndex(-1);
 		choiceJoinOperationJoinType.setEnabled(false);
 		tableJoinConstraints.setModel(new DefaultTableModel());
-		tableJoinConstraints.setEnabled(false);
 		comboBoxJoinOperationTableA.setModel(new DefaultComboBoxModel());
 		comboBoxJoinOperationTableA.setSelectedIndex(-1);
 		comboBoxJoinOperationTableA.setEnabled(false);
@@ -1142,7 +1147,7 @@ public class TableJoinDialog extends JFrame  {
 		txtFieldNameTableNewTableName.setText("");
 		txtFieldNameTableNewTableName.setEnabled(false);
 		btnJoinTable.setEnabled(false);
-		tableJoinConstraints.setEnabled(true);
+		tableJoinConstraints.setEnabled(false);
 		tableJoinConstraints.setRowSelectionAllowed(true);
 		tableJoinConstraints.setColumnSelectionAllowed(false);
 		
@@ -1461,7 +1466,6 @@ public class TableJoinDialog extends JFrame  {
 		tableJoinConstraints.getSelectionModel().addListSelectionListener(new ConstraintTableListSelectionListener());
 		tableJoinConstraints.addContainerListener(new ConstraintTableContainerListener());
 		btnJoinOperationRemoveSelected.addActionListener(new JoinOperationRemoveSelectActionListener());
-		
 		
 		clearForm();
 	}
