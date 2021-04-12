@@ -107,7 +107,7 @@ Table of Contence<br>
 	 <summary>
 		How to export data to another Garuda gadget?
 	 </summary>
-	<div style="margin-left: 30px">
+	<div style="margin-left: 40px">
 	 <ol>
 	 	<li>
 			<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/6.png" border="1px solid red"/>
@@ -233,14 +233,12 @@ Table of Contence<br>
 			<summary>
 				<i>Note, RONE only supports "=" constraints.</i>
 			</summary>
-            <p>
-			```SQL
-			SELECT column name(s)
-			FROM table1
-			LEFT JOIN table2
-			ON table1.column_name = table2.column_name;
-			```
-            </p>
+```SQL
+SELECT column name(s)
+FROM table1
+LEFT JOIN table2
+ON table1.column_name = table2.column_name;
+```
 			</details>
 		</small>
 		<br>
@@ -290,6 +288,19 @@ Table of Contence<br>
 			<li> 
 				Finally, in the Name Table section, enter the name for the new table. Click <b>Join Table</b>.
 				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/24.png" border="1px solid red"/>
+						<small>
+			<details>
+			<summary>
+				<i>Equivelent to</i>
+			</summary>
+```SQL
+SELECT GeneSymbols.Gene, GeneSymbols.Cluster, SHOE.Gene, SHOE.Strand, SHOE.Similarity
+FROM GeneSymbols
+LEFT JOIN SHOE
+ON GeneSymbols.Gene = GeneSymbols.Cluster;
+```
+			</details>
+		</small>
 			</li>
 			<li> 
 				The resulting table can be seen the new tab. 
