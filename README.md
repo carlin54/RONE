@@ -48,7 +48,8 @@ Table of Contence<br>
 				Your data will be loaded from the file and presented to you in a new tab.  <br>
 				<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/5.png" border="1px solid red"/><br>
 				<br>
-			</li></ol>
+			</li>
+		</ol>
 	</div>
  </details>
 <details>
@@ -232,14 +233,14 @@ Table of Contence<br>
 			<summary>
 				<i>Note, RONE only supports "=" constraints.</i>
 			</summary>
-
+            <p>
 			```SQL
 			SELECT column name(s)
 			FROM table1
 			LEFT JOIN table2
 			ON table1.column_name = table2.column_name;
 			```
-
+            </p>
 			</details>
 		</small>
 		<br>
@@ -297,7 +298,8 @@ Table of Contence<br>
 		</ol>
 	</div>
  </details>
-  
+   </details>
+   
 ## Plugins<br>
 <details>
 	<summary>
@@ -306,7 +308,7 @@ Table of Contence<br>
 	 <p style="margin-left: 40px">
 	 <br>
 	When RONE begins, it trys to activate its plugins. If the plugin has been loaded successfully, it can be accessed from the plugin menu. <br>
-	 <img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/5.10-goinoeprationcontraintsele.png" border="1px solid red"/>
+	 <img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/28.png" border="1px solid red"/>
 	 <br>
 	 <br>
 	 <details>
@@ -375,4 +377,3 @@ Table of Contence<br>
 </summary>
 </details>
  
-# New Document
