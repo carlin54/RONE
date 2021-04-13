@@ -92,17 +92,16 @@ Formats that RONE accepts as inputs
 <img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/32.png" border="1px solid red"/>
 </li>
 <ol>
-<li>It will try import the data based on configurable import settings.<br>
-<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/32.png" border="1px solid red"/>
+<li>It will try import the data based on configurable import settings.<br><br>
 </li>
-<li>Or, it will try to import the file automatically based on the extension of the file.<br>
+<li>If they havn't been set, it will try to import the data automatically based on the extension of the file given.<br><br>
 </li>
 </ol>
 <li>You will be able the imported data in the new table.<br>
 <img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/33.png" border="1px solid red"/>
 </li>
 </ol>
-<div>
+</div>
 </details>
 <details>
 <summary>
@@ -120,35 +119,43 @@ In your file explorer, navigate to the folder where Garuda Platform is located.<
 <li>
 Locate and open the folder/file "11136dd6-baa0-49c0-9c1e-d2bec673eec6/config.txt".<br><br>
 You should see the following:<br>
-```
-Garuda.GeneMapper.seperator=,
-Garuda.Reactome\ gadget.seperator=,
-Garuda.GeneMapper.column_headers=Gene, NM, TF, Region, Strand, MA Score, PSSM Score, ID, Motif, Similarity, Pareto
-Garuda.Reactome\ gadget.column_headers=Name, Species, Disease Association, Inferred Association, Pathways
-Garuda.Reactome\ gadget.skip_header=true
-Garuda.GeneMapper.skip_header=true
-```
+
+    Garuda.GeneMapper.seperator=,
+    Garuda.Reactome\ gadget.seperator=,
+    Garuda.GeneMapper.column_headers=Gene, NM, TF, Region, Strand, MA Score, PSSM Score, ID, Motif, Similarity, Pareto
+    Garuda.Reactome\ gadget.column_headers=Name, Species, Disease Association, Inferred Association, Pathways
+    Garuda.Reactome\ gadget.skip_header=true
+    Garuda.GeneMapper.skip_header=true
+    
+<br>
+<br>
 </li>
 <li>
-To add an import setting for a gadget, you will need to add three lines into the configuration file. As your gadget, you can use its UUID (preferable), or you can use the gadget's name. In the above case, the gadgets name was used "Reactome gadget". 
+To add an import setting for a gadget, you will need to add three lines into the configuration file. You can use its UUID (preferable), or you can use the gadget's name to reference the settings for your gadget. In the above case, the gadgets name was used "Reactome gadget". In the following case it will be "MyExampleGadget". 
 <ol>
 <li>
-Firstly, the "column_headers" refer to the column names of the data provided by the gadget. 
-```
-Garuda.MyExampleGadget.column_headers=[Example Header 1, Example Header 2, Example Header...]
-```
+Firstly, the "column_headers" refer to the column names of the data provided by the gadget. <br>
+
+    Garuda.MyExampleGadget.column_headers=Example Header 1, Example Header 2, Example Header...
+
+<br>
+<br>
 </li>
 <li>
-Secondly, the "seperator" refer the character used to seperate cells. For a CSV-file, that would be ",".
-```
-Garuda.MyExampleGadget.seperator=,
-```
+Secondly, the "seperator" refer the character used to seperate cells. For a CSV-file, that would be ",".<br>
+
+    Garuda.MyExampleGadget.seperator=,
+    
+<br>
+<br>
 </li>
 <li>
-Finally, the "skip_header" refer tell RONE weather or not the first row of data being imported should be discarded. This is useful if the column headers are contained in the first-row of the incoming data. This value can <b>ONLY</b> be either "true" or "false".  
-```
-Garuda.MyExampleGadget.skip_header=true
-```
+Finally, the "skip_header" refer tell RONE weather or not the first row of data being imported should be discarded. This is useful if the column headers are contained in the first-row of the incoming data. This value can <b>ONLY</b> be either "true" or "false". <br>
+
+    Garuda.MyExampleGadget.skip_header=true
+    
+<br>
+<br>
 </li>
 </ol>
 </li>
@@ -198,6 +205,7 @@ Click <b> Save</b>.
 How to export data to a Garuda Gadget?
 </summary>
 <div style="margin-left: 5%">
+<br>
 <ol>
 <li>
 To export data from a table to a gadget. <b> Select</b> the cells that you would like to export. If no cells are selected, the <i>whole table</i> will be as the selection. <br> 
@@ -225,6 +233,7 @@ To export data from a table to a gadget. <b> Select</b> the cells that you would
 How to export data to a new table?<br>
 </summary>
 <div style="margin-left: 5%">
+<br>
 <ol>
 <li>
 To export data from a table to a file. <b> Select</b> the cells that you would like to export. If no cells are selected, the <i>whole table</i> will be as the selection. 					<br> 
