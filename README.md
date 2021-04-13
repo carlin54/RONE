@@ -2,26 +2,22 @@
 <h4>What is RONE?</h4>
 RONE is a tool designed for <a href="http://www.garuda-alliance.org/">Garuda Platform</a> to organise data from several sources. This application was implemented in Java, using JSwing, GarduaSDK, IntermineFramework, Derby, and PF4J. <br>This application supports run-time plugins for searching databases. 
 <br>
-<br>
-Latest PDF documentation  <a href="https://raw.githubusercontent.com/carlin54/RONE/master/doc/RONE-manual.pdf">here</a>.
 <h4>How to install RONE?</h4>
 <ol>
-<li>Download the latest package <a href="https://raw.githubusercontent.com/carlin54/RONE/master/package/11136dd6-baa0-49c0-9c1e-d2bec673eec6.zip">here</a>.<br></li> 
-<li>Open the Garuda Platform, load Gadget Installer.<br></li>
-<li>Load the package to the using the Gadget Installer. </li>
+<li>Download the latest package <a href="https://raw.githubusercontent.com/carlin54/RONE/master/package/11136dd6-baa0-49c0-9c1e-d2bec673eec6.zip">here</a> (1.2.1).<br></li> 
+<li>Open the Garuda Platform, load Gadget Installer <img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/30.png" border="1px solid red" style="width:32px;height:32px;"/>.</li>
+<li>Load the package to the using the Gadget Installer <img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/31.png" border="1px solid red" style="width:32px;height:32px;""/>.</li>
 </ol>
-<i>Make sure you have the latest 	Java Runtime Enviroment.</i>
+<i>Make sure you have the latest Java Runtime Enviroment.</i>
 <h4>Licence</h4>
 This project is covered under the  <a href="https://raw.githubusercontent.com/carlin54/RONE/master/LICENCE">GNU LGPL v3 Licence</a>.
 <h4>Changelog</h4>
 <ul>
 <li>Generated documentation</li>
 <li>Fixed the join table issues</li>
+<li>Added UUID use for setting import settings</li>
 </ul>
-
-Tuesday, 13. April 2021 01:06AM 
-
-
+Tuesday, 13. April 2021 12:59PM 
 <h2>Tables</h2>
 <details>
 <summary>
@@ -65,10 +61,52 @@ Your data will be loaded from the file and presented to you in a new tab.  <br>
 <summary>
 How to import data from a Garuda Gadget?
 </summary>
+<div style="margin-left: 5%">
+<br>
+Formats that RONE accepts as inputs 
+<table style="width:100%">
+<tr>
+<th>File Type</th>
+<th>File Format</th>
+</tr>
+<tr>
+<td>Genelist</td>
+<td>TXT</td>
+</tr>
+<tr>
+<td>Genelist</td>
+<td>CSV</td>
+</tr>
+<tr>
+<td>Ensemble</td>
+<td>TXT</td>
+</tr>
+<tr>
+<td>Ensemble</td>
+<td>CSV</td>
+</tr>
+</table>
+<br>
+<ol>
+<li>To import data into RONE from a Garuda Gadget.<br>
+<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/32.png" border="1px solid red"/>
+</li>
+<ol>
+<li>It will try import the data based on configurable import settings.<br>
+<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/32.png" border="1px solid red"/>
+</li>
+<li>Or, it will try to import the file automatically based on the extension of the file.<br>
+</li>
+</ol>
+<li>You will be able the imported data in the new table.<br>
+<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/33.png" border="1px solid red"/>
+</li>
+</ol>
+<div>
 </details>
 <details>
 <summary>
-How to add/remove/edit import settings for other Garuda Gadgets?<
+How to add/remove/edit import settings for other Garuda Gadgets?
 </summary>
 <div style="margin-left: 5%">
 
@@ -85,33 +123,33 @@ You should see the following:<br>
 ```
 Garuda.GeneMapper.seperator=,
 Garuda.Reactome\ gadget.seperator=,
-Garuda.GeneMapper.column_headers=[Gene, NM, TF, Region, Strand, MA Score, PSSM Score, ID, Motif, Similarity, Pareto]
-Garuda.Reactome\ gadget.column_headers=[Name, Species, Disease Association, Inferred Association, Pathways]
+Garuda.GeneMapper.column_headers=Gene, NM, TF, Region, Strand, MA Score, PSSM Score, ID, Motif, Similarity, Pareto
+Garuda.Reactome\ gadget.column_headers=Name, Species, Disease Association, Inferred Association, Pathways
 Garuda.Reactome\ gadget.skip_header=true
 Garuda.GeneMapper.skip_header=true
 ```
 </li>
 <li>
-	To add an import setting for a gadget, you will need to add three lines into the configuration file.
+To add an import setting for a gadget, you will need to add three lines into the configuration file. As your gadget, you can use its UUID (preferable), or you can use the gadget's name. In the above case, the gadgets name was used "Reactome gadget". 
 <ol>
-	<li>
-		Firstly, the "column_headers" refer to the column names of the data provided by the gadget. 
+<li>
+Firstly, the "column_headers" refer to the column names of the data provided by the gadget. 
 ```
 Garuda.MyExampleGadget.column_headers=[Example Header 1, Example Header 2, Example Header...]
 ```
-	</li>
-	<li>
-		Secondly, the "seperator" refer the character used to seperate cells. For a CSV-file, that would be ",".
+</li>
+<li>
+Secondly, the "seperator" refer the character used to seperate cells. For a CSV-file, that would be ",".
 ```
 Garuda.MyExampleGadget.seperator=,
 ```
-	</li>
-	<li>
-		Finally, the "skip_header" refer tell RONE weather or not the first row of data being imported should be discarded. This is useful if the column headers are contained in the first-row of the incoming data. This value can <b>ONLY</b> be either "true" or "false".  
+</li>
+<li>
+Finally, the "skip_header" refer tell RONE weather or not the first row of data being imported should be discarded. This is useful if the column headers are contained in the first-row of the incoming data. This value can <b>ONLY</b> be either "true" or "false".  
 ```
 Garuda.MyExampleGadget.skip_header=true
 ```
-	</li>
+</li>
 </ol>
 </li>
 </div>
@@ -157,7 +195,7 @@ Click <b> Save</b>.
 </details>
 <details>
 <summary>
-<strike>How to export data to a Garuda Gadget?</strike>
+How to export data to a Garuda Gadget?
 </summary>
 <div style="margin-left: 5%">
 <ol>
@@ -168,8 +206,14 @@ To export data from a table to a gadget. <b> Select</b> the cells that you would
 <br>
 </li>
 <li>
+Navigate to <b>File</b> > <b>Export</b> > <b>to Garuda</b> > <b>(export Setting)</b>. Select the export option with the desired file type, and file format.<br> 
+<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/35.png" border="1px solid red"/>
+<br>
+<br>
+</li>
+<li>
 To export data from a table to a gadget. <b> Select</b> the cells that you would like to export. If no cells are selected, the <i>whole table</i> will be as the selection. <br> 
-<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/6.png" border="1px solid red"/>
+<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/34.png" border="1px solid red"/>
 <br>
 <br>
 </li>
