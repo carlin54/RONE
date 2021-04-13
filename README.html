@@ -1,6 +1,6 @@
 <h1  style="text-align:center" width=9%; style="font-size:40px;">RONE<img src="https://raw.githubusercontent.com/carlin54/RONE/master/icons/rone_icon.png" style="float:right;width:40px;height:40px;"></h1>
 <h4>What is RONE?</h4>
-RONE is a tool designed for <a href="http://www.garuda-alliance.org/">Garuda Platform</a> to organise data from several sources. This application was implemented in Java, using JSwing, GarduaSDK, IntermineFramework, Derby, and PF4J. <br>This application supports run-time plugins for searching databases. 
+RONE is a tool designed for <a href="http://www.garuda-alliance.org/">Garuda Platform</a> to organise data from several sources. This application was implemented in Java, using JSwing, GarduaSDK, IntermineFramework, Derby, and PF4J. <br>This app support for run-time plugins for searching databases. 
 <br>
 <br>
 Latest PDF documentation  <a href="https://raw.githubusercontent.com/carlin54/RONE/master/doc/RONE-manual.pdf">here</a>.
@@ -14,15 +14,13 @@ Latest PDF documentation  <a href="https://raw.githubusercontent.com/carlin54/RO
 <h4>Licence</h4>
 This project is covered under the  <a href="https://raw.githubusercontent.com/carlin54/RONE/master/LICENCE">GNU LGPL v3 Licence</a>.
 <h4>Changelog</h4>
-<ul>
-<li>Generated documentation</li>
-<li>Fixed the join table issues</li>
-</ul>
-
-Tuesday, 13. April 2021 01:06AM 
+ - Generated documentation<br>
+ - Fixed the join table issues<br>
 
 
-<h2>Tables</h2>
+Tuesday, 13. April 2021 12:34AM 
+
+## Tables
 <details>
 <summary>
 How to import data from a file? 
@@ -68,52 +66,9 @@ How to import data from a Garuda Gadget?
 </details>
 <details>
 <summary>
-How to add/remove/edit import settings for other Garuda Gadgets?<
+<strike>How add/remove/edit import settings for other Garuda Gadgets?</strike>
 </summary>
 <div style="margin-left: 5%">
-
-<ol>
-<li>
-In your file explorer, navigate to the folder where Garuda Platform is located.<br>
-<br>
-<br>
-</li>
-
-<li>
-Locate and open the folder/file "11136dd6-baa0-49c0-9c1e-d2bec673eec6/config.txt".<br><br>
-You should see the following:<br>
-```
-Garuda.GeneMapper.seperator=,
-Garuda.Reactome\ gadget.seperator=,
-Garuda.GeneMapper.column_headers=[Gene, NM, TF, Region, Strand, MA Score, PSSM Score, ID, Motif, Similarity, Pareto]
-Garuda.Reactome\ gadget.column_headers=[Name, Species, Disease Association, Inferred Association, Pathways]
-Garuda.Reactome\ gadget.skip_header=true
-Garuda.GeneMapper.skip_header=true
-```
-</li>
-<li>
-	To add an import setting for a gadget, you will need to add three lines into the configuration file.
-<ol>
-	<li>
-		Firstly, the "column_headers" refer to the column names of the data provided by the gadget. 
-```
-Garuda.MyExampleGadget.column_headers=[Example Header 1, Example Header 2, Example Header...]
-```
-	</li>
-	<li>
-		Secondly, the "seperator" refer the character used to seperate cells. For a CSV-file, that would be ",".
-```
-Garuda.MyExampleGadget.seperator=,
-```
-	</li>
-	<li>
-		Finally, the "skip_header" refer tell RONE weather or not the first row of data being imported should be discarded. This is useful if the column headers are contained in the first-row of the incoming data. This value can <b>ONLY</b> be either "true" or "false".  
-```
-Garuda.MyExampleGadget.skip_header=true
-```
-	</li>
-</ol>
-</li>
 </div>
 </details>
 <details>
@@ -210,7 +165,7 @@ The selected data will be presented in the new tab. <br>
 </div>
 </details>
 
-<h2>Table Operations</h2>
+## Manipulating the table<br>
 <details>
 <summary>
 How to sort a table?<br>
@@ -366,7 +321,7 @@ The resulting table can be seen the new tab.
 </details>
 </details>
 
-<h2>Plugins</h2>
+## Plugins
 <details>
 <summary>
 How to use plugins?<br>
