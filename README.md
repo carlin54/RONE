@@ -10,7 +10,7 @@ Latest PDF documentation  <a href="https://raw.githubusercontent.com/carlin54/RO
 <li>Open the Garuda Platform, load Gadget Installer.<br></li>
 <li>Load the package to the using the Gadget Installer. </li>
 </ol>
-<i>Make sure you have the latest Java Runtime Enviroment.</i>
+<i>Make sure you have the latest 	Java Runtime Enviroment.</i>
 <h4>Licence</h4>
 This project is covered under the  <a href="https://raw.githubusercontent.com/carlin54/RONE/master/LICENCE">GNU LGPL v3 Licence</a>.
 <h4>Changelog</h4>
@@ -162,6 +162,13 @@ Click <b> Save</b>.
 <div style="margin-left: 5%">
 <ol>
 <li>
+To export data from a table to a gadget. <b> Select</b> the cells that you would like to export. If no cells are selected, the <i>whole table</i> will be as the selection. <br> 
+<img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/6.png" border="1px solid red"/>
+<br>
+<br>
+</li>
+<li>
+To export data from a table to a gadget. <b> Select</b> the cells that you would like to export. If no cells are selected, the <i>whole table</i> will be as the selection. <br> 
 <img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/6.png" border="1px solid red"/>
 <br>
 <br>
