@@ -1,8 +1,15 @@
 #RONE Application Properties
 #Wed Feb 24 11:19:05 AEST 2021
 Garuda.GeneMapper.seperator=,
-Garuda.Reactome\ gadget.seperator=,
-Garuda.GeneMapper.column_headers=[Gene, NM, TF, Region, Strand, MA Score, PSSM Score, ID, Motif, Similarity, Pareto]
-Garuda.Reactome\ gadget.column_headers=[Name, Species, Disease Association, Inferred Association, Pathways]
-Garuda.Reactome\ gadget.skip_header=true
+Garuda.GeneMapper.column_headers=Gene, NM, TF, Region, Strand, MA Score, PSSM Score, ID, Motif, Similarity, Pareto
 Garuda.GeneMapper.skip_header=true
+
+Garuda.1bd616c8-86aa-4ea0-9783-70f7b35f916b.seperator=,
+Garuda.1bd616c8-86aa-4ea0-9783-70f7b35f916b.column_headers=Pathway, Species, Coverage (%), PVal, FDR, Entry
+Garuda.1bd616c8-86aa-4ea0-9783-70f7b35f916b.skip_header=false
+
+Garuda.cce74594-e712-41da-a261-a7d2a0e23a53.seperator=,
+Garuda.cce74594-e712-41da-a261-a7d2a0e23a53.column_headers=Name, Species, Disease Association, Inferred Association, Pathways
+Garuda.cce74594-e712-41da-a261-a7d2a0e23a53.skip_header=false
+
+

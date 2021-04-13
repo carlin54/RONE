@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Sealed: true
+Plugin-Id: percellome-plugin
+Plugin-Version: 0.0.1
+Plugin-Provider: Carlin. R. Connell
+Plugin-Class: rone.plugins.PercellomeSearchPlugin

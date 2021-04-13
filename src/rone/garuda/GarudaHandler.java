@@ -157,9 +157,9 @@ public class GarudaHandler {
 	
 	private boolean hasProperties(String senderName) {
 		Properties properties = FileManager.getProperties();
-		String propColumnHeaders = (String)properties.get("garuda." + senderName + ".column_headers");
-		String propSeperator = (String)properties.get("garuda." + senderName + ".seperator");
-		String propSkipHeader = (String)properties.get("garuda." + senderName + ".skip_header");
+		String propColumnHeaders = (String)properties.get("Garuda." + senderName + ".column_headers");
+		String propSeperator = (String)properties.get("Garuda." + senderName + ".seperator");
+		String propSkipHeader = (String)properties.get("Garuda." + senderName + ".skip_header");
 		return !isNull(propColumnHeaders) && !isNull(propSeperator) && !isNull(propSkipHeader);
 	}
 	
@@ -182,68 +182,72 @@ public class GarudaHandler {
 				if(!file.exists())
 					return;
 				
-				boolean hasProperties = hasProperties(senderName);
+				boolean hasSenderId = hasProperties(senderId);
+				boolean hasName = hasProperties(senderName);
 				
-				if(hasProperties) {
-					Object[] options = {"Continue",
-		                    			"Cancel"};
-					
-					int n = JOptionPane.showOptionDialog(null,
-							"File Name: " + fileName + "\n" + 
-							"File Format: " + fileFormat + "\n" + 
-							"Sender Name: " + senderName + "\n" + 
-							"Sender ID: " + senderId + "\n",
-							
-					    "Garuda Import",
-					    JOptionPane.YES_NO_CANCEL_OPTION,
-					    JOptionPane.QUESTION_MESSAGE,
-					    null,
-					    options,
-					    options[0]);
-					
-					if(n == 1)
-						return;
-				
-				}
-				
-				String tableName = senderName + " (" + fileFormat + ")"; 
-				Properties properties = FileManager.getProperties();
-				String propColumnHeaders = (String)properties.get("garuda." + senderName + ".column_headers");
-				String propSeperator = (String)properties.get("garuda." + senderName + ".seperator");
-				String propSkipHeader = (String)properties.get("garuda." + senderName + ".skip_header");
-				
+				boolean hasProperties = hasSenderId || hasName;
 				ArrayList<Object[]> loadedFile = null; 
 				String[] columnHeaders = null;
+				String tableName = senderName + " (" + fileFormat + ")"; 
 				try {
+					
 					if(hasProperties) {
+						String key = hasSenderId ? senderId : senderName;
+						
+						Properties properties = FileManager.getProperties();
+						String propColumnHeaders = (String)properties.get("Garuda." + key + ".column_headers");
+						String propSeperator = (String)properties.get("Garuda." + key + ".seperator");
+						String propSkipHeader = (String)properties.get("Garuda." + key + ".skip_header");
+						
+	
 						columnHeaders = getColumnHeaders(propColumnHeaders, propSeperator);
 						boolean skipHeader = Boolean.getBoolean(propSkipHeader);
+						
 						loadedFile = FileManager.loadStructuredFile(file, propSeperator, skipHeader);
+						
+						
 					} else {
+						Object[] options = {"Continue","Cancel"};
+	
+						int n = JOptionPane.showOptionDialog(null,
+								"File Name: " + fileName + "\n" + 
+								"File Format: " + fileFormat + "\n" + 
+								"Sender Name: " + senderName + "\n" + 
+								"Sender ID: " + senderId + "\n",
+						    "Garuda Import",
+						    JOptionPane.YES_NO_CANCEL_OPTION,
+						    JOptionPane.QUESTION_MESSAGE,
+						    null,
+						    options,
+						    options[0]);
+						
+						if(n == 1)
+							return;
+	
 						String path = file.getAbsolutePath();
 						String extension = FilenameUtils.getExtension(path);
 						
 						switch(extension) {
-							case "csv": 
-								columnHeaders = null;
-								loadedFile = FileManager.loadCSV(file,  false);
-								break; 
-							
-							case "txt": 
-								columnHeaders = new String[1];
-								columnHeaders[0] = fileFormat;
-								loadedFile = FileManager.loadTextFile(file, true);
-								break; 
-							
-							default:
-								columnHeaders = new String[1];
-								columnHeaders[0] = senderName;
-								loadedFile = FileManager.loadTextFile(file, true);
-								break; 
+						case "csv": 
+							columnHeaders = null;
+							loadedFile = FileManager.loadCSV(file,  false);
+							break; 
+						
+						case "txt": 
+							columnHeaders = new String[1];
+							columnHeaders[0] = fileFormat;
+							loadedFile = FileManager.loadTextFile(file, true);
+							break; 
+						
+						default:
+							columnHeaders = new String[1];
+							columnHeaders[0] = senderName;
+							loadedFile = FileManager.loadTextFile(file, true);
+							break; 
 						}
-					
+						
 					}
-				
+					
 					if(isNull(loadedFile) || isNull(columnHeaders)) {
 						JOptionPane.showMessageDialog(mParentFrame, "Failed to accept import data from the Garuda Platform.", "Import Error", JOptionPane.ERROR_MESSAGE);
 					} else {
@@ -256,7 +260,6 @@ public class GarudaHandler {
 					MainWindow.showError(e);
 				}
 			
-				
 			}
 
 			@Override
