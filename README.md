@@ -1,12 +1,12 @@
-<h1  style="text-align:center" width=9%; style="font-size:40px;">RONE<img src="https://raw.githubusercontent.com/carlin54/RONE/master/icons/rone_icon.png" style="float:right;width:40px;height:40px;"></h1>
+<h1  style="text-align:center" width=0%; style="font-size:40px;">RONE<img src="https://raw.githubusercontent.com/carlin54/RONE/master/icons/rone_icon.png" align="Right"></h1>
 <h4>What is RONE?</h4>
 RONE is a tool designed for <a href="http://www.garuda-alliance.org/">Garuda Platform</a> to organise data from several sources. This application was implemented in Java, using JSwing, GarduaSDK, IntermineFramework, Derby, and PF4J. <br>This application supports run-time plugins for searching databases. 
 <br>
 <h4>How to install RONE?</h4>
 <ol>
 <li>Download the latest package <a href="https://raw.githubusercontent.com/carlin54/RONE/master/package/11136dd6-baa0-49c0-9c1e-d2bec673eec6.zip">here</a> (1.2.1).<br></li> 
-<li>Open the Garuda Platform, load Gadget Installer <img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/30.png" border="1px solid red" style="width:32px;height:32px;"/>.</li>
-<li>Load the package to the using the Gadget Installer <img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/31.png" border="1px solid red" style="width:32px;height:32px;""/>.</li>
+<li>Open the Garuda Platform, load Gadget Installer <img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/30.png" border="1px solid red" width = "32px" height="32px"/>.</li>
+<li>Load the package to the using the Gadget Installer <img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/31.png" border="1px solid red" width = "32px" height="32px"/>.</li>
 </ol>
 <i>Make sure you have the latest Java Runtime Enviroment.</i>
 <h4>Licence</h4>
