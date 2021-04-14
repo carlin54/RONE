@@ -345,12 +345,14 @@ Venn Diagrams
 <summary>
 <i>Note, RONE only supports "=" constraints.</i>
 </summary>
+
 ```SQL
 SELECT column name(s)
 FROM table1
 LEFT JOIN table2
 ON table1.column_name = table2.column_name;
 ```
+
 </details>
 </small>
 <br>
@@ -407,12 +409,14 @@ Finally, in the Name Table section, enter the name for the new table. Click <b>J
 <summary>
 <i>Equivelent to</i>
 </summary>
+
 ```SQL
 SELECT GeneSymbols.Gene, GeneSymbols.Cluster, SHOE.Gene, SHOE.Strand, SHOE.Similarity
 FROM GeneSymbols
 LEFT JOIN SHOE
 ON GeneSymbols.Gene = SHOE.Gene;
 ```
+
 </details>
 </small>
 <img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/24.png" border="1px solid red"/>
