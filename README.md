@@ -4,7 +4,7 @@ RONE is a tool designed for <a href="http://www.garuda-alliance.org/">Garuda Pla
 <br>
 <h4>How to install RONE?</h4>
 <ol>
-<li>Download the latest package <a href="https://raw.githubusercontent.com/carlin54/RONE/master/package/11136dd6-baa0-49c0-9c1e-d2bec673eec6.zip">here</a> (1.2.1).<br></li> 
+<li>Download the latest package <a href="https://raw.githubusercontent.com/carlin54/RONE/master/package/11136dd6-baa0-49c0-9c1e-d2bec673eec6.zip">here</a> (1.2.2).<br></li> 
 <li>Open the Garuda Platform, load Gadget Installer <img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/30.png" border="1px solid red" width = "32px" height="32px"/>.</li>
 <li>Load the package to the using the Gadget Installer <img src="https://raw.githubusercontent.com/carlin54/RONE/master/doc/images/31.png" border="1px solid red" width = "32px" height="32px"/>.</li>
 </ol>
