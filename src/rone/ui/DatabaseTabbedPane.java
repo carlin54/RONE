@@ -507,7 +507,7 @@ public class DatabaseTabbedPane extends JTabbedPane {
 				MainWindow.showError(e);
 			}
     		
-    		DefaultTableModel dtm = new DefaultTableModel();
+    		final DefaultTableModel dtm = new DefaultTableModel();
     		dtm.setColumnCount(0);
     		dtm.setRowCount(0);
     		

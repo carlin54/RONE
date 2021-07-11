@@ -656,14 +656,14 @@ public class MainWindow {
 	        }
 	        
 			
-			String newTableName = (String)JOptionPane.showInputDialog(mMainWindowJFrame, "New table name:");
+			final String newTableName = (String)JOptionPane.showInputDialog(mMainWindowJFrame, "New table name:");
 			if(newTableName == null || newTableName.equals(""))
 				return;
 			
-			ArrayList<Object[]> selectedRows = mDatabaseTabbedPane.getActiveTab().getSelectedRows();
+			final ArrayList<Object[]> selectedRows = mDatabaseTabbedPane.getActiveTab().getSelectedRows();
 			Object[] columnIdentifers = mDatabaseTabbedPane.getActiveTab().getSelectedColumnIdentifers();
 
-	        String[] stringColumnIdentifers = Arrays.copyOf(columnIdentifers, columnIdentifers.length, String[].class);
+	        final String[] stringColumnIdentifers = Arrays.copyOf(columnIdentifers, columnIdentifers.length, String[].class);
 	        		
 			EventQueue.invokeLater(new Runnable() {
 				public void run() {
@@ -677,7 +677,7 @@ public class MainWindow {
 		}
 	}
 	
-	public static void showError(Exception exceptionError) {
+	public static void showError(final Exception exceptionError) {
     	
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {

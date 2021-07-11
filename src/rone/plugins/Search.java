@@ -27,7 +27,7 @@ public abstract class Search {
 	public void setSearchSize(int searchSize) 						{ mMaximumSearchSize = (searchSize > 0) ? searchSize : 1;};
 	public void setThreadPoolSize(int threadPoolSize) 				{ mThreadPoolSize = (threadPoolSize > 0) ? threadPoolSize : 1;};
 	public void setSearchRequests(Object[] selection)				{ mSelectionRequests = selection; }
-	public void setUniqueSearchRequests(Object[] selection)			{ mSelectionRequests = Arrays.stream(selection).distinct().toArray(Object[]::new);; }
+	public void setUniqueSearchRequests(Object[] selection)			{ mSelectionRequests = Arrays.stream(selection).distinct().toArray(Object[]::new); }
 	public Object[] getSelectionRequests()							{ return mSelectionRequests; }
 	
 	

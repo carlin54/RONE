@@ -213,7 +213,8 @@ public class GarudaHandler {
 								"File Name: " + fileName + "\n" + 
 								"File Format: " + fileFormat + "\n" + 
 								"Sender Name: " + senderName + "\n" + 
-								"Sender ID: " + senderId + "\n",
+								"Sender ID: " + senderId + "\n" +
+								"File Location: " + file.getAbsolutePath() + "\n",
 						    "Garuda Import",
 						    JOptionPane.YES_NO_CANCEL_OPTION,
 						    JOptionPane.QUESTION_MESSAGE,

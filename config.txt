@@ -1,7 +1,8 @@
 #RONE Application Properties
 #Wed Feb 24 11:19:05 AEST 2021
+
 Garuda.GeneMapper.seperator=,
-Garuda.GeneMapper.column_headers=Gene, NM, TF, Region, Strand, MA Score, PSSM Score, ID, Motif, Similarity, Pareto
+Garuda.GeneMapper.column_headers=uid,Gene,NM,TF,Region,Strand,MA Score,PSSM Score,ID,MOTIF,CONSENSUS,Similarity,Pareto
 Garuda.GeneMapper.skip_header=true
 
 Garuda.1bd616c8-86aa-4ea0-9783-70f7b35f916b.seperator=,

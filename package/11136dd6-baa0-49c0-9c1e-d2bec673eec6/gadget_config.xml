@@ -2,10 +2,10 @@
 <Gadget>
     <UUID>11136dd6-baa0-49c0-9c1e-d2bec673eec6</UUID><!-- The unique ID of the gadget -->
     <Name>RONE</Name><!-- The name of the gadget as it appears on the Dashboard -->
-    <LaunchCommand>cmd /c start javaw.exe -jar "RONE-1.2.1.jar"</LaunchCommand> <!-- The default launch command -->
-    <LaunchCommandWin>cmd /c start javaw.exe -jar "RONE-1.2.1.jar"</LaunchCommandWin> <!-- Launch command for Windows -->
-    <LaunchCommandMac>open "RONE-1.2.1.jar"</LaunchCommandMac> <!-- Launch command for Mac -->
-    <LaunchCommandLinux>java -jar "RONE-1.2.1.jar"</LaunchCommandLinux> <!-- Launch command for Linux-->
+    <LaunchCommand>cmd /c start javaw.exe -jar "RONE-1.2.2.jar"</LaunchCommand> <!-- The default launch command -->
+    <LaunchCommandWin>cmd /c start javaw.exe -jar "RONE-1.2.2.jar"</LaunchCommandWin> <!-- Launch command for Windows -->
+    <LaunchCommandMac>open "RONE-1.2.2.jar"</LaunchCommandMac> <!-- Launch command for Mac -->
+    <LaunchCommandLinux>java -jar "RONE-1.2.2.jar"</LaunchCommandLinux> <!-- Launch command for Linux-->
      <WorkingDirectory>gadgets/11136dd6-baa0-49c0-9c1e-d2bec673eec6</WorkingDirectory><!-- Working directory for this Gadget-->
     <IconPaths>
         <Icon32Path>icons/roneicon.png</Icon32Path><!-- Path for the icon that will appear on the Dashboard-->

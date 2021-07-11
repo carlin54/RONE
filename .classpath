@@ -27,6 +27,13 @@
 	<classpathentry kind="lib" path="lib/log4j-1.2.16.jar"/>
 	<classpathentry kind="lib" path="lib/GarudaPipelinePluginsrc.jar"/>
 	<classpathentry kind="lib" path="lib"/>
+	<classpathentry kind="lib" path="lib/java-semver-0.9.0.jar"/>
+	<classpathentry kind="lib" path="lib/javatuples-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/jgoodies-forms-1.8.0.jar"/>
+	<classpathentry kind="lib" path="lib/jgoodies-forms-1.8.0-sources.jar"/>
+	<classpathentry kind="lib" path="lib/miglayout15-swing.jar"/>
+	<classpathentry kind="lib" path="lib/pf4j-3.7.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/slf4j-api-1.7.5.jar"/>
 	<classpathentry kind="lib" path="lib/derby/derby.jar"/>
 	<classpathentry kind="lib" path="lib/derby/derby.war"/>
 	<classpathentry kind="lib" path="lib/derby/derbyclient.jar"/>
@@ -46,14 +53,6 @@
 	<classpathentry kind="lib" path="lib/derby/derbynet.jar"/>
 	<classpathentry kind="lib" path="lib/derby/derbyoptionaltools.jar"/>
 	<classpathentry kind="lib" path="lib/derby/derbyrun.jar"/>
-	<classpathentry kind="lib" path="lib/derby/derbyshared.jar"/>
 	<classpathentry kind="lib" path="lib/derby/derbytools.jar"/>
-	<classpathentry kind="lib" path="lib/java-semver-0.9.0.jar"/>
-	<classpathentry kind="lib" path="lib/javatuples-1.2.jar"/>
-	<classpathentry kind="lib" path="lib/jgoodies-forms-1.8.0.jar"/>
-	<classpathentry kind="lib" path="lib/jgoodies-forms-1.8.0-sources.jar"/>
-	<classpathentry kind="lib" path="lib/miglayout15-swing.jar"/>
-	<classpathentry kind="lib" path="lib/pf4j-3.7.0-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/slf4j-api-1.7.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

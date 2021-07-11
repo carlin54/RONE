@@ -37,7 +37,7 @@ public class ErrorDialog {
 		
 		String stackTraceToString = stackTraceToString(e.getStackTrace()); 
 		 
-		JFrame f = new JFrame();
+		final JFrame f = new JFrame();
 		Icon errorIcon = UIManager.getIcon("OptionPane.errorIcon");
 		
 		GridBagLayout gridBagLayout = new GridBagLayout();
@@ -55,10 +55,10 @@ public class ErrorDialog {
 		f.getContentPane().add(panelTop, gbc_panelTop);
 		panelTop.setLayout(new GridLayout(1, 0, 0, 0));
 		
-		JPanel panelUpper = new JPanel();
+		final JPanel panelUpper = new JPanel();
 		panelUpper.setBorder(UIManager.getBorder("EditorPane.border"));
 		panelTop.add(panelUpper);
-		GridBagLayout gbl_panelUpper = new GridBagLayout();
+		final GridBagLayout gbl_panelUpper = new GridBagLayout();
 		gbl_panelUpper.columnWidths = new int[]{320, 0};
 		gbl_panelUpper.rowHeights = new int[]{25, 0, 25, 0};
 		gbl_panelUpper.columnWeights = new double[]{1.0, Double.MIN_VALUE};
@@ -106,9 +106,9 @@ public class ErrorDialog {
 		gbc_lblExceptionTypeDescription.gridy = 0;
 		panelUpperLabels.add(lblExceptionTypeDescription, gbc_lblExceptionTypeDescription);
 		
-		JPanel panelMiddleTextArea = new JPanel();
+		final JPanel panelMiddleTextArea = new JPanel();
 		panelMiddleTextArea.setBorder(UIManager.getBorder("EditorPane.border"));
-		GridBagConstraints gbc_panelMiddleTextArea = new GridBagConstraints();
+		final GridBagConstraints gbc_panelMiddleTextArea = new GridBagConstraints();
 		gbc_panelMiddleTextArea.insets = new Insets(0, 0, 5, 0);
 		gbc_panelMiddleTextArea.fill = GridBagConstraints.BOTH;
 		gbc_panelMiddleTextArea.gridx = 0;
@@ -128,7 +128,7 @@ public class ErrorDialog {
 		gbc_scrollPaneExceptionTextArea.gridy = 0;
 		panelMiddleTextArea.add(scrollPaneExceptionTextArea, gbc_scrollPaneExceptionTextArea);
 		
-		JTextArea exceptionTextArea = new JTextArea();
+		final JTextArea exceptionTextArea = new JTextArea();
 		exceptionTextArea.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		scrollPaneExceptionTextArea.setViewportView(exceptionTextArea);
 		
@@ -163,7 +163,7 @@ public class ErrorDialog {
 		gbl_panelDetailsPanel.rowWeights = new double[]{0.0, Double.MIN_VALUE};
 		panelDetailsPanel.setLayout(gbl_panelDetailsPanel);
 		
-		JButton btnShowDetails = new JButton("Show Detail (↓)");
+		final JButton btnShowDetails = new JButton("Show Detail (↓)");
 		btnShowDetails.setHorizontalAlignment(SwingConstants.RIGHT);
 		btnShowDetails.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		GridBagConstraints gbc_btnShowDetails = new GridBagConstraints();

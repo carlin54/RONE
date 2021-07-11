@@ -1001,7 +1001,7 @@ public class TableJoinDialog extends JFrame  {
 		public void keyReleased(KeyEvent arg0) {
 			if(txtFieldNameTableNewTableName.isEnabled()) {
 				String textInField = txtFieldNameTableNewTableName.getText();
-				boolean enableJoinTable = !textInField.isBlank();
+				boolean enableJoinTable = !textInField.isEmpty();
 				btnJoinTable.setEnabled(enableJoinTable);
 			}
 		}
