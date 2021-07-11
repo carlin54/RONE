@@ -2,6 +2,8 @@
 <h4>What is RONE?</h4>
 RONE is a tool designed for <a href="http://www.garuda-alliance.org/">Garuda Platform</a> to organise data from several sources. This application was implemented in Java, using JSwing, GarduaSDK, IntermineFramework, Derby, and PF4J. <br>This application supports run-time plugins for searching databases. 
 <br>
+A demonstration video can be seen <a href="https://www.youtube.com/watch?v=3xwriU14dnk">here</a>. 
+
 <h4>How to install RONE?</h4>
 <ol>
 <li>Download the latest package <a href="https://raw.githubusercontent.com/carlin54/RONE/master/package/11136dd6-baa0-49c0-9c1e-d2bec673eec6.zip">here</a> (1.2.2).<br></li> 
